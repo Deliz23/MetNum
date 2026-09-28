@@ -32,10 +32,6 @@ def latencia(q):
     return 18 + (0.0025 * q**2) / denominador
 
 def f(q):
-    """
-    Función cuya raíz buscamos:
-    f(q) = L(q) - SLA
-    """
 
     return latencia(q) - SLA
 

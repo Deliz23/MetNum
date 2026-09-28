@@ -1,12 +1,3 @@
-"""
-Reto grupal: Calibración de un umbral probabilístico
-------------------------------------------------------
-Resuelve f(z) = 1/(1 + exp(-z)) - 0.83 = 0,  z en [-10, 10]
-
-Compara Newton-Raphson, secante y una iteración de punto fijo,
-cada una con amortiguamiento y rescate por bisección cuando el
-paso sale del dominio o la derivada/el denominador colapsan.
-"""
 
 from __future__ import annotations
 
@@ -20,14 +11,10 @@ from typing import Optional
 
 Z_MIN = -10.0
 Z_MAX = 10.0
-
 INICIOS = [-8.0, 0.0, 8.0]
-
 TOL_X = 1e-6
 TOL_F = 1e-6
-
 MAX_ITER = 100
-
 ALPHA = 0.5  # factor de amortiguamiento, aplicado en los tres métodos
 
 
@@ -36,9 +23,7 @@ ALPHA = 0.5  # factor de amortiguamiento, aplicado en los tres métodos
 # ------------------------------------------------------------------
 
 def f(z: float) -> float:
-    """f(z) = sigmoide(z) - 0.83, evaluada de forma numéricamente estable."""
-    # Dentro de [-10, 10] exp() nunca desborda; el try/except queda
-    # solo como red de seguridad si en algún momento se amplía el dominio.
+    
     try:
         if z >= 0:
             e = math.exp(-z)
@@ -57,17 +42,9 @@ def df(z: float) -> float:
     except (OverflowError, ValueError):
         return float("nan")
 
-
 # ------------------------------------------------------------------
 # 3. g(z) para punto fijo
 # ------------------------------------------------------------------
-# NOTA PARA EL EQUIPO: tal como está, g(z) = z - f(z)/f'(z) es la misma
-# fórmula de Newton-Raphson. Con esto, "punto fijo" y "Newton" no son
-# métodos independientes: van a converger casi idénticos y la
-# comparación de costo-robustez del paso 3 pierde sentido. Si quieren
-# una iteración realmente distinta, avísenme y les paso, por ejemplo,
-# g(z) = z - alpha_fijo * f(z) con alpha_fijo constante (no recalculado
-# cada paso), verificando |g'(z*)| < 1 por separado.
 
 def g(z: float) -> float:
     derivada = df(z)
