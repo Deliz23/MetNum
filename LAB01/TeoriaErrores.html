@@ -249,7 +249,7 @@
             <div class="card card-custom h-100 p-4">
               <div class="card-body">
                 <h4 class="card-title text-primary"><i class="bi bi-bounding-box me-2"></i>Error Absoluto</h4>
-                <p class="card-text">Diferencia en magnitud absoluta entre la referencia exacta $x$ y el valor aproximado $\tilde{x}$.</p>
+                <p class="card-text">Diferencia en magnitud absoluta entre la referencia exacta x y el valor aproximado x.</p>
                 <div class="math-box">
                   <div id="math-ea"></div>
                 </div>
@@ -273,7 +273,7 @@
             <div class="card card-custom h-100 p-4">
               <div class="card-body">
                 <h4 class="card-title text-primary"><i class="bi bi-exclamation-triangle me-2"></i>Absorción Numérica</h4>
-                <p class="card-text">Ocurre cuando la suma $A + b$ descarte los bits de $b$ si $A \gg b$ debido a la alineación de exponentes en la mantisa.</p>
+                <p class="card-text">Ocurre cuando la suma A + b descarte los bits de b si A \ b debido a la alineación de exponentes en la mantisa.</p>
                 <div class="math-box">
                   <div id="math-abs"></div>
                 </div>
@@ -289,17 +289,17 @@
       <div class="container">
         <div class="section-title">
           <h2>Caso Práctico y Calculadora de Latencias</h2>
-          <p class="text-muted">Simulación interactiva de acumulación de errores sobre $N$ registros de latencia.</p>
+          <p class="text-muted">Simulación interactiva de acumulación de errores sobre N registros de latencia.</p>
         </div>
 
         <!-- Contexto del Problema -->
         <div class="card card-custom p-4 mb-4 border-start border-4 border-primary bg-light">
           <h5><i class="bi bi-info-circle me-2 text-primary"></i>Contexto del Sistema de Ingeniería</h5>
           <p class="mb-2">
-            En una arquitectura de microservicios distribuida, una plataforma de APM (Application Performance Monitoring) procesa millones de solicitudes por minuto. Cada medición registra la latencia alrededor de $10^6\,\mu\text{s}$ (1 segundo) con pequeñas fluctuaciones de red ($0.01$ a $2.0\,\mu\text{s}$).
+            En una arquitectura de microservicios distribuida, una plataforma de APM (Application Performance Monitoring) procesa millones de solicitudes por minuto. Cada medición registra la latencia alrededor de 10^6 us(1 segundo) con pequeñas fluctuaciones de red (0.01 a 2.0,us).
           </p>
           <p class="mb-0 text-secondary">
-            <strong>Problema Numérico:</strong> El acumulador total en `float32` acumula error rápidamente debido al truncamiento de la mantisa de 23 bits, superando los umbrales de tolerancia del $0.5\%$. Esta calculadora evalúa 5 algoritmos en tiempo real.
+            <strong>Problema Numérico:</strong> El acumulador total en `float32` acumula error rápidamente debido al truncamiento de la mantisa de 23 bits, superando los umbrales de tolerancia del 0.5%. Esta calculadora evalúa 5 algoritmos en tiempo real.
           </p>
         </div>
 
@@ -308,15 +308,15 @@
           <h5 class="mb-3 text-primary"><i class="bi bi-sliders me-2"></i>Parámetros de Entrada de la Calculadora</h5>
           <div class="row g-3 align-items-end">
             <div class="col-md-3">
-              <label class="form-label font-weight-bold">Cantidad de Muestras ($N$)</label>
+              <label class="form-label font-weight-bold">Cantidad de Muestras (N)</label>
               <input type="number" id="calcN" class="form-control" value="200000" step="10000">
             </div>
             <div class="col-md-3">
-              <label class="form-label font-weight-bold">Latencia Base ($\mu\text{s}$)</label>
+              <label class="form-label font-weight-bold">Latencia Base (us)</label>
               <input type="number" id="calcBase" class="form-control" value="1000000">
             </div>
             <div class="col-md-3">
-              <label class="form-label font-weight-bold">Variación Máx. ($\mu\text{s}$)</label>
+              <label class="form-label font-weight-bold">Variación Máx. (us)</label>
               <input type="number" id="calcVar" class="form-control" value="2.0" step="0.1">
             </div>
             <div class="col-md-3">
@@ -334,8 +334,8 @@
               <thead class="table-dark">
                 <tr>
                   <th>Método / Tipo de Dato</th>
-                  <th>Suma Acumulada ($\mu\text{s}$)</th>
-                  <th>Error Absoluto ($\mu\text{s}$)</th>
+                  <th>Suma Acumulada (us)</th>
+                  <th>Error Absoluto (us)</th>
                   <th>Error Relativo Porcentual</th>
                   <th>Tiempo (ms)</th>
                   <th>Estado (Umbral &lt; 0.5%)</th>
@@ -353,7 +353,7 @@
               <div class="card card-custom p-3 bg-light border-warning h-100">
                 <h6><i class="bi bi-exclamation-octagon me-2 text-warning"></i>Diagnóstico del Fenómeno Numérico</h6>
                 <p class="small text-secondary mb-0">
-                  Se evidencia **Absorción Numérica** severa en **Float32 Directa**. Al crecer la suma acumulada, el exponente desplaza la mantisa de las variaciones pequeñas ($0.01\,\mu\text{s}$ a $2.0\,\mu\text{s}$), ignorando la suma de los deltas.
+                  Se evidencia **Absorción Numérica** severa en **Float32 Directa**. Al crecer la suma acumulada, el exponente desplaza la mantisa de las variaciones pequeñas (0.01,us a 2.0,us), ignorando la suma de los deltas.
                 </p>
               </div>
             </div>
@@ -361,7 +361,7 @@
               <div class="card card-custom p-3 bg-light border-success h-100">
                 <h6><i class="bi bi-check-circle me-2 text-success"></i>Recomendaciones para Producción</h6>
                 <p class="small text-secondary mb-0">
-                  Se recomienda implementar **Suma Compensada de Kahan** o la técnica de **Datos Centrados** ($d_i = x_i - x_{\text{ref}}$) para conservar el uso eficiente de memoria sin perder exactitud en producción.
+                  Se recomienda implementar **Suma Compensada de Kahan** o la técnica de **Datos Centrados** (di = xi - x) para conservar el uso eficiente de memoria sin perder exactitud en producción.
                 </p>
               </div>
             </div>
