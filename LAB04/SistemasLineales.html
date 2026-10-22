@@ -1,0 +1,665 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sistemas lineales: eliminación gaussiana, pivoteo parcial y factorización PA = LU. Simulador del reparto de solicitudes entre cuatro servidores, residuo, condición y ejercicio de ingeniería.">
+  <meta name="theme-color" content="#0b1830">
+
+  <title>Sistemas lineales: solución directa y reutilización | Métodos Numéricos</title>
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+
+  <!-- Estilos compartidos con la página de Teoría de errores + extras de esta página -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+  <!-- ENCABEZADO Y MENÚ ADAPTABLE -->
+  <header id="header" class="header sticky-top">
+    <nav class="navbar navbar-expand-xl" aria-label="Navegación principal">
+      <div class="container-xl header-inner">
+
+        <a href="#hero" class="navbar-brand logo text-decoration-none">
+          <span class="brand-icon" aria-hidden="true"><i class="bi bi-table"></i></span>
+          <span class="sitename">Met<span>Num</span></span>
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navmenu"
+          aria-controls="navmenu"
+          aria-expanded="false"
+          aria-label="Abrir menú">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navmenu">
+          <ul class="navbar-nav ms-auto align-items-xl-center">
+
+            <li class="nav-item nav-course-item">
+              <a href="../index.html" class="course-link">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Cursos
+              </a>
+            </li>
+
+            <li class="nav-item"><a href="#hero" class="nav-link active">Inicio</a></li>
+            <li class="nav-item"><a href="#teoria" class="nav-link">Teoría</a></li>
+            <li class="nav-item"><a href="#caso-practico" class="nav-link">Caso Práctico</a></li>
+            <li class="nav-item"><a href="#calculadora" class="nav-link"> Calculadora</a></li>
+            <li class="nav-item"><a href="#grafico" class="nav-link">Gráfica</a></li>
+            <li class="nav-item"><a href="#ejercicios" class="nav-link"> Problemas</a></li>
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="contenido">
+
+    <!-- INICIO -->
+    <section id="hero" class="hero">
+      <div class="container">
+        <div class="row gy-5 align-items-center">
+
+          <div class="col-lg-6">
+            <h1>Sistemas lineales: solución directa y reutilización</h1>
+
+            <p class="lead mt-3">
+              Eliminación gaussiana, pivoteo y factorización LU. Factoriza una
+              vez, resuelve muchas veces y comprueba cuánto puedes fiarte del
+              resultado.
+            </p>
+
+            <div class="hero-buttons mt-4">
+              <a href="#calculadora" class="btn btn-light btn-lg">
+                <i class="bi bi-calculator me-2" aria-hidden="true"></i>Abrir el simulador
+              </a>
+              <a href="#teoria" class="btn btn-outline-light btn-lg">Leer la teoría</a>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="readout" role="group" aria-labelledby="readoutTitulo">
+              <h2 id="readoutTitulo" class="readout-title">Prueba el pivoteo: εx₁ + x₂ = 1, x₁ + x₂ = 2</h2>
+
+              <div class="readout-inputs single">
+                <label for="heroEps">ε (pivote inicial)
+                  <input id="heroEps" type="number" step="any" value="1e-17" inputmode="decimal">
+                </label>
+              </div>
+
+              <dl class="readout-rows">
+                <div><dt>Sin pivoteo</dt><dd id="heroNop">—</dd></div>
+                <div><dt>Con pivoteo parcial</dt><dd id="heroPiv">—</dd></div>
+                <div><dt>Solución exacta</dt><dd id="heroRef">—</dd></div>
+                <div><dt>Multiplicador sin pivoteo (1/ε)</dt><dd id="heroMult">—</dd></div>
+              </dl>
+
+              <p id="heroMsg" class="readout-msg" aria-live="polite"></p>
+
+              <div class="readout-presets" aria-label="Ejemplos">
+                <button type="button" class="preset" data-e="0.001">ε = 10<sup>−3</sup></button>
+                <button type="button" class="preset" data-e="1e-8">ε = 10<sup>−8</sup></button>
+                <button type="button" class="preset" data-e="1e-14">ε = 10<sup>−14</sup></button>
+                <button type="button" class="preset" data-e="1e-17">ε = 10<sup>−17</sup></button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TEORÍA GENERAL -->
+    <section id="teoria" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <h2>Teoría de los métodos directos</h2>
+          <p>
+            Un método directo llega a la solución de <em>Ax</em> = <em>b</em> en un número
+            finito de pasos conocido de antemano. Para usarlo con criterio hay que
+            responder tres preguntas.
+          </p>
+        </header>
+
+        <dl class="sources">
+          <div>
+            <dt>¿Existe y es única la solución?</dt>
+            <dd>Depende de que <em>A</em> sea no singular. En la práctica se detecta con pivotes nulos o demasiado pequeños.</dd>
+          </div>
+          <div>
+            <dt>¿Qué tan fiable es el resultado?</dt>
+            <dd>El residuo mide cuánto falla la ecuación y la condición de <em>A</em> indica cuánto se amplifica un error en los datos.</dd>
+          </div>
+          <div>
+            <dt>¿Se puede reutilizar el trabajo?</dt>
+            <dd>La factorización LU separa lo caro (factorizar) de lo barato (sustituir) y sirve para cualquier vector <em>b</em> nuevo.</dd>
+          </div>
+        </dl>
+
+        <div class="concepts">
+
+          <article class="concept">
+            <h3>Eliminación gaussiana</h3>
+            <p>
+              Convierte <em>A</em> en una matriz triangular restando múltiplos de la
+              fila pivote. Cuesta del orden de 2<em>n</em><sup>3</sup>/3 operaciones.
+            </p>
+            <div class="math-box"><div id="math-gauss"></div></div>
+          </article>
+
+          <article class="concept">
+            <h3>Pivoteo parcial</h3>
+            <p>
+              Antes de eliminar, se intercambian filas para que el pivote sea el mayor
+              de su columna. Así los multiplicadores no superan 1 en valor absoluto.
+            </p>
+            <div class="math-box"><div id="math-pivot"></div></div>
+          </article>
+
+          <article class="concept">
+            <h3>Factorización PA = LU</h3>
+            <p>
+              Guarda los multiplicadores en <em>L</em> y el resultado triangular en <em>U</em>.
+              Cada vector <em>b</em> nuevo solo exige dos sustituciones.
+            </p>
+            <div class="math-box"><div id="math-lu"></div></div>
+          </article>
+
+        </div>
+
+        <div class="row g-5 mt-1">
+
+          <div class="col-lg-6">
+            <h3 class="subhead">Estrategias de pivoteo</h3>
+            <p class="text-secondary">
+              Ninguna sustituye al criterio: un pivote pequeño produce multiplicadores
+              enormes que destruyen las cifras significativas.
+            </p>
+
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0">
+                <caption class="visually-hidden">Comparación de estrategias de pivoteo</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Estrategia</th>
+                    <th scope="col">Qué hace</th>
+                    <th scope="col">Estabilidad y uso</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Sin pivoteo</th><td>Usa siempre <em>a<sub>kk</sub></em>.</td><td>Falla si el pivote es cero o pequeño. Solo para matrices diagonal dominantes o simétricas definidas positivas.</td></tr>
+                  <tr><th scope="row">Parcial</th><td>Elige el mayor |<em>a<sub>ik</sub></em>| de la columna.</td><td>Estable en la práctica y barata. Es la opción por defecto de las librerías.</td></tr>
+                  <tr><th scope="row">Completo</th><td>Busca en toda la submatriz restante.</td><td>La más robusta, pero con coste de búsqueda de orden <em>n</em><sup>3</sup>. Rara vez necesaria.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3 class="subhead mt-4">Costo de reutilizar la factorización</h3>
+            <p class="text-secondary mb-0">
+              Para <em>k</em> vectores <em>b</em>, repetir la eliminación cada vez frente a factorizar una sola vez:
+            </p>
+            <div class="math-box"><div id="math-costo"></div></div>
+          </div>
+
+          <div class="col-lg-6">
+            <h3 class="subhead">Residuo, condición y sensibilidad</h3>
+            <p class="text-secondary">
+              Un residuo pequeño no garantiza una solución exacta. Lo que decide cuánto error
+              hay en <em>x</em> es la condición κ(<em>A</em>).
+            </p>
+
+            <div class="math-box">
+              <div id="math-resid"></div>
+              <div id="math-cond"></div>
+            </div>
+
+            <div class="table-responsive mt-3">
+              <table class="table data-table align-middle mb-0">
+                <caption class="visually-hidden">Interpretación del número de condición</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">κ(<em>A</em>)</th>
+                    <th scope="col">Lectura</th>
+                    <th scope="col" class="num">Dígitos perdidos ≈ log<sub>10</sub> κ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">&lt; 10<sup>2</sup></th><td>Bien condicionada</td><td class="num">0 a 2</td></tr>
+                  <tr><th scope="row">10<sup>2</sup> a 10<sup>6</sup></th><td>Condición moderada: revisar</td><td class="num">2 a 6</td></tr>
+                  <tr><th scope="row">&gt; 10<sup>8</sup></th><td>Mal condicionada: con float64 quedan menos de 8 cifras fiables</td><td class="num">&gt; 8</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="table-note mt-3 mb-0">
+              En esta página las normas son la del máximo por filas (‖·‖<sub>∞</sub>), de modo que el residuo, la condición y la cota
+              se comparan siempre con la misma medida.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+        <!-- 2. CASO PRÁCTICO -->
+    <section id="caso-practico" class="section">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-badge">Caso Práctico en Ingeniería</span>
+          <h2>Balanceo de Carga en Granja de Servidores (Ax = b)</h2>
+          <p>
+            Un cluster de infraestructura distribuye peticiones de red entre cuatro nodos servidores. Para mantener el equilibrio térmico y de ancho de banda, las cargas individuales <em>x<sub>i</sub></em> (en solicitudes/segundo) deben satisfacer un sistema lineal acoplado.
+          </p>
+        </header>
+
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-hdd-network text-primary me-2"></i>Ecuaciones Físicas del Sistema</h3>
+              <p class="text-secondary small mb-2">
+                El sistema $A\mathbf{x} = \mathbf{b}$ modela el reparto continuo de tráfico en el clúster:
+              </p>
+              <div class="math-box mb-3">
+                $$\begin{cases}
+                x_1 + x_2 + x_3 + x_4 = T & \text{(Conservación del flujo total)} \\[4pt]
+                2x_1 - x_2 = 0 & \text{(Servidor 2 duplica al Servidor 1)} \\[4pt]
+                x_2 - 2x_3 = 0 & \text{(Servidor 2 duplica al Servidor 3)} \\[4pt]
+                x_1 - x_4 = 120 & \text{(Servidor 1 procesa 120 sol/s más que el 4)}
+                \end{cases}$$
+              </div>
+              <p class="text-secondary small mb-0">
+                El vector incógnita $\mathbf{x} = [x_1, x_2, x_3, x_4]^T$ representa las cargas asignadas a cada nodo en sol/s.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-cpu text-primary me-2"></i>Por qué Factorización LU en vez de Gauss Simple</h3>
+              <p class="text-secondary small">
+                En ingeniería de software de alto rendimiento, la matriz de enrutamiento <strong>A</strong> cambia con poca frecuencia, pero el volumen de tráfico <strong>T</strong> (lado derecho <em>b</em>) varía continuamente.
+              </p>
+              <div class="p-3 bg-light rounded-3 border mb-3">
+                <div class="fw-bold text-dark small mb-2">Costo Computacional Comparativo:</div>
+                <div class="math-box mb-2">
+                  $$C_{\text{Gauss}} = \mathcal{O}\left(\tfrac{2}{3}n^3\right) \approx 43 \text{ FLOPs} \quad \text{vs} \quad C_{LU} = \mathcal{O}(2n^2) = 32 \text{ FLOPs}$$
+                </div>
+                <div class="small text-secondary">
+                  Eliminación Gaussiana completa requiere re-triangularizar cada vez que varía <em>T</em>. Con <strong>PA = LU</strong>, la descomposición se ejecuta una sola vez; cada nuevo vector $\mathbf{b}$ se resuelve de forma inmediata mediante sustitución progresiva y regresiva $\mathcal{O}(2n^2)$.
+                </div>
+              </div>
+              <p class="text-secondary small mb-0">
+                A continuación puedes editar la matriz o los vectores de carga para resolver matricialmente el sistema.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SIMULADOR Y CALCULADORA -->
+    <section id="calculadora" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-badge">Calculadora Numérica</span>
+          <h2>Solucionador Matricial y Factorización PA = LU</h2>
+          <p>
+            Modifica los coeficientes del sistema, define los escenarios de tráfico y analiza la descomposición LU, el residuo y el número de condición de la matriz.
+          </p>
+        </header>
+
+        <div class="row g-5">
+
+          <!-- Contexto y roles -->
+          <div class="col-lg-5">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-person-gear text-primary me-2"></i>Roles de Verificación Técnica</h3>
+              <dl class="method-list">
+                <div>
+                  <dt>1. Ingeniero de Algoritmos</dt>
+                  <dd>Implementa el pivoteo parcial por filas y extrae las matrices <code>L</code> (triangular inferior con 1s en la diagonal) y <code>U</code> (triangular superior escalonada).</dd>
+                </div>
+                <div>
+                  <dt>2. Ingeniero de Aseguramiento de Calidad</dt>
+                  <dd>Calcula el vector residuo <code>r = b − Ax</code> y la cota de amplificación del error mediante el número de condición <code>κ(A) = ‖A‖·‖A⁻¹‖</code>.</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+
+          <!-- Parámetros -->
+          <div class="col-lg-7">
+            <form id="formSim" class="panel" novalidate>
+              <h3 class="panel-title"><i class="bi bi-grid-3x3 text-primary me-2"></i>Matriz de Coeficientes A y Cargas</h3>
+
+              <p class="form-label mb-2" id="etiquetaMatriz">Matriz de coeficientes <em>A</em> (4 &times; 4)</p>
+              <div id="matrizA" class="matrix-input" role="group" aria-labelledby="etiquetaMatriz"></div>
+
+              <div class="row g-3 mt-1">
+                <div class="col-sm-4">
+                  <label for="calcT1" class="form-label">Total <em>T</em>₁ (sol/s)</label>
+                  <input type="number" id="calcT1" class="form-control" value="850" step="any">
+                </div>
+                <div class="col-sm-4">
+                  <label for="calcT2" class="form-label">Total <em>T</em>₂ (sol/s)</label>
+                  <input type="number" id="calcT2" class="form-control" value="1000" step="any">
+                </div>
+                <div class="col-sm-4">
+                  <label for="calcT3" class="form-label">Total <em>T</em>₃ (sol/s)</label>
+                  <input type="number" id="calcT3" class="form-control" value="1200" step="any">
+                </div>
+
+                <div class="col-sm-4">
+                  <label for="calcB4" class="form-label">Diferencia <em>b</em>₄ (sol/s)</label>
+                  <input type="number" id="calcB4" class="form-control" value="120" step="any">
+                  <div class="form-text">Lado derecho ec. 4.</div>
+                </div>
+                <div class="col-sm-4">
+                  <label for="calcCap" class="form-label">Capacidad Máx. (sol/s)</label>
+                  <input type="number" id="calcCap" class="form-control" value="400" min="0" step="any">
+                  <div class="form-text">Límite por servidor.</div>
+                </div>
+                <div class="col-sm-4">
+                  <label for="calcPert" class="form-label">Perturbación (%)</label>
+                  <input type="number" id="calcPert" class="form-control" value="0.1" min="0" step="any">
+                  <div class="form-text">Para sensibilidad (&plusmn;).</div>
+                </div>
+              </div>
+
+              <div id="calcError" class="form-error" role="alert" hidden></div>
+
+              <div class="d-flex flex-wrap gap-2 mt-4">
+                <button type="submit" class="btn btn-primary" id="btnEjecutar">
+                  <i class="bi bi-play-fill me-1" aria-hidden="true"></i>Resolver Sistema (PA = LU)
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnReset">
+                  <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Restablecer
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnInforme" disabled>
+                  <i class="bi bi-download me-1" aria-hidden="true"></i>Descargar Informe
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- RESULTADOS -->
+        <div id="simResultados" class="results" hidden>
+
+          <h3 class="subhead"><i class="bi bi-check2-circle text-success me-2"></i>Resultados del Sistema y Factorización PA = LU</h3>
+
+          <!-- Métricas Clave de Condicionamiento -->
+          <div class="metrics mb-4" aria-label="Métricas del sistema">
+            <div class="metric">
+              <span class="metric-label">Número de Condición κ∞(A)</span>
+              <span class="metric-value" id="mCond">—</span>
+              <span class="metric-unit" id="mCondTxt">—</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Residuo Máximo ‖r‖∞</span>
+              <span class="metric-value" id="mResiduo">—</span>
+              <span class="metric-unit">‖b − Ax‖∞</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Diferencia vs Gauss-Jordan</span>
+              <span class="metric-value" id="mDif">—</span>
+              <span class="metric-unit">Validación cruzada</span>
+            </div>
+          </div>
+
+          <!-- Bloque 1: Factorización PA = LU -->
+          <article class="panel mb-4">
+            <div class="block-head d-flex justify-content-between align-items-center">
+              <div>
+                <span class="role-tag">Paso 1</span>
+                <h4 class="d-inline-block ms-2 mb-0">Factorización PA = LU con Pivoteo Parcial</h4>
+              </div>
+              <span id="checkLU" class="status"></span>
+            </div>
+            <p id="textoLU" class="text-secondary small mb-3"></p>
+
+            <div class="matrix-trio">
+              <figure>
+                <figcaption>Vector Permutación <em>p</em></figcaption>
+                <div id="viewP"></div>
+              </figure>
+              <figure>
+                <figcaption>Matriz Triangular Inferior <em>L</em></figcaption>
+                <div id="viewL"></div>
+              </figure>
+              <figure>
+                <figcaption>Matriz Triangular Superior <em>U</em></figcaption>
+                <div id="viewU"></div>
+              </figure>
+            </div>
+
+            <!-- Historial de Pivoteo -->
+            <div class="mt-4">
+              <h5 class="minor-head">Historial de Pivoteo Parcial</h5>
+              <div class="table-responsive">
+                <table class="table data-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th scope="col">Paso <em>k</em></th>
+                      <th scope="col">Intercambio de Filas</th>
+                      <th scope="col" class="num">Pivote Elegido</th>
+                      <th scope="col">Multiplicadores <em>m</em><sub>ik</sub></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaPivotes"></tbody>
+                </table>
+              </div>
+            </div>
+          </article>
+
+          <!-- Bloque 2: Soluciones para cada total T -->
+          <article class="panel mb-4">
+            <div class="block-head">
+              <span class="role-tag">Paso 2</span>
+              <h4 class="d-inline-block ms-2 mb-0">Cargas Calculadas por Servidor (sol/s)</h4>
+            </div>
+            <div class="table-responsive">
+              <table class="table data-table results-table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col" class="num">Total <em>T</em></th>
+                    <th scope="col" class="num">Servidor 1 (sol/s)</th>
+                    <th scope="col" class="num">Servidor 2 (sol/s)</th>
+                    <th scope="col" class="num">Servidor 3 (sol/s)</th>
+                    <th scope="col" class="num">Servidor 4 (sol/s)</th>
+                    <th scope="col">Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaSoluciones"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <!-- Bloque 3: Factibilidad por Servidor -->
+          <article class="panel mb-4">
+            <div class="block-head">
+              <span class="role-tag">Paso 3</span>
+              <h4 class="d-inline-block ms-2 mb-0">Capacidad y Factibilidad Operativa</h4>
+            </div>
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0">
+                <thead id="theadFact"></thead>
+                <tbody id="tablaFactibilidad"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <!-- Bloque 4: Verificación Numérica y Sensibilidad -->
+          <article class="panel mb-4">
+            <div class="block-head">
+              <span class="role-tag">Paso 4</span>
+              <h4 class="d-inline-block ms-2 mb-0">Verificación Numérica y Sensibilidad</h4>
+            </div>
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col" class="num">Total <em>T</em></th>
+                    <th scope="col" class="num">‖r‖∞</th>
+                    <th scope="col" class="num">Residuo Relativo</th>
+                    <th scope="col" class="num">Dif. Gauss-Jordan</th>
+                    <th scope="col" class="num">Sensibilidad Obs.</th>
+                    <th scope="col" class="num">Cota Teórica κ·δ</th>
+                    <th scope="col">Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaVerificacion"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <!-- Bloque 5: Diagnóstico y Evidencia -->
+          <div class="row g-4">
+            <div class="col-lg-7">
+              <div class="panel h-100">
+                <h4 class="subhead"><i class="bi bi-clipboard-pulse text-primary me-2"></i>Diagnóstico de Ingeniería</h4>
+                <ul id="diagnostico" class="diagnosis"></ul>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="panel h-100">
+                <h4 class="subhead"><i class="bi bi-check2-all text-success me-2"></i>Evidencia Numérica</h4>
+                <ul id="evidencia" class="evidence"></ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+<!-- GRÁFICO -->
+    <section id="grafico" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <h2>Cargas y sensibilidad</h2>
+          <p>
+            Dos vistas del mismo sistema: cómo cambian las cargas al variar el total y qué
+            tan bien predice la condición la sensibilidad real a los errores en los datos.
+          </p>
+        </header>
+
+        <div class="panel">
+          <div class="chart-controls">
+            <div class="d-flex flex-wrap gap-3 align-items-end">
+              <div>
+                <label for="modoGrafico" class="form-label">Vista</label>
+                <select id="modoGrafico" class="form-select">
+                  <option value="cargas">Carga de cada servidor según el total</option>
+                  <option value="sens">Sensibilidad observada frente a la cota</option>
+                </select>
+              </div>
+              <div>
+                <label for="casoGrafico" class="form-label">Caso (solo sensibilidad)</label>
+                <select id="casoGrafico" class="form-select" disabled></select>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="btnGrafico">
+              <i class="bi bi-graph-up me-2" aria-hidden="true"></i>Actualizar gráfico
+            </button>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="errorChart" role="img" aria-label="Gráfico de cargas por servidor o de sensibilidad del sistema"></canvas>
+            <p id="chartVacio" class="chart-empty">Pulsa «Actualizar gráfico» para dibujar la vista elegida.</p>
+          </div>
+
+          <p id="notaGrafico" class="table-note mb-0"></p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- EJERCICIO -->
+    <section id="ejercicios" class="section">
+      <div class="container">
+
+        <header class="section-head">
+          <h2>Ejercicios Propuestos</h2>
+          <p>
+            Un problema en cinco apartados, con datos distintos cada vez. Tienes
+            tres intentos por apartado y puedes usar calculadora.
+          </p>
+        </header>
+
+        <div class="row justify-content-center">
+          <div class="col-xl-10">
+
+            <div class="panel scenario" id="escenarioEjercicio"></div>
+
+            <div class="exercise-bar">
+              <div class="progress" role="progressbar" aria-label="Progreso del ejercicio" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" id="barraProgreso">
+                <div class="progress-bar" id="barraProgresoRelleno" style="width: 0%"></div>
+              </div>
+              <span id="progresoTexto" class="progress-text">0 de 5 apartados</span>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="btnNuevoCaso">
+                <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>Nuevo caso
+              </button>
+            </div>
+
+            <ol id="partesEjercicio" class="steps"></ol>
+
+            <div id="resumenEjercicio" class="panel summary" hidden aria-live="polite"></div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+      </main>
+
+  <!-- PIE DE PÁGINA -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="fw-bold mb-0 text-dark">MetNum · Métodos Numéricos para Ingeniería</p>
+        <small class="text-muted">Módulo 04: Sistemas de Ecuaciones Lineales Directos, Factorización PA = LU y Condicionamiento.</small>
+      </div>
+      <div class="d-flex gap-3 text-muted small align-items-center">
+        <a href="../index.html" class="text-decoration-none text-muted">← Volver al Portal de Cursos</a>
+        <span>•</span>
+        <a href="#hero" class="text-decoration-none text-muted">Volver al Inicio ↑</a>
+      </div>
+    </div>
+  </footer>
+<!-- BOTÓN VOLVER ARRIBA -->
+  <a href="#hero" id="scrollTopBtn" class="back-to-top" aria-label="Volver al inicio">
+    <i class="bi bi-arrow-up-short" aria-hidden="true"></i>
+  </a>
+
+  <!-- LIBRERÍAS EXTERNAS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Nuestro JavaScript -->
+  <script src="main.js" defer></script>
+
+</body>
+</html>

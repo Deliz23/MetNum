@@ -1,0 +1,106 @@
+/* ===================================================
+   LAB04 - SISTEMAS DE ECUACIONES LINEALES
+   Importa la hoja de estilos compartida del proyecto MetNum
+=================================================== */
+
+@import "../shared/base.css";
+
+/* Presentación de Matrices P, L, U */
+.matrix-trio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin: 1.25rem 0;
+}
+
+.matrix-trio figure {
+  margin: 0;
+  background: var(--paper);
+  padding: 1.1rem 1.3rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.matrix-trio figure:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.matrix-trio figcaption {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.matrix-view {
+  border-collapse: separate;
+  border-spacing: 0;
+  border-left: 3px solid var(--brand-wine, #722f37);
+  border-right: 3px solid var(--brand-wine, #722f37);
+  background: var(--canvas);
+  border-radius: 4px;
+  padding: 0.35rem;
+}
+
+.matrix-view td {
+  padding: 0.4rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.matrix-view td.is-zero {
+  color: var(--muted);
+  opacity: 0.4;
+}
+
+.perm-vector {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.25rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--ink);
+  background: var(--canvas);
+  border-radius: var(--radius-s);
+  border-left: 3px solid var(--brand-wine, #722f37);
+  border-right: 3px solid var(--brand-wine, #722f37);
+}
+
+/* Matriz de entrada editable */
+.matrix-input {
+  max-width: 440px;
+  background: var(--paper);
+  border-left: 3px solid var(--accent);
+  border-right: 3px solid var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.matrix-input input {
+  text-align: center;
+  font-weight: 600;
+  border-radius: 6px;
+  background: var(--canvas);
+  border: 1px solid var(--line);
+}
+
+.matrix-input input:focus {
+  background: var(--paper);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(29, 79, 215, 0.18);
+}
