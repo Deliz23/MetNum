@@ -1,0 +1,695 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sistemas lineales iterativos: métodos de Jacobi, Gauss-Seidel y SOR, dominancia diagonal, radio espectral y criterios de convergencia. Simulador del ranking de cuatro nodos y ejercicio de ingeniería.">
+  <meta name="theme-color" content="#0b1830">
+
+  <title>Sistemas lineales iterativos y criterios de convergencia | Métodos Numéricos</title>
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+  <!-- ENCABEZADO Y MENÚ ADAPTABLE -->
+  <header id="header" class="header sticky-top">
+    <nav class="navbar navbar-expand-xl" aria-label="Navegación principal">
+      <div class="container-xl header-inner">
+
+        <a href="#hero" class="navbar-brand logo text-decoration-none">
+          <span class="brand-icon" aria-hidden="true"><i class="bi bi-arrow-repeat"></i></span>
+          <span class="sitename">Met<span>Num</span></span>
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navmenu"
+          aria-controls="navmenu"
+          aria-expanded="false"
+          aria-label="Abrir menú">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navmenu">
+          <ul class="navbar-nav ms-auto align-items-xl-center">
+
+            <li class="nav-item nav-course-item">
+              <a href="../index.html" class="course-link">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Cursos
+              </a>
+            </li>
+
+            <li class="nav-item"><a href="#hero" class="nav-link active">Inicio</a></li>
+            <li class="nav-item"><a href="#teoria" class="nav-link">Teoría</a></li>
+            <li class="nav-item"><a href="#caso-practico" class="nav-link"> Caso Práctico</a></li>
+            <li class="nav-item"><a href="#calculadora" class="nav-link"> Calculadora</a></li>
+            <li class="nav-item"><a href="#grafico" class="nav-link">Gráfica</a></li>
+            <li class="nav-item"><a href="#ejercicios" class="nav-link"> Problemas</a></li>
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="contenido">
+
+    <!-- INICIO -->
+    <section id="hero" class="hero">
+      <div class="container">
+        <div class="row gy-5 align-items-center">
+
+          <div class="col-lg-6">
+            <h1>Sistemas lineales iterativos y criterios de convergencia</h1>
+
+            <p class="lead mt-3">
+              Jacobi, Gauss–Seidel y SOR. Aprende a saber, antes de iterar, si un
+              método va a converger, con qué rapidez y cuándo detenerlo.
+            </p>
+
+            <div class="hero-buttons mt-4">
+              <a href="#calculadora" class="btn btn-light btn-lg">
+                <i class="bi bi-calculator me-2" aria-hidden="true"></i>Abrir el simulador
+              </a>
+              <a href="#teoria" class="btn btn-outline-light btn-lg">Leer la teoría</a>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="readout" role="group" aria-labelledby="readoutTitulo">
+              <h2 id="readoutTitulo" class="readout-title">Prueba la convergencia: x₁ − a·x₂ = 1, −a·x₁ + x₂ = 1</h2>
+
+              <div class="readout-inputs single">
+                <label for="heroA">a (acoplamiento entre las incógnitas)
+                  <input id="heroA" type="number" step="any" value="0.8" inputmode="decimal">
+                </label>
+              </div>
+
+              <dl class="readout-rows">
+                <div><dt>Radio espectral de Jacobi</dt><dd id="heroRhoJ">—</dd></div>
+                <div><dt>Radio espectral de Gauss–Seidel</dt><dd id="heroRhoGS">—</dd></div>
+                <div><dt>Iteraciones de Jacobi</dt><dd id="heroItJ">—</dd></div>
+                <div><dt>Iteraciones de Gauss–Seidel</dt><dd id="heroItGS">—</dd></div>
+              </dl>
+
+              <p id="heroMsg" class="readout-msg" aria-live="polite"></p>
+
+              <div class="readout-presets" aria-label="Ejemplos">
+                <button type="button" class="preset" data-a="0.3">a = 0.3</button>
+                <button type="button" class="preset" data-a="0.6">a = 0.6</button>
+                <button type="button" class="preset" data-a="0.9">a = 0.9</button>
+                <button type="button" class="preset" data-a="1.1">a = 1.1</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TEORÍA GENERAL -->
+    <section id="teoria" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-badge">Fundamentos de Convergencia</span>
+          <h2> Matrices de Iteración T y Radio Espectral ρ(T)</h2>
+          <p>
+            Un método iterativo no resuelve el sistema de golpe: parte de una
+            estimación y la mejora paso a paso. Para usarlo con criterio hay que
+            responder tres preguntas antes de empezar.
+          </p>
+        </header>
+
+        <dl class="sources">
+          <div>
+            <dt>¿Converge?</dt>
+            <dd>Depende de la matriz de iteración <em>T</em>: converge para cualquier inicio si y solo si ρ(<em>T</em>) &lt; 1.</dd>
+          </div>
+          <div>
+            <dt>¿Con qué rapidez?</dt>
+            <dd>El error se multiplica por ρ(<em>T</em>) en cada paso. Cuanto más cerca de 0, menos iteraciones.</dd>
+          </div>
+          <div>
+            <dt>¿Cuándo detenerse?</dt>
+            <dd>Se vigila el residuo y el cambio relativo entre iteraciones, pero ninguno de los dos mide el error por sí solo.</dd>
+          </div>
+        </dl>
+
+        <div class="concepts">
+
+          <article class="concept">
+            <h3>Jacobi</h3>
+            <p>
+              Calcula cada componente solo con los valores de la iteración
+              anterior. Todas las componentes son independientes entre sí.
+            </p>
+            <div class="math-box"><div id="math-jacobi"></div></div>
+          </article>
+
+          <article class="concept">
+            <h3>Gauss–Seidel</h3>
+            <p>
+              Usa de inmediato los valores recién calculados. Suele converger
+              más rápido, pero las componentes dependen unas de otras.
+            </p>
+            <div class="math-box"><div id="math-gs"></div></div>
+          </article>
+
+          <article class="concept">
+            <h3>SOR</h3>
+            <p>
+              Mezcla el valor anterior con el de Gauss–Seidel mediante un factor
+              de relajación ω. Con un ω bien elegido acelera mucho la convergencia.
+            </p>
+            <div class="math-box"><div id="math-sor"></div></div>
+          </article>
+
+        </div>
+
+        <div class="row g-5 mt-1">
+
+          <div class="col-lg-6">
+            <h3 class="subhead">Criterios de convergencia</h3>
+            <p class="text-secondary">
+              Los tres métodos son de la forma <em>x</em><sup>(k+1)</sup> = <em>T x</em><sup>(k)</sup> + <em>c</em>,
+              con <em>A</em> = <em>D</em> + <em>L</em> + <em>U</em>.
+            </p>
+
+            <div class="math-box">
+              <div id="math-matriz"></div>
+              <div id="math-conv"></div>
+            </div>
+
+            <div class="table-responsive mt-3">
+              <table class="table data-table align-middle mb-0">
+                <caption class="visually-hidden">Condiciones de convergencia</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Condición</th>
+                    <th scope="col">Qué garantiza</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">ρ(<em>T</em>) &lt; 1</th><td>Necesaria y suficiente: converge para cualquier inicio.</td></tr>
+                  <tr><th scope="row">‖<em>T</em>‖ &lt; 1 en alguna norma</th><td>Suficiente. Es la forma práctica de comprobarlo sin calcular valores propios.</td></tr>
+                  <tr><th scope="row">Dominancia diagonal estricta</th><td>Jacobi y Gauss–Seidel convergen. Suficiente, no necesaria.</td></tr>
+                  <tr><th scope="row"><em>A</em> simétrica definida positiva</th><td>Gauss–Seidel converge y SOR converge para todo 0 &lt; ω &lt; 2 (Ostrowski–Reich).</td></tr>
+                  <tr><th scope="row">0 &lt; ω &lt; 2</th><td>Condición necesaria de SOR (Kahan): ρ(<em>T</em><sub>ω</sub>) ≥ |ω − 1|.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <h3 class="subhead">Rapidez y criterios de paro</h3>
+            <p class="text-secondary">
+              Como el error cae como ρ<sup>k</sup>, se puede predecir cuántas iteraciones harán falta
+              y compararlo con lo que se observa.
+            </p>
+
+            <div class="math-box">
+              <div id="math-nit"></div>
+              <div id="math-paro"></div>
+            </div>
+
+            <div class="table-responsive mt-3">
+              <table class="table data-table align-middle mb-0">
+                <caption class="visually-hidden">Criterios de paro</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Criterio</th>
+                    <th scope="col">Cuidado con</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Residuo relativo ‖<em>r</em>‖/‖<em>b</em>‖</th><td>Un residuo pequeño no garantiza un error pequeño si κ(<em>A</em>) es grande.</td></tr>
+                  <tr><th scope="row">Cambio relativo δ<sub>k</sub></th><td>Engaña cuando ρ ≈ 1: los pasos son pequeños aunque quede mucho error.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3 class="subhead mt-4">Comparación para cálculo distribuido</h3>
+
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0">
+                <caption class="visually-hidden">Comparación de Jacobi, Gauss-Seidel y SOR</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Método</th>
+                    <th scope="col">Valores nuevos</th>
+                    <th scope="col">Paralelismo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Jacobi</th><td>No</td><td>Total: una ronda por iteración.</td></tr>
+                  <tr><th scope="row">Gauss–Seidel</th><td>Sí</td><td>Secuencial: cada nodo espera al anterior.</td></tr>
+                  <tr><th scope="row">SOR</th><td>Sí</td><td>Secuencial, y exige elegir ω.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+        <!-- 2. CASO PRÁCTICO -->
+    <section id="caso-practico" class="section">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-badge">Caso Práctico en Ingeniería</span>
+          <h2>Difusión de Influencia y Ranking en Redes Distribuidas</h2>
+          <p>
+            En redes de servidores, sistemas de reputación (PageRank) y mallados térmicos discretos mediante diferencias finitas, cada nodo calcula su estado a partir de las interacciones continuas con sus vecinos.
+          </p>
+        </header>
+
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-diagram-2 text-primary me-2"></i>Significado de las Ecuaciones</h3>
+              <p class="text-secondary small">
+                El puntaje o potencial <em>x<sub>i</sub></em> de cada nodo es una combinación lineal de una fuente base (lado derecho <em>b</em>) más la influencia transmitida por los demás nodos de la topología.
+              </p>
+              <dl class="method-list" id="ecuaciones"></dl>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-code-slash text-primary me-2"></i>Arquitectura de Software y Paso Iterativo</h3>
+              <p class="text-secondary small">
+                Para resolver sistemas dispersos de gran dimensión donde almacenar <code>A⁻¹</code> es prohibitivo en memoria, los tres algoritmos comparten una interfaz común:
+              </p>
+              <pre class="code-block mb-3" aria-label="Interfaz común de los métodos iterativos"><code>metodo.paso(A, b, x, omega) -> x_nuevo
+
+iterar(metodo, A, b, x0, {omega, tol, maxIter})
+  -> { x, iteraciones, historial, converge }</code></pre>
+              <div class="p-3 bg-light rounded-3 border small">
+                <strong>¿Por qué SOR?</strong> Con el factor de relajación óptimo <code>ω_opt</code>, SOR reduce drásticamente el número de pasos requeridos frente a Gauss-Seidel estándar.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SIMULADOR Y CALCULADORA -->
+    <section id="calculadora" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-badge">Calculadora Numérica</span>
+          <h2>Simulador y Comparador Iterativo en Vivo</h2>
+          <p>
+            Ingresa la matriz de coeficientes, el vector <em>b</em> y los vectores de arranque (frío vs caliente) para comparar el comportamiento de convergencia y las tasas espectrales.
+          </p>
+        </header>
+
+        <div class="row g-5">
+
+          <!-- Contexto -->
+          <div class="col-lg-5">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-speedometer2 text-primary me-2"></i>Condiciones de Parada</h3>
+              <p class="text-secondary small">
+                El algoritmo detiene su ejecución cuando el cambio relativo entre iteraciones sucesivas o el residuo relativo de la ecuación cae por debajo de la tolerancia estipulada:
+              </p>
+              <div class="math-box mb-3">
+                $$\frac{\|x^{(k+1)} - x^{(k)}\|_\infty}{\|x^{(k+1)}\|_\infty} < \text{tol}, \quad \frac{\|b - Ax^{(k+1)}\|_\infty}{\|b\|_\infty} < \text{tol}$$
+              </div>
+              <p class="text-secondary small mb-0">
+                Si <code>ρ(T) &ge; 1</code>, el método diverge geométricamente y el simulador alertará de inestabilidad espectral.
+              </p>
+            </div>
+          </div>
+
+          <!-- Parámetros -->
+          <div class="col-lg-7">
+            <form id="formSim" class="panel" novalidate>
+              <h3 class="panel-title"><i class="bi bi-sliders text-primary me-2"></i>Datos del Sistema</h3>
+
+              <p class="form-label mb-2" id="etiquetaMatriz">Matriz de coeficientes <em>A</em> (4 &times; 4)</p>
+              <div id="matrizA" class="matrix-input" role="group" aria-labelledby="etiquetaMatriz"></div>
+
+              <p class="form-label mt-3 mb-2" id="etiquetaB">Vector de términos independientes <em>b</em></p>
+              <div id="vectorB" class="matrix-input" role="group" aria-labelledby="etiquetaB"></div>
+
+              <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <p class="form-label mb-2" id="etiquetaIA">Inicio A (Arranque en Frío x₀ = 0)</p>
+                  <div id="inicioA" class="matrix-input" role="group" aria-labelledby="etiquetaIA"></div>
+                </div>
+                <div class="col-md-6">
+                  <p class="form-label mb-2" id="etiquetaIB">Inicio B (Arranque en Caliente)</p>
+                  <div id="inicioB" class="matrix-input" role="group" aria-labelledby="etiquetaIB"></div>
+                </div>
+              </div>
+
+              <div class="row g-3 mt-1">
+                <div class="col-sm-6">
+                  <label for="calcOmegas" class="form-label">Factores ω de SOR</label>
+                  <input type="text" id="calcOmegas" class="form-control" value="0.8, 1.0, 1.2, 1.5, 1.8" autocomplete="off">
+                  <div class="form-text">Separados por comas; rango (0, 2).</div>
+                </div>
+                <div class="col-sm-6">
+                  <label for="calcTol" class="form-label">Tolerancia Relativa</label>
+                  <input type="number" id="calcTol" class="form-control" value="0.00000001" min="0" step="any">
+                  <div class="form-text">Criterio de convergencia.</div>
+                </div>
+                <div class="col-sm-6">
+                  <label for="calcMax" class="form-label">Máx. Iteraciones</label>
+                  <input type="number" id="calcMax" class="form-control" value="500" min="1" max="5000" step="1">
+                </div>
+                <div class="col-sm-6">
+                  <label for="calcDeltaB" class="form-label">Variación de b (%)</label>
+                  <input type="number" id="calcDeltaB" class="form-control" value="5" min="0" max="100" step="1">
+                </div>
+              </div>
+
+              <div id="calcError" class="form-error" role="alert" hidden></div>
+
+              <div class="d-flex flex-wrap gap-2 mt-4">
+                <button type="submit" class="btn btn-primary" id="btnEjecutar">
+                  <i class="bi bi-play-fill me-1" aria-hidden="true"></i>Ejecutar Iteraciones
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnReset">
+                  <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Restablecer
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnInforme" disabled>
+                  <i class="bi bi-download me-1" aria-hidden="true"></i>Descargar Informe
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+                <!-- RESULTADOS -->
+        <div id="simResultados" class="results" hidden>
+
+          <h3 class="subhead"><i class="bi bi-check2-circle text-success me-2"></i>Evaluación Numérica de Convergencia</h3>
+
+          <!-- Métricas Destacadas (KPIs) -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div class="metric-card">
+                <span class="metric-title">Radio Espectral Jacobi ρ(T_J)</span>
+                <span class="metric-value font-mono" id="mRhoJ">—</span>
+                <span class="metric-meta" id="mRhoJTxt">—</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="metric-card">
+                <span class="metric-title">Radio Espectral Gauss–Seidel ρ(T_GS)</span>
+                <span class="metric-value font-mono" id="mRhoGS">—</span>
+                <span class="metric-meta" id="mRhoGSTxt">—</span>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="metric-card">
+                <span class="metric-title">Factor Óptimo SOR ω*</span>
+                <span class="metric-value font-mono" id="mOmega">—</span>
+                <span class="metric-meta" id="mOmegaTxt">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloque 1: Dominancia y radios espectrales -->
+          <article class="panel mb-4">
+            <div class="block-head">
+              <span class="role-tag">Análisis Previo</span>
+              <h4 class="mb-0">Dominancia diagonal y radios espectrales ρ(T)</h4>
+            </div>
+
+            <div class="row g-4">
+              <div class="col-lg-6">
+                <h5 class="minor-head">Dominancia diagonal estricta</h5>
+                <div class="table-responsive">
+                  <table class="table data-table align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th scope="col">Fila</th>
+                        <th scope="col" class="num">|a<sub>ii</sub>|</th>
+                        <th scope="col" class="num">Σ|a<sub>ij</sub>| (j≠i)</th>
+                        <th scope="col" class="num">Razón Fila</th>
+                        <th scope="col" class="num">Razón Col</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaDominancia"></tbody>
+                  </table>
+                </div>
+                <p id="notaDominancia" class="table-note mt-2 mb-0"></p>
+              </div>
+
+              <div class="col-lg-6">
+                <h5 class="minor-head">Radios espectrales de las matrices de iteración</h5>
+                <div class="table-responsive">
+                  <table class="table data-table align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th scope="col">Método</th>
+                        <th scope="col" class="num">ρ(T)</th>
+                        <th scope="col" class="num">Iteraciones est.</th>
+                        <th scope="col">Convergencia</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tablaRadios"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Bloque 2: Comparación de configuraciones -->
+          <article class="panel mb-4">
+            <div class="block-head">
+              <span class="role-tag">Resultados</span>
+              <h4 class="mb-0">Historial de iteraciones y residuos</h4>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table data-table results-table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Configuración</th>
+                    <th scope="col">Inicio</th>
+                    <th scope="col" class="num">Iteraciones</th>
+                    <th scope="col" class="num">Residuo final ‖r‖</th>
+                    <th scope="col" class="num">Cambio final ‖Δx‖</th>
+                    <th scope="col" class="num">Tasa observada</th>
+                    <th scope="col" class="num">ρ(T)</th>
+                    <th scope="col">Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaIter"></tbody>
+              </table>
+            </div>
+            <div id="solucionRef" class="table-note mt-3"></div>
+          </article>
+
+          <!-- Bloque 3: Diagnóstico y Clasificación -->
+          <article class="panel mb-4">
+            <div class="block-head">
+              <span class="role-tag">Diagnóstico</span>
+              <h4 class="mb-0">Dictamen Técnico y Clasificación de Desempeño</h4>
+            </div>
+
+            <ul id="diagnostico" class="evidence mb-4"></ul>
+
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+              <h5 class="minor-head mb-0">Ranking de eficiencia según criterio</h5>
+              <div class="d-flex align-items-center gap-2">
+                <label for="criterioReco" class="form-label mb-0 small text-secondary">Criterio:</label>
+                <select id="criterioReco" class="form-select form-select-sm" style="width: auto;">
+                  <option value="rondas">Rondas de comunicación (iteraciones × rondas)</option>
+                  <option value="iter">Iteraciones totales de cómputo</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive mb-4">
+              <table class="table data-table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Configuración</th>
+                    <th scope="col" class="num">Iteraciones (Inicio A)</th>
+                    <th scope="col" class="num">Iteraciones (Inicio B)</th>
+                    <th scope="col" class="num">Costo Ponderado</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaRanking"></tbody>
+              </table>
+            </div>
+
+            <h5 class="minor-head">Actualización periódica: Arranque en frío frente a caliente</h5>
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Configuración</th>
+                    <th scope="col" class="num">Inicio Frío (ceros)</th>
+                    <th scope="col" class="num">Inicio Caliente (ranking anterior)</th>
+                    <th scope="col" class="num">Ahorro (%)</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaCaliente"></tbody>
+              </table>
+            </div>
+            <p id="notaCaliente" class="table-note mt-2 mb-0"></p>
+          </article>
+
+          <!-- Bloque 4: Recomendación Operativa -->
+          <article class="panel">
+            <div class="block-head">
+              <span class="role-tag">Recomendación</span>
+              <h4 class="mb-0">Dictamen Técnico de Operación</h4>
+            </div>
+            <div id="recomendacion" class="prose"></div>
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+<!-- GRÁFICO -->
+    <section id="grafico" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <h2>Residuo, cambio relativo y radio espectral</h2>
+          <p>
+            Cuatro vistas del mismo experimento: cómo cae el residuo y el cambio
+            relativo con las iteraciones, y cómo depende de ω la velocidad de SOR.
+          </p>
+        </header>
+
+        <div class="panel">
+          <div class="chart-controls">
+            <div class="d-flex flex-wrap gap-3 align-items-end">
+              <div>
+                <label for="modoGrafico" class="form-label">Vista</label>
+                <select id="modoGrafico" class="form-select">
+                  <option value="res">Residuo relativo de todos los métodos</option>
+                  <option value="cambio">Cambio relativo de todos los métodos</option>
+                  <option value="ambos">Residuo y cambio relativo de un método</option>
+                  <option value="rho">Radio espectral de SOR según ω</option>
+                </select>
+              </div>
+              <div>
+                <label for="inicioGrafico" class="form-label">Inicio</label>
+                <select id="inicioGrafico" class="form-select">
+                  <option value="0">Inicio A</option>
+                  <option value="1">Inicio B</option>
+                </select>
+              </div>
+              <div>
+                <label for="metodoGrafico" class="form-label">Método (solo en «un método»)</label>
+                <select id="metodoGrafico" class="form-select" disabled></select>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="btnGrafico">
+              <i class="bi bi-graph-up me-2" aria-hidden="true"></i>Actualizar gráfico
+            </button>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="errorChart" role="img" aria-label="Gráfico de convergencia de los métodos iterativos"></canvas>
+            <p id="chartVacio" class="chart-empty">Pulsa «Actualizar gráfico» para dibujar la vista elegida.</p>
+          </div>
+
+          <p id="notaGrafico" class="table-note mb-0"></p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- EJERCICIO -->
+    <section id="ejercicios" class="section">
+      <div class="container">
+
+        <header class="section-head">
+          <h2>Ejercicios Propuestos</h2>
+          <p>
+            Un problema en cinco apartados, con datos distintos cada vez. Tienes
+            tres intentos por apartado y puedes usar calculadora.
+          </p>
+        </header>
+
+        <div class="row justify-content-center">
+          <div class="col-xl-10">
+
+            <div class="panel scenario" id="escenarioEjercicio"></div>
+
+            <div class="exercise-bar">
+              <div class="progress" role="progressbar" aria-label="Progreso del ejercicio" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" id="barraProgreso">
+                <div class="progress-bar" id="barraProgresoRelleno" style="width: 0%"></div>
+              </div>
+              <span id="progresoTexto" class="progress-text">0 de 5 apartados</span>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="btnNuevoCaso">
+                <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>Nuevo caso
+              </button>
+            </div>
+
+            <ol id="partesEjercicio" class="steps"></ol>
+
+            <div id="resumenEjercicio" class="panel summary" hidden aria-live="polite"></div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+      </main>
+
+  <!-- PIE DE PÁGINA -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="fw-bold mb-0 text-dark">MetNum · Métodos Numéricos para Ingeniería</p>
+        <small class="text-muted">Módulo 05: Sistemas Lineales Iterativos, Jacobi, Gauss–Seidel, SOR y Radio Espectral.</small>
+      </div>
+      <div class="d-flex gap-3 text-muted small align-items-center">
+        <a href="../index.html" class="text-decoration-none text-muted">← Volver al Portal de Cursos</a>
+        <span>•</span>
+        <a href="#hero" class="text-decoration-none text-muted">Volver al Inicio ↑</a>
+      </div>
+    </div>
+  </footer>
+<!-- BOTÓN VOLVER ARRIBA -->
+  <a href="#hero" id="scrollTopBtn" class="back-to-top" aria-label="Volver al inicio">
+    <i class="bi bi-arrow-up-short" aria-hidden="true"></i>
+  </a>
+
+  <!-- LIBRERÍAS EXTERNAS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Nuestro JavaScript -->
+  <script src="iterativos.js" defer></script>
+
+</body>
+</html>
