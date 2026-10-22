@@ -1,756 +1,541 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Métodos Numéricos - Teoría de Errores en Ingeniería</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Teoría de errores y estabilidad numérica: error absoluto y relativo, coma flotante IEEE 754, absorción numérica, suma de Kahan, simulador y ejercicio de ingeniería.">
+  <meta name="theme-color" content="#0b1830">
 
-  <!-- Fuentes Google -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <title>Teoría de errores y estabilidad numérica | Métodos Numéricos</title>
 
-  <!-- Bootstrap CSS & Icons -->
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
-  <!-- KaTeX CSS -->
+  <!-- KaTeX -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
 
-  <style>
-    :root {
-      --primary-color: #0d6efd;
-      --secondary-color: #0b5ed7;
-      --dark-bg: #1e293b;
-      --light-bg: #f8f9fa;
-      --text-dark: #212529;
-    }
-
-    body {
-      font-family: 'Roboto', sans-serif;
-      color: var(--text-dark);
-      background-color: #ffffff;
-      scroll-behavior: smooth;
-    }
-
-    h1, h2, h3, h4, h5, h6 {
-      font-family: 'Poppins', sans-serif;
-    }
-
-    /* Header & Nav */
-    .header {
-      background: #ffffff;
-      box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-      transition: all 0.3s;
-    }
-
-    .sitename {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--primary-color);
-      margin: 0;
-    }
-
-    .navmenu ul {
-      margin: 0;
-      padding: 0;
-      display: flex;
-      list-style: none;
-      align-items: center;
-      gap: 18px;
-    }
-
-    .navmenu a {
-      color: #444444;
-      font-weight: 500;
-      text-decoration: none;
-      transition: 0.3s;
-    }
-
-    .navmenu a:hover, .navmenu a.active {
-      color: var(--primary-color);
-    }
-
-    /* Hero Section */
-    .hero {
-      padding: 80px 0;
-      background: linear-gradient(135deg, #eef2f7 0%, #ffffff 100%);
-    }
-
-    .hero h1 {
-      font-size: 40px;
-      font-weight: 700;
-      color: #2c3e50;
-    }
-
-    /* Section titles */
-    .section-title {
-      text-align: center;
-      padding-bottom: 25px;
-      margin-top: 40px;
-    }
-
-    .section-title h2 {
-      font-size: 30px;
-      font-weight: 700;
-      position: relative;
-      padding-bottom: 10px;
-    }
-
-    .section-title h2::after {
-      content: '';
-      position: absolute;
-      display: block;
-      width: 50px;
-      height: 3px;
-      background: var(--primary-color);
-      bottom: 0;
-      left: calc(50% - 25px);
-    }
-
-    /* Cards */
-    .card-custom {
-      border: none;
-      border-radius: 12px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-      transition: transform 0.3s ease;
-    }
-
-    .card-custom:hover {
-      transform: translateY(-3px);
-    }
-
-    /* Math Box */
-    .math-box {
-      background: #f1f5f9;
-      border-left: 4px solid var(--primary-color);
-      padding: 15px;
-      border-radius: 0 8px 8px 0;
-      margin: 10px 0;
-    }
-
-    /* Footer */
-    .footer {
-      background: var(--dark-bg);
-      color: #ffffff;
-      padding: 30px 0 15px 0;
-    }
-
-    .footer a {
-      color: #38bdf8;
-      text-decoration: none;
-    }
-
-    /* Heart Lives */
-    .life-icon {
-      color: #dc3545;
-      font-size: 1.3rem;
-      margin-right: 3px;
-    }
-
-    /* Scroll to Top / Portal Button */
-    .back-to-top {
-      position: fixed;
-      visibility: hidden;
-      opacity: 0;
-      right: 20px;
-      bottom: 20px;
-      z-index: 99999;
-      background: var(--primary-color);
-      width: 44px;
-      height: 44px;
-      border-radius: 50px;
-      transition: all 0.4s;
-    }
-
-    .back-to-top i {
-      font-size: 24px;
-      color: #fff;
-      line-height: 0;
-    }
-
-    .back-to-top:hover {
-      background: var(--secondary-color);
-      color: #fff;
-    }
-
-    .back-to-top.active {
-      visibility: visible;
-      opacity: 1;
-    }
-  </style>
+  <!-- Nuestro CSS -->
+  <link rel="stylesheet" href="styles.css">
 </head>
 
-<body class="index-page">
+<body>
 
-  <!-- Header -->
-  <header id="header" class="header d-flex align-items-center sticky-top py-3">
-    <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
-      <a href="#hero" class="logo d-flex align-items-center text-decoration-none">
-        <h1 class="sitename"><i class="bi bi-cpu me-2"></i>MÉTODOS NUMÉRICOS</h1>
-      </a>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-      <nav id="navmenu" class="navmenu">
-        <ul>
-          <!-- BOTÓN PRINCIPAL PARA VOLVER AL PORTAL GLOBAL DE CURSOS -->
-          <li>
-            <a href="../index.html" class="btn btn-outline-primary btn-sm px-3 fw-bold">
-              <i class="bi bi-grid-fill me-1"></i> Cursos
-            </a>
-          </li>
-          <li><a href="#hero" class="active">Inicio</a></li>
-          <li><a href="#teoria">Teoría General</a></li>
-          <li><a href="#calculadora">Caso Práctico y Calculadora</a></li>
-          <li><a href="#grafico">Gráfico</a></li>
-          <li><a href="#ejercicios">Ejercicios</a></li>
-          <li><a href="#contacto">Contacto</a></li>
-        </ul>
-      </nav>
-    </div>
+  <!-- ENCABEZADO Y MENÚ ADAPTABLE -->
+  <header id="header" class="header sticky-top">
+    <nav class="navbar navbar-expand-xl" aria-label="Navegación principal">
+      <div class="container-xl header-inner">
+
+        <a href="#hero" class="navbar-brand logo text-decoration-none">
+          <span class="brand-icon" aria-hidden="true"><i class="bi bi-cpu"></i></span>
+          <span class="sitename">Met<span>Num</span></span>
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navmenu"
+          aria-controls="navmenu"
+          aria-expanded="false"
+          aria-label="Abrir menú">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navmenu">
+          <ul class="navbar-nav ms-auto align-items-xl-center">
+
+            <li class="nav-item nav-course-item">
+              <a href="../index.html" class="course-link">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Cursos
+              </a>
+            </li>
+
+            <li class="nav-item"><a href="#hero" class="nav-link active">Inicio</a></li>
+            <li class="nav-item"><a href="#teoria" class="nav-link">Teoría</a></li>
+            <li class="nav-item"><a href="#caso-practico" class="nav-link">Caso Práctico</a></li>
+            <li class="nav-item"><a href="#calculadora" class="nav-link">Calculadora</a></li>
+            <li class="nav-item"><a href="#grafico" class="nav-link">Gráfica</a></li>
+            <li class="nav-item"><a href="#ejercicios" class="nav-link">Problemas</a></li>
+
+          </ul>
+        </div>
+      </div>
+    </nav>
   </header>
 
-  <main class="main">
+  <main id="contenido">
 
-    <!-- Hero Section -->
+    <!-- INICIO -->
     <section id="hero" class="hero">
       <div class="container">
-        <div class="row gy-4 align-items-center">
-          <div class="col-lg-7">
-            <!-- Acceso rápido adicional al catálogo principal -->
-            <div class="mb-2">
-              <a href="../index.html" class="text-decoration-none text-primary fw-semibold small">
-                <i class="bi bi-arrow-left-circle me-1"></i> Catálogo Principal de Cursos de Ingeniería
-              </a>
-            </div>
-            <h1>Teoría de Errores y Estabilidad Numérica</h1>
-            <p class="lead text-secondary mt-3">
-              Análisis del impacto de la representación binaria en sistemas de telemetría de alto tráfico. Mitigación de absorción y acumulación de redondeo en cómputo distribuido.
+        <div class="row gy-5 align-items-center">
+
+          <div class="col-lg-6">
+            <h1>Teoría de errores y estabilidad numérica</h1>
+
+            <p class="lead mt-3">
+              Una suma de números pequeños puede perderse sin dar ningún aviso.
+              Aprende a medir ese error, a predecirlo y a reducirlo en sistemas
+              que acumulan millones de datos.
             </p>
-            <div class="d-flex gap-3 mt-4">
-              <a href="#calculadora" class="btn btn-primary btn-lg shadow-sm">Ir a la Calculadora / Caso Práctico</a>
-              <a href="#teoria" class="btn btn-outline-secondary btn-lg">Revisar Teoría</a>
+
+            <div class="hero-buttons mt-4">
+              <a href="#calculadora" class="btn btn-light btn-lg">
+                <i class="bi bi-calculator me-2" aria-hidden="true"></i>Abrir el simulador
+              </a>
+              <a href="#teoria" class="btn btn-outline-light btn-lg">Leer la teoría</a>
             </div>
           </div>
-          <div class="col-lg-5 text-center">
-            <i class="bi bi-diagram-3 text-primary" style="font-size: 9rem;"></i>
+
+          <div class="col-lg-6">
+            <div class="readout" role="group" aria-labelledby="readoutTitulo">
+              <h2 id="readoutTitulo" class="readout-title">Prueba la absorción: x + δ</h2>
+
+              <div class="readout-inputs">
+                <label for="heroX">x
+                  <input id="heroX" type="number" step="any" value="16777216" inputmode="decimal">
+                </label>
+                <label for="heroD">δ
+                  <input id="heroD" type="number" step="any" value="1" inputmode="decimal">
+                </label>
+              </div>
+
+              <dl class="readout-rows">
+                <div><dt>float64 (referencia)</dt><dd id="heroF64">—</dd></div>
+                <div><dt>float32</dt><dd id="heroF32">—</dd></div>
+                <div><dt>Error absoluto</dt><dd id="heroErr">—</dd></div>
+                <div><dt>ulp(x) en float32</dt><dd id="heroUlp">—</dd></div>
+              </dl>
+
+              <p id="heroMsg" class="readout-msg" aria-live="polite"></p>
+
+              <div class="readout-presets" aria-label="Ejemplos">
+                <button type="button" class="preset" data-x="16777216" data-d="1">2<sup>24</sup> + 1</button>
+                <button type="button" class="preset" data-x="100000000" data-d="3">10<sup>8</sup> + 3</button>
+                <button type="button" class="preset" data-x="1" data-d="0.00000001">1 + 10<sup>−8</sup></button>
+                <button type="button" class="preset" data-x="0.1" data-d="0.2">0.1 + 0.2</button>
+              </div>
+            </div>
           </div>
+
         </div>
       </div>
     </section>
 
-    <!-- Section 1: Teoría General -->
-    <section id="teoria" class="py-5 bg-light">
+    <!-- TEORÍA GENERAL -->
+    <section id="teoria" class="section section-alt">
       <div class="container">
-        <div class="section-title">
+
+        <header class="section-head">
+          <span class="section-badge">Fundamentos Matemáticos</span>
           <h2>Teoría General de Errores</h2>
-          <p class="text-muted">Fundamentos para cuantificar la imprecisión en representación de coma flotante.</p>
+          <p>
+            Todo cálculo numérico mezcla tres fuentes de error. Para controlarlas
+            primero hay que saber medirlas y entender cómo las limita el formato
+            con que el computador guarda los números.
+          </p>
+        </header>
+
+        <!-- Fuentes de error -->
+        <dl class="sources">
+          <div>
+            <dt>Error inherente</dt>
+            <dd>Viene de los datos: mediciones de un sensor, constantes con pocas cifras, parámetros estimados.</dd>
+          </div>
+          <div>
+            <dt>Error de truncamiento</dt>
+            <dd>Aparece al sustituir un proceso infinito por uno finito: cortar una serie, aproximar una derivada con una diferencia.</dd>
+          </div>
+          <div>
+            <dt>Error de redondeo</dt>
+            <dd>Se produce porque el computador guarda un número finito de bits. Es el protagonista de esta página.</dd>
+          </div>
+        </dl>
+
+        <!-- Medidas del error -->
+        <div class="concepts">
+
+          <article class="concept">
+            <h3>Error absoluto</h3>
+            <p>
+              Diferencia entre el valor exacto <em>x</em> y su aproximación
+              <em>x̃</em>. Conserva las unidades de la magnitud medida.
+            </p>
+            <div class="math-box"><div id="math-ea"></div></div>
+          </article>
+
+          <article class="concept">
+            <h3>Error relativo y porcentual</h3>
+            <p>
+              Compara el error con el tamaño del valor. Un error de 1&nbsp;μs es
+              enorme sobre 2&nbsp;μs y despreciable sobre 10<sup>9</sup>&nbsp;μs.
+            </p>
+            <div class="math-box"><div id="math-er"></div></div>
+          </article>
+
+          <article class="concept">
+            <h3>Absorción numérica</h3>
+            <p>
+              Si un sumando es menor que la mitad del espaciado entre números
+              representables (<em>ulp</em>), la suma no cambia.
+            </p>
+            <div class="math-box">
+              <div id="math-abs"></div>
+              <div id="math-ulp"></div>
+            </div>
+          </article>
+
         </div>
+
+        <!-- IEEE 754 -->
+        <div class="row g-5 mt-1">
+
+          <div class="col-lg-6">
+            <h3 class="subhead">Coma flotante IEEE 754</h3>
+            <p class="text-secondary">
+              JavaScript trabaja con <em>float64</em>. La página simula
+              <em>float32</em> con <code>Math.fround</code>, que redondea cada
+              resultado a 24 bits de precisión.
+            </p>
+
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0">
+                <caption class="visually-hidden">Comparación entre float32 y float64</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Característica</th>
+                    <th scope="col" class="num">float32</th>
+                    <th scope="col" class="num">float64</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Bits (signo / exponente / fracción)</th><td class="num">1 / 8 / 23</td><td class="num">1 / 11 / 52</td></tr>
+                  <tr><th scope="row">Precisión <em>p</em> (bits)</th><td class="num">24</td><td class="num">53</td></tr>
+                  <tr><th scope="row">Épsilon de máquina 2<sup>1−p</sup></th><td class="num">≈ 1.19 × 10<sup>−7</sup></td><td class="num">≈ 2.22 × 10<sup>−16</sup></td></tr>
+                  <tr><th scope="row">Unidad de redondeo <em>u</em> = 2<sup>−p</sup></th><td class="num">≈ 5.96 × 10<sup>−8</sup></td><td class="num">≈ 1.11 × 10<sup>−16</sup></td></tr>
+                  <tr><th scope="row">Cifras decimales fiables</th><td class="num">≈ 7</td><td class="num">≈ 15–16</td></tr>
+                  <tr><th scope="row">Valor máximo</th><td class="num">≈ 3.40 × 10<sup>38</sup></td><td class="num">≈ 1.80 × 10<sup>308</sup></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <h3 class="subhead">Cómo crece el error al sumar <em>n</em> términos</h3>
+            <p class="text-secondary">
+              Cotas de peor caso para el error de una suma, con
+              <em>S</em> = Σ|x<sub>i</sub>| y <em>u</em> la unidad de redondeo.
+            </p>
+
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0">
+                <caption class="visually-hidden">Cotas del error según el método de suma</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Método</th>
+                    <th scope="col">Cota del error</th>
+                    <th scope="col">Cuándo conviene</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Recursiva</th><td class="num">(<em>n</em>−1)·<em>u</em>·<em>S</em></td><td>Pocos datos o magnitudes parecidas.</td></tr>
+                  <tr><th scope="row">Por pares</th><td class="num">≈ log<sub>2</sub>(<em>n</em>)·<em>u</em>·<em>S</em></td><td>Opción por defecto; sin costo extra.</td></tr>
+                  <tr><th scope="row">Kahan</th><td class="num">≈ 2<em>u</em>·<em>S</em></td><td>Muchos datos y precisión exigida; unas 4 veces más operaciones.</td></tr>
+                  <tr><th scope="row">Datos centrados</th><td class="num">depende de los datos</td><td>Valor base grande con variaciones pequeñas.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+        <!-- 2. CASO PRÁCTICO -->
+    <section id="caso-practico" class="section">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-badge">Caso Práctico</span>
+          <h2>Monitoreo de Latencia y Absorción Numérica</h2>
+          <p>
+            En telemetría, aviónica y servidores de alta concurrencia con arquitecturas de 32 bits, se acumulan millones de mediciones en microsegundos. Cuando un acumulador grande recibe incrementos minúsculos, la precisión finita IEEE 754 puede truncar o absorber por completo los datos.
+          </p>
+        </header>
 
         <div class="row g-4">
-          <div class="col-md-4">
-            <div class="card card-custom h-100 p-4">
-              <div class="card-body">
-                <h4 class="card-title text-primary"><i class="bi bi-bounding-box me-2"></i>Error Absoluto</h4>
-                <p class="card-text">Diferencia en magnitud absoluta entre la referencia exacta x y el valor aproximado x.</p>
-                <div class="math-box">
-                  <div id="math-ea"></div>
+          <div class="col-lg-6">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-cpu text-primary me-2"></i>Modelo Matemático del Sistema</h3>
+              <p class="text-secondary small">
+                Cada evento aporta una latencia <code>x<sub>i</sub> = base + δ<sub>i</sub></code>, donde la base es de magnitud grande (ej. 1,000,000 μs) y la fluctuación es diminuta (δ<sub>i</sub> ≈ 1 a 2 μs).
+              </p>
+              <div class="p-3 bg-light rounded-3 border mb-3">
+                <div class="fw-bold text-dark small mb-1">Mecanismo de Pérdida por Absorción:</div>
+                <div class="small text-secondary">
+                  Cuando la suma acumulada <code>S</code> excede <code>2²⁴ ≈ 16,777,216</code>, la distancia mínima entre dos números representables (<code>ulp(S)</code>) supera 1.0. Cualquier variación menor a <code>0.5 · ulp(S)</code> desaparece completamente al redondearse al múltiplo más cercano.
                 </div>
               </div>
+              <p class="text-secondary small mb-0">
+                A continuación comparamos 5 estrategias algorítmicas de ingeniería para mitigar este error sin incurrir en el costo computacional de hardware de 64 bits.
+              </p>
             </div>
           </div>
 
-          <div class="col-md-4">
-            <div class="card card-custom h-100 p-4">
-              <div class="card-body">
-                <h4 class="card-title text-primary"><i class="bi bi-percent me-2"></i>Error Relativo y Porcentual</h4>
-                <p class="card-text">Ponderación del error respecto a la magnitud real. Criterio clave para evaluar acuerdos de nivel de servicio (SLA).</p>
-                <div class="math-box">
-                  <div id="math-er"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-4">
-            <div class="card card-custom h-100 p-4">
-              <div class="card-body">
-                <h4 class="card-title text-primary"><i class="bi bi-exclamation-triangle me-2"></i>Absorción Numérica</h4>
-                <p class="card-text">Ocurre cuando la suma A + b descarte los bits de b si A \ b debido a la alineación de exponentes en la mantisa.</p>
-                <div class="math-box">
-                  <div id="math-abs"></div>
-                </div>
-              </div>
+          <div class="col-lg-6">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-diagram-3 text-primary me-2"></i>Estrategias Algorítmicas de Suma</h3>
+              <dl class="method-list">
+                <div><dt class="text-danger">1. Float32 directa</dt><dd>Suma secuencial estándar. El error de redondeo crece linealmente: cota O(N·u).</dd></div>
+                <div><dt class="text-primary">2. Kahan (Compensada en float32)</dt><dd>Arrastra el error residual en una variable de compensación. Cota teórica O(2·u).</dd></div>
+                <div><dt class="text-indigo">3. Por Pares (Pairwise)</dt><dd>Divide y vencerás: suma en árbol binario recursivo. Cota reducida a O(log₂N·u).</dd></div>
+                <div><dt class="text-success">4. Datos Centrados (Float32)</dt><dd>Calcula <code>N · base</code> por separado y acumula únicamente las variaciones pequeñas.</dd></div>
+                <div><dt class="text-dark">5. Referencia Neumaier (Float64)</dt><dd>Algoritmo de compensación bidireccional en doble precisión como estándar de exactitud.</dd></div>
+              </dl>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Section 2: Caso Práctico y Calculadora -->
-    <section id="calculadora" class="py-5">
+    <!-- 3. SIMULADOR Y CALCULADORA -->
+    <section id="calculadora" class="section section-alt">
       <div class="container">
-        <div class="section-title">
-          <h2>Caso Práctico y Calculadora de Latencias</h2>
-          <p class="text-muted">Simulación interactiva de acumulación de errores sobre N registros de latencia.</p>
-        </div>
 
-        <!-- Contexto del Problema -->
-        <div class="card card-custom p-4 mb-4 border-start border-4 border-primary bg-light">
-          <h5><i class="bi bi-info-circle me-2 text-primary"></i>Contexto del Sistema de Ingeniería</h5>
-          <p class="mb-2">
-            En una arquitectura de microservicios distribuida, una plataforma de APM (Application Performance Monitoring) procesa millones de solicitudes por minuto. Cada medición registra la latencia alrededor de 10^6 us(1 segundo) con pequeñas fluctuaciones de red (0.01 a 2.0,us).
+        <header class="section-head">
+          <span class="section-badge">Calculadora Numérica</span>
+          <h2>Simulador en Vivo</h2>
+          <p>
+            Define los parámetros de ingeniería (volumen de muestras <em>N</em>, magnitud base y tolerancia) para evaluar simultáneamente los 5 métodos y medir su exactitud y tiempo de procesamiento.
           </p>
-          <p class="mb-0 text-secondary">
-            <strong>Problema Numérico:</strong> El acumulador total en `float32` acumula error rápidamente debido al truncamiento de la mantisa de 23 bits, superando los umbrales de tolerancia del 0.5%. Esta calculadora evalúa 5 algoritmos en tiempo real.
-          </p>
-        </div>
+        </header>
 
-        <!-- Panel Control / Calculadora -->
-        <div class="card card-custom p-4 mb-4">
-          <h5 class="mb-3 text-primary"><i class="bi bi-sliders me-2"></i>Parámetros de Entrada de la Calculadora</h5>
-          <div class="row g-3 align-items-end">
-            <div class="col-md-3">
-              <label class="form-label font-weight-bold">Cantidad de Muestras (N)</label>
-              <input type="number" id="calcN" class="form-control" value="200000" step="10000">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label font-weight-bold">Latencia Base (us)</label>
-              <input type="number" id="calcBase" class="form-control" value="1000000">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label font-weight-bold">Variación Máx. (us)</label>
-              <input type="number" id="calcVar" class="form-control" value="2.0" step="0.1">
-            </div>
-            <div class="col-md-3">
-              <button class="btn btn-primary w-100 shadow-sm" onclick="ejecutarCalculadora()">
-                <i class="bi bi-calculator me-1"></i> Ejecutar y Generar Tabla
-              </button>
-            </div>
+        <div class="row g-4 align-items-stretch">
+          <div class="col-lg-12">
+            <form id="formSim" class="panel" novalidate>
+              <h3 class="panel-title"><i class="bi bi-sliders text-primary me-2"></i>Parámetros de Entrada</h3>
+
+              <div class="row g-3">
+                <div class="col-md-3 col-sm-6">
+                  <label for="calcN" class="form-label">Muestras (<em>N</em>)</label>
+                  <input type="number" id="calcN" class="form-control" value="200000" min="1" max="1000000" step="10000">
+                  <div class="form-text">De 1 a 1,000,000 lecturas.</div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                  <label for="calcBase" class="form-label">Latencia Base (μs)</label>
+                  <input type="number" id="calcBase" class="form-control" value="1000000" min="0.000001" step="any">
+                  <div class="form-text">Valor promedio nominal.</div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                  <label for="calcVar" class="form-label">Variación Máx. δ (μs)</label>
+                  <input type="number" id="calcVar" class="form-control" value="2" min="0" step="0.1">
+                  <div class="form-text">Amplitud de la fluctuación.</div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                  <label for="calcTol" class="form-label">Tolerancia Relativa</label>
+                  <input type="number" id="calcTol" class="form-control" value="0.000001" min="0" step="any">
+                  <div class="form-text">Criterio de aprobación.</div>
+                </div>
+              </div>
+
+              <div id="calcError" class="form-error" role="alert" hidden></div>
+
+              <div class="d-flex flex-wrap gap-2 mt-4">
+                <button type="submit" class="btn btn-primary" id="btnEjecutar">
+                  <i class="bi bi-play-fill me-1" aria-hidden="true"></i>Ejecutar Simulación
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnCsv" disabled>
+                  <i class="bi bi-download me-1" aria-hidden="true"></i>Exportar Resultados (CSV)
+                </button>
+              </div>
+            </form>
           </div>
         </div>
 
-        <!-- Tabla de Resultados -->
-        <div id="simResultados" class="d-none">
-          <div class="table-responsive card card-custom p-3">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="table-dark">
+        <!-- RESULTADOS -->
+        <div id="simResultados" class="results" hidden>
+
+          <h3 class="subhead"><i class="bi bi-speedometer2 text-primary me-2"></i>Resultados del Benchmark Numérico</h3>
+
+          <!-- Métricas Clave -->
+          <div class="metrics" aria-label="Magnitudes clave">
+            <div class="metric">
+              <span class="metric-label">Suma de Referencia</span>
+              <span class="metric-value" id="mSuma">—</span>
+              <span class="metric-unit">μs (Neumaier Float64)</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">ulp de float32 a esta magnitud</span>
+              <span class="metric-value" id="mUlp">—</span>
+              <span class="metric-unit">μs (Espaciado de máquina)</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Cota Teórica de Error Directo</span>
+              <span class="metric-value" id="mCota">—</span>
+              <span class="metric-unit">μs (Peor Caso N·u·S)</span>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table data-table results-table align-middle mb-0">
+              <caption class="visually-hidden">Resultados de la suma por método</caption>
+              <thead>
                 <tr>
-                  <th>Método / Tipo de Dato</th>
-                  <th>Suma Acumulada (us)</th>
-                  <th>Error Absoluto (us)</th>
-                  <th>Error Relativo Porcentual</th>
-                  <th>Tiempo (ms)</th>
-                  <th>Estado (Umbral &lt; 0.5%)</th>
+                  <th scope="col">Método Algorítmico</th>
+                  <th scope="col" class="num">Suma Acumulada (μs)</th>
+                  <th scope="col" class="num">Error Absoluto (μs)</th>
+                  <th scope="col" class="num">Error Relativo</th>
+                  <th scope="col" class="num">Tiempo (ms)</th>
+                  <th scope="col">Estado</th>
                 </tr>
               </thead>
-              <tbody id="tablaBenchmark">
-                <!-- Se construye dinámicamente -->
-              </tbody>
+              <tbody id="tablaBenchmark"></tbody>
             </table>
           </div>
 
-          <!-- Diagnóstico y Recomendación -->
-          <div class="row mt-4 g-3">
-            <div class="col-md-6">
-              <div class="card card-custom p-3 bg-light border-warning h-100">
-                <h6><i class="bi bi-exclamation-octagon me-2 text-warning"></i>Diagnóstico del Fenómeno Numérico</h6>
-                <p class="small text-secondary mb-0">
-                  Se evidencia **Absorción Numérica** severa en **Float32 Directa**. Al crecer la suma acumulada, el exponente desplaza la mantisa de las variaciones pequeñas (0.01,us a 2.0,us), ignorando la suma de los deltas.
-                </p>
-              </div>
+          <p class="table-note mt-2">
+            <i class="bi bi-info-circle me-1"></i> Todos los métodos procesan el mismo vector de datos sintéticos. El estado "Cumple" indica que el error relativo es inferior a la tolerancia establecida.
+          </p>
+
+          <div class="row g-4 mt-2">
+            <div class="col-lg-7">
+              <h3 class="subhead"><i class="bi bi-clipboard-pulse text-primary me-2"></i>Diagnóstico Numérico Detallado</h3>
+              <ul id="diagnostico" class="diagnosis"></ul>
             </div>
-            <div class="col-md-6">
-              <div class="card card-custom p-3 bg-light border-success h-100">
-                <h6><i class="bi bi-check-circle me-2 text-success"></i>Recomendaciones para Producción</h6>
-                <p class="small text-secondary mb-0">
-                  Se recomienda implementar **Suma Compensada de Kahan** o la técnica de **Datos Centrados** (di = xi - x) para conservar el uso eficiente de memoria sin perder exactitud en producción.
+
+            <div class="col-lg-5">
+              <div class="panel h-100 bg-white">
+                <h3 class="subhead"><i class="bi bi-lightbulb text-warning me-2"></i>Recomendación para Ingeniería</h3>
+                <p class="text-secondary small mb-2">
+                  Los algoritmos de <strong>Kahan</strong> y <strong>Suma por Pares</strong> eliminan el error de acumulación progresiva, pero cada dato sufre redondeo inicial al convertirse a float32 (hasta ½·ulp).
+                </p>
+                <p class="text-secondary small mb-0">
+                  La técnica de <strong>Datos Centrados</strong> ofrece la mayor fidelidad porque almacena la base constante de forma analítica y mantiene las variaciones en un rango donde float32 posee su máxima resolución.
                 </p>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </section>
-
-    <!-- Section 3: Gráfico Interactivo -->
-    <section id="grafico" class="py-5 bg-light">
+<!-- GRÁFICO -->
+    <section id="grafico" class="section section-alt">
       <div class="container">
-        <div class="section-title">
-          <h2>Gráfico de Convergencia / Desviación</h2>
-          <p class="text-muted">Representación gráfica del crecimiento del error según el método.</p>
-        </div>
 
-        <div class="card card-custom p-4 mb-4">
-          <div class="row align-items-center">
-            <div class="col-md-8">
-              <p class="mb-0 text-secondary">
-                Haga clic en el botón para renderizar el gráfico comparativo basado en los datos de la calculadora.
-              </p>
+        <header class="section-head">
+          <span class="section-badge">Análisis de Convergencia</span>
+          <h2>Crecimiento del Error Acumulado</h2>
+          <p>
+            El error absoluto acumulado según el número de muestras procesadas.
+            La escala logarítmica permite ver a la vez métodos que difieren en
+            muchos órdenes de magnitud.
+          </p>
+        </header>
+
+        <div class="panel">
+          <div class="chart-controls">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="logScale" checked>
+              <label class="form-check-label" for="logScale">Escala logarítmica en el eje Y</label>
             </div>
-            <div class="col-md-4 text-end">
-              <button class="btn btn-success w-100 shadow-sm" onclick="generarGrafico()">
-                <i class="bi bi-graph-up me-1"></i> Generar Gráfico de Desviación
-              </button>
-            </div>
+
+            <button type="button" class="btn btn-primary" id="btnGrafico">
+              <i class="bi bi-graph-up me-2" aria-hidden="true"></i>Actualizar gráfico
+            </button>
           </div>
+
+          <div class="chart-container">
+            <canvas id="errorChart" role="img" aria-label="Error absoluto acumulado de la suma en float32, con Kahan y en float64"></canvas>
+            <p id="chartVacio" class="chart-empty">Pulsa «Actualizar gráfico» para dibujar la comparación.</p>
+          </div>
+
+          <p class="table-note mb-0">
+            Los puntos se calculan con los parámetros del simulador. Cuando un
+            método tiene error cero en un punto, la escala logarítmica no puede
+            dibujarlo y la línea se interrumpe.
+          </p>
         </div>
 
-        <div class="card card-custom p-3">
-          <canvas id="errorChart" style="max-height: 380px;"></canvas>
-        </div>
       </div>
     </section>
 
-    <!-- Section 4: Ejercicios Propuestos -->
-    <section id="ejercicios" class="py-5">
+    <!-- EJERCICIO -->
+    <section id="ejercicios" class="section">
       <div class="container">
-        <div class="section-title">
-          <h2>Ejercicios Propuestos para Ingenieros</h2>
-          <p class="text-muted">Aplica los conceptos sobre escenarios reales de optimización flotante.</p>
-        </div>
+
+        <header class="section-head">
+          <span class="section-badge">Problemas de Ingeniería</span>
+          <h2>Problemas Propuestos </h2>
+          <p>
+            Un problema en cinco apartados, con datos distintos cada vez. Tienes
+            tres intentos por apartado y puedes usar calculadora.
+          </p>
+        </header>
 
         <div class="row justify-content-center">
-          <div class="col-md-9">
-            <div class="card card-custom p-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0 text-primary">Problema de Ingeniería: Acumulación de Redondeo en Telemetría</h5>
-                <div id="livesContainer">
-                  <i class="bi bi-heart-fill life-icon"></i>
-                  <i class="bi bi-heart-fill life-icon"></i>
-                  <i class="bi bi-heart-fill life-icon"></i>
-                </div>
-              </div>
-              
-              <p class="text-secondary">
-                Un pipeline de datos de procesamiento masivo en tiempo real procesa $N = 1,000,000$ de peticiones. La latencia base es de $x_0 = 500,000\,\mu\text{s}$ con un incremento constante por request de $\Delta = 0.05\,\mu\text{s}$.
-              </p>
-              <p class="text-secondary">
-                Sabiendo que el valor exacto de la suma total es $X_{\text{exacto}} = 500,000,050,000\,\mu\text{s}$, y que en un acumulador `float32` estándar la suma calculada resulta en $X_{\text{f32}} = 500,000,016,384\,\mu\text{s}$ debido a la pérdida de bits por absorción:
-              </p>
-              <p class="fw-bold">
-                ¿Cuál es el Error Porcentual ($\varepsilon_t$) cometido en esta acumulación? (Ingrese su resultado en porcentaje redondeado a 5 decimales).
-              </p>
+          <div class="col-xl-10">
 
-              <div class="input-group mb-3">
-                <input type="number" step="0.00001" id="ansInput" class="form-control" placeholder="Ej: 0.00672">
-                <button class="btn btn-primary" type="button" onclick="validarRespuesta()">Validar Respuesta</button>
-              </div>
+            <div class="panel scenario" id="escenarioEjercicio"></div>
 
-              <div id="feedbackMsg" class="mt-2"></div>
-
-              <div id="solucionDesplegada" class="math-box d-none mt-3">
-                <h6>Desarrollo Matemático Paso a Paso:</h6>
-                <div id="math-sol1"></div>
-                <div id="math-sol2" class="mt-2"></div>
+            <div class="exercise-bar">
+              <div class="progress" role="progressbar" aria-label="Progreso del ejercicio" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" id="barraProgreso">
+                <div class="progress-bar" id="barraProgresoRelleno" style="width: 0%"></div>
               </div>
+              <span id="progresoTexto" class="progress-text">0 de 5 apartados</span>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="btnNuevoCaso">
+                <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>Nuevo caso
+              </button>
             </div>
+
+            <ol id="partesEjercicio" class="steps"></ol>
+
+            <div id="resumenEjercicio" class="panel summary" hidden aria-live="polite"></div>
+
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Section 5: Contacto -->
-    <section id="contacto" class="py-5 bg-light">
-      <div class="container">
-        <div class="section-title">
-          <h2>Sobre Nosotros / Contacto</h2>
-          <p class="text-muted">Información institucional y soporte para la plataforma web académica.</p>
-        </div>
+      </main>
 
-        <div class="row g-4">
-          <div class="col-md-5">
-            <div class="card card-custom p-4 h-100">
-              <h4 class="text-primary"><i class="bi bi-building me-2"></i>Información del Proyecto</h4>
-              <p class="mt-3 text-secondary">
-                Esta plataforma es una iniciativa desarrollada para la asignatura de Métodos Numéricos en Ingeniería de Sistemas, dedicada al análisis de la precisión flotante y estabilidad de algoritmos.
-              </p>
-              <ul class="list-unstyled text-secondary mt-3">
-                <li class="mb-2"><i class="bi bi-geo-alt text-primary me-2"></i>Departamento de Ciencias de la Computación</li>
-                <li class="mb-2"><i class="bi bi-envelope text-primary me-2"></i>ingenieria@metodosnumericos.edu</li>
-                <li><i class="bi bi-code-slash text-primary me-2"></i>Versión 2.4 - Producción</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="col-md-7">
-            <div class="card card-custom p-4">
-              <form onsubmit="event.preventDefault(); alert('Mensaje enviado correctamente.');">
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <input type="text" class="form-control" placeholder="Nombre Completo" required>
-                  </div>
-                  <div class="col-md-6">
-                    <input type="email" class="form-control" placeholder="Correo Institucional" required>
-                  </div>
-                  <div class="col-12">
-                    <input type="text" class="form-control" placeholder="Asunto" required>
-                  </div>
-                  <div class="col-12">
-                    <textarea class="form-control" rows="4" placeholder="Escriba sus dudas sobre la simulación de errores..." required></textarea>
-                  </div>
-                  <div class="col-12">
-                    <button type="submit" class="btn btn-primary w-100">Enviar Mensaje</button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+  <!-- PIE DE PÁGINA -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="fw-bold mb-0 text-dark">MetNum · Métodos Numéricos para Ingeniería</p>
+        <small class="text-muted">Módulo 01: Teoría de Errores, Precisión de Coma Flotante y Estabilidad Numérica.</small>
       </div>
-    </section>
-
-  </main>
-
-  <!-- Footer -->
-  <footer class="footer text-center">
-    <div class="container">
-      
-      <p class="mb-1">&copy; 2026 Métodos Numéricos - Portal de Ingeniería</p>
-      <small class="text-muted">Diseñado para la enseñanza práctica de análisis de errores y rendimiento computacional.</small>
+      <div class="d-flex gap-3 text-muted small align-items-center">
+        <a href="../index.html" class="text-decoration-none text-muted">← Volver al Portal de Cursos</a>
+        <span>•</span>
+        <a href="#hero" class="text-decoration-none text-muted">Volver al Inicio ↑</a>
+      </div>
     </div>
   </footer>
-
-  <!-- Botón Regresar al Inicio de Página -->
-  <a href="#hero" id="scrollTopBtn" class="back-to-top d-flex align-items-center justify-content-center text-decoration-none">
-    <i class="bi bi-arrow-up-short"></i>
+<!-- BOTÓN VOLVER ARRIBA -->
+  <a href="#hero" id="scrollTopBtn" class="back-to-top" aria-label="Volver al inicio">
+    <i class="bi bi-arrow-up-short" aria-hidden="true"></i>
   </a>
 
-  <!-- Scripts -->
+  <!-- LIBRERÍAS EXTERNAS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
 
-  <script>
-    // Inicialización KaTeX
-    document.addEventListener("DOMContentLoaded", function() {
-      katex.render("E_a = |x - \\tilde{x}|", document.getElementById("math-ea"));
-      katex.render("E_r = \\frac{|x - \\tilde{x}|}{|x|}, \\quad \\varepsilon_t = E_r \\times 100\\%", document.getElementById("math-er"));
-      katex.render("S_n = \\sum_{i=1}^{N} (x_{\\text{base}} + \\delta_i)", document.getElementById("math-abs"));
+  <!-- Nuestro JavaScript -->
+  <script src="main.js" defer></script>
 
-      // Control del botón flotante
-      const scrollTop = document.getElementById("scrollTopBtn");
-      window.addEventListener("scroll", () => {
-        if (window.scrollY > 300) {
-          scrollTop.classList.add("active");
-        } else {
-          scrollTop.classList.remove("active");
-        }
-      });
-    });
-
-    // Calculadora y Benchmark de Latencias
-    function ejecutarCalculadora() {
-      const N = parseInt(document.getElementById("calcN").value) || 200000;
-      const base = parseFloat(document.getElementById("calcBase").value) || 1000000;
-      const maxVar = parseFloat(document.getElementById("calcVar").value) || 2.0;
-
-      let sumRef = 0.0;
-      let sumF32 = Math.fround(0);
-      let sumF64 = 0.0;
-      let sumKahan = Math.fround(0);
-      let cKahan = Math.fround(0);
-      let sumCentrada = Math.fround(0);
-
-      const t0 = performance.now();
-
-      for (let i = 0; i < N; i++) {
-        let delta = 0.01 + ((i * 13) % 100) * (maxVar / 100.0);
-        let val = base + delta;
-
-        sumRef += val;
-        sumF32 = Math.fround(sumF32 + Math.fround(val));
-        sumF64 += val;
-
-        // Kahan Float32
-        let y = Math.fround(Math.fround(val) - cKahan);
-        let t = Math.fround(sumKahan + y);
-        cKahan = Math.fround(Math.fround(t - sumKahan) - y);
-        sumKahan = t;
-
-        // Centrados
-        sumCentrada = Math.fround(sumCentrada + Math.fround(delta));
-      }
-
-      let totalCentrada = Math.fround(Math.fround(N * base) + sumCentrada);
-      const t1 = performance.now();
-      const tiempoBase = (t1 - t0).toFixed(2);
-
-      const metodos = [
-        { nombre: "Float32 Directa", valor: sumF32, t: tiempoBase },
-        { nombre: "Float64 Directa", valor: sumF64, t: tiempoBase },
-        { nombre: "Suma Compensada Kahan (Float32)", valor: sumKahan, t: (tiempoBase * 1.25).toFixed(2) },
-        { nombre: "Datos Centrados (Float32)", valor: totalCentrada, t: (tiempoBase * 1.10).toFixed(2) },
-        { nombre: "Referencia Exacta (High-Precision)", valor: sumRef, t: tiempoBase }
-      ];
-
-      const tbody = document.getElementById("tablaBenchmark");
-      tbody.innerHTML = "";
-
-      metodos.forEach(m => {
-        let ea = Math.abs(sumRef - m.valor);
-        let er = (ea / sumRef) * 100;
-        let cumple = er < 0.5;
-
-        let tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><strong>${m.nombre}</strong></td>
-          <td>${m.valor.toLocaleString('es-ES', {maximumFractionDigits: 2})}</td>
-          <td>${ea.toFixed(4)}</td>
-          <td>${er.toFixed(6)}%</td>
-          <td>${m.t} ms</td>
-          <td>
-            <span class="badge ${cumple ? 'bg-success' : 'bg-danger'}">
-              ${cumple ? 'CUMPLE (<0.5%)' : 'EXCEDE UMBRAL'}
-            </span>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      document.getElementById("simResultados").classList.remove("d-none");
-    }
-
-    // Gráfico de Desviación
-    let chartInstance = null;
-
-    function generarGrafico() {
-      const N = parseInt(document.getElementById("calcN").value) || 200000;
-      const base = parseFloat(document.getElementById("calcBase").value) || 1000000;
-      const maxVar = parseFloat(document.getElementById("calcVar").value) || 2.0;
-
-      const pasos = 10;
-      const stepSize = Math.floor(N / pasos);
-
-      let labels = [];
-      let dataF32 = [];
-      let dataKahan = [];
-
-      let sumRef = 0;
-      let sumF32 = Math.fround(0);
-      let sumKahan = Math.fround(0);
-      let cKahan = Math.fround(0);
-
-      for (let i = 1; i <= N; i++) {
-        let delta = 0.01 + ((i * 13) % 100) * (maxVar / 100.0);
-        let val = base + delta;
-
-        sumRef += val;
-        sumF32 = Math.fround(sumF32 + Math.fround(val));
-
-        let y = Math.fround(Math.fround(val) - cKahan);
-        let t = Math.fround(sumKahan + y);
-        cKahan = Math.fround(Math.fround(t - sumKahan) - y);
-        sumKahan = t;
-
-        if (i % stepSize === 0 || i === N) {
-          labels.push(`N=${(i/1000).toFixed(0)}k`);
-          dataF32.push(Math.abs(sumRef - sumF32));
-          dataKahan.push(Math.abs(sumRef - sumKahan));
-        }
-      }
-
-      const ctx = document.getElementById("errorChart").getContext("2d");
-
-      if (chartInstance) {
-        chartInstance.destroy();
-      }
-
-      chartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: 'Error Absoluto Float32 Directa (μs)',
-              data: dataF32,
-              borderColor: '#dc3545',
-              backgroundColor: 'rgba(220, 53, 69, 0.1)',
-              fill: true,
-              tension: 0.2
-            },
-            {
-              label: 'Error Absoluto Kahan / Centrado (μs)',
-              data: dataKahan,
-              borderColor: '#198754',
-              backgroundColor: 'rgba(25, 135, 84, 0.1)',
-              fill: true,
-              tension: 0.2
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            title: {
-              display: true,
-              text: 'Crecimiento del Error Absoluto Acumulado por Muestras'
-            }
-          },
-          scales: {
-            y: {
-              title: { display: true, text: 'Error Absoluto (μs)' }
-            }
-          }
-        }
-      });
-    }
-
-    // Ejercicio Propuesto
-    let vidas = 3;
-    const respEsperada = 0.00672;
-
-    function validarRespuesta() {
-      const inputVal = parseFloat(document.getElementById("ansInput").value);
-      const feedback = document.getElementById("feedbackMsg");
-
-      if (isNaN(inputVal)) {
-        feedback.innerHTML = `<span class="text-warning">Ingrese una cifra numérica válida.</span>`;
-        return;
-      }
-
-      if (Math.abs(inputVal - respEsperada) <= 0.0005) {
-        feedback.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-check-circle me-1"></i>¡Respuesta Correcta! Excelente análisis de la absorción.</span>`;
-        revelarSolucion();
-      } else {
-        vidas--;
-        actualizarVidasUI();
-
-        if (vidas > 0) {
-          feedback.innerHTML = `<span class="text-danger"><i class="bi bi-x-circle me-1"></i>Respuesta incorrecta. Te quedan ${vidas} intentos.</span>`;
-        } else {
-          feedback.innerHTML = `<span class="text-danger fw-bold"><i class="bi bi-x-octagon me-1"></i>Agotaste tus 3 intentos. Revisa la resolución técnica abajo.</span>`;
-          revelarSolucion();
-        }
-      }
-    }
-
-    function actualizarVidasUI() {
-      const container = document.getElementById("livesContainer");
-      let html = "";
-      for (let i = 0; i < 3; i++) {
-        if (i < vidas) {
-          html += `<i class="bi bi-heart-fill life-icon"></i>`;
-        } else {
-          html += `<i class="bi bi-heart life-icon text-muted"></i>`;
-        }
-      }
-      container.innerHTML = html;
-    }
-
-    function revelarSolucion() {
-      const box = document.getElementById("solucionDesplegada");
-      box.classList.remove("d-none");
-
-      katex.render(
-        "E_a = |500,000,050,000 - 500,000,016,384| = 33,616\\,\\mu\\text{s}",
-        document.getElementById("math-sol1")
-      );
-
-      katex.render(
-        "\\varepsilon_t = \\left(\\frac{33,616}{500,000,050,000}\\right) \\times 100\\% \\approx 0.00672\\%",
-        document.getElementById("math-sol2")
-      );
-    }
-    
-  </script>
-  
 </body>
 </html>
