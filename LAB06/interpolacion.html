@@ -1,0 +1,704 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Interpolación y reconstrucción de señales: polinomios de Lagrange y Newton y splines cúbicos naturales. Simulador de la temperatura de un centro de datos, validación con punto retenido y ejercicio de ingeniería.">
+  <meta name="theme-color" content="#0b1830">
+
+  <title>Interpolación y reconstrucción de señales | Métodos Numéricos</title>
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+  <!-- ENCABEZADO Y MENÚ ADAPTABLE -->
+  <header id="header" class="header sticky-top">
+    <nav class="navbar navbar-expand-xl" aria-label="Navegación principal">
+      <div class="container-xl header-inner">
+
+        <a href="#hero" class="navbar-brand logo text-decoration-none">
+          <span class="brand-icon" aria-hidden="true"><i class="bi bi-bezier2"></i></span>
+          <span class="sitename">Met<span>Num</span></span>
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navmenu"
+          aria-controls="navmenu"
+          aria-expanded="false"
+          aria-label="Abrir menú">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navmenu">
+          <ul class="navbar-nav ms-auto align-items-xl-center">
+
+            <li class="nav-item nav-course-item">
+              <a href="../index.html" class="course-link">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Cursos
+              </a>
+            </li>
+
+            <li class="nav-item"><a href="#hero" class="nav-link active">Inicio</a></li>
+            <li class="nav-item"><a href="#teoria" class="nav-link">Teoría</a></li>
+            <li class="nav-item"><a href="#caso-practico" class="nav-link"> Caso Práctico</a></li>
+            <li class="nav-item"><a href="#calculadora" class="nav-link"> Calculadora</a></li>
+            <li class="nav-item"><a href="#grafico" class="nav-link"> Gráfica</a></li>
+            <li class="nav-item"><a href="#ejercicios" class="nav-link"> Problemas</a></li>
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="contenido">
+
+    <!-- INICIO -->
+    <section id="hero" class="hero">
+      <div class="container">
+        <div class="row gy-5 align-items-center">
+
+          <div class="col-lg-6">
+            <h1>Interpolación y reconstrucción de señales</h1>
+
+            <p class="lead mt-3">
+              Lagrange, Newton y splines cúbicos. Aprende a reconstruir una señal
+              a partir de pocas medidas y a saber cuándo la curva que obtienes es
+              fiable y cuándo se está inventando oscilaciones.
+            </p>
+
+            <div class="hero-buttons mt-4">
+              <a href="#calculadora" class="btn btn-light btn-lg">
+                <i class="bi bi-calculator me-2" aria-hidden="true"></i>Abrir el simulador
+              </a>
+              <a href="#teoria" class="btn btn-outline-light btn-lg">Leer la teoría</a>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="readout" role="group" aria-labelledby="readoutTitulo">
+              <h2 id="readoutTitulo" class="readout-title">Prueba el fenómeno de Runge: f(x) = 1 / (1 + 25x²) en [−1, 1]</h2>
+
+              <div class="readout-inputs single">
+                <label for="heroN">Número de nodos equiespaciados (3 a 25)
+                  <input id="heroN" type="number" step="1" min="3" max="25" value="11" inputmode="numeric">
+                </label>
+              </div>
+
+              <dl class="readout-rows">
+                <div><dt>Error máximo del polinomio</dt><dd id="heroErrP">—</dd></div>
+                <div><dt>Error máximo del spline natural</dt><dd id="heroErrS">—</dd></div>
+                <div><dt>Mayor valor del polinomio (f nunca pasa de 1)</dt><dd id="heroMaxP">—</dd></div>
+                <div><dt>Dónde falla más el polinomio (x)</dt><dd id="heroPos">—</dd></div>
+              </dl>
+
+              <p id="heroMsg" class="readout-msg" aria-live="polite"></p>
+
+              <div class="readout-presets" aria-label="Ejemplos">
+                <button type="button" class="preset" data-n="5">5 nodos</button>
+                <button type="button" class="preset" data-n="9">9 nodos</button>
+                <button type="button" class="preset" data-n="11">11 nodos</button>
+                <button type="button" class="preset" data-n="17">17 nodos</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- TEORÍA GENERAL -->
+    <section id="teoria" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-badge">Fundamentos Matemáticos</span>
+          <h2>Teoría de Interpolación, Fenómeno de Runge y Splines C²</h2>
+          <p>
+            Interpolar es construir una función que pasa exactamente por unas
+            medidas. Hacerlo es fácil; lo difícil es saber si la curva resultante
+            es creíble entre los puntos.
+          </p>
+        </header>
+
+        <dl class="sources">
+          <div>
+            <dt>¿Existe y es única?</dt>
+            <dd>Con <em>n</em> + 1 nodos distintos hay un único polinomio de grado ≤ <em>n</em>. Con nodos repetidos no existe.</dd>
+          </div>
+          <div>
+            <dt>¿Cuánto error comete?</dt>
+            <dd>Depende de la derivada de orden <em>n</em> + 1 de la señal y de la posición de los nodos, no solo de cuántos haya.</dd>
+          </div>
+          <div>
+            <dt>¿Global o por tramos?</dt>
+            <dd>Un polinomio único puede oscilar con muchos nodos. Los splines usan un polinomio cúbico por tramo y se mantienen estables.</dd>
+          </div>
+        </dl>
+
+        <div class="concepts">
+
+          <article class="concept">
+            <h3>Lagrange</h3>
+            <p>
+              Suma de las medidas ponderadas por polinomios base que valen 1 en su
+              nodo y 0 en los demás. Es directa, pero cada evaluación cuesta del orden de <em>n</em><sup>2</sup>.
+            </p>
+            <div class="math-box"><div id="math-lagrange"></div></div>
+          </article>
+
+          <article class="concept">
+            <h3>Newton</h3>
+            <p>
+              El mismo polinomio escrito con diferencias divididas. Se construye una vez y se evalúa en
+              orden <em>n</em>; añadir un nodo solo agrega un término.
+            </p>
+            <div class="math-box">
+              <div id="math-newton"></div>
+              <div id="math-dd"></div>
+            </div>
+          </article>
+
+          <article class="concept">
+            <h3>Spline cúbico</h3>
+            <p>
+              Un polinomio cúbico por intervalo, unidos de forma suave: la función, su
+              primera y su segunda derivada son continuas (clase C²).
+            </p>
+            <div class="math-box"><div id="math-spline"></div></div>
+          </article>
+
+        </div>
+
+        <div class="row g-5 mt-1">
+
+          <div class="col-lg-6">
+            <h3 class="subhead">Error y fenómeno de Runge</h3>
+            <p class="text-secondary">
+              El error depende del producto de las distancias a los nodos. Con nodos equiespaciados
+              ese producto se dispara cerca de los bordes y el polinomio oscila.
+            </p>
+
+            <div class="math-box"><div id="math-error"></div></div>
+
+            <div class="table-responsive mt-3">
+              <table class="table data-table align-middle mb-0">
+                <caption class="visually-hidden">Comparación de Lagrange, Newton y spline natural</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Aspecto</th>
+                    <th scope="col">Lagrange</th>
+                    <th scope="col">Newton</th>
+                    <th scope="col">Spline natural</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Resultado</th><td>Polinomio de grado <em>n</em></td><td>El mismo polinomio</td><td>Cúbicas por tramos</td></tr>
+                  <tr><th scope="row">Construcción</th><td>Ninguna</td><td>≈ <em>n</em><sup>2</sup></td><td>≈ <em>n</em> (sistema tridiagonal)</td></tr>
+                  <tr><th scope="row">Cada evaluación</th><td>≈ <em>n</em><sup>2</sup></td><td>≈ <em>n</em></td><td>≈ constante</td></tr>
+                  <tr><th scope="row">Añadir un nodo</th><td>Recalcular todo</td><td>Un término nuevo</td><td>Resolver otra vez el sistema</td></tr>
+                  <tr><th scope="row">Riesgo</th><td colspan="2">Oscilación con muchos nodos</td><td>Menos preciso donde hay pocos nodos</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <h3 class="subhead">Spline natural y continuidad C²</h3>
+            <p class="text-secondary">
+              Con <em>n</em> intervalos hay 4<em>n</em> coeficientes. Las condiciones de continuidad
+              fijan 4<em>n</em> − 2 y las dos de frontera natural completan el sistema.
+            </p>
+
+            <div class="math-box">
+              <div id="math-c2"></div>
+              <div id="math-tridiag"></div>
+            </div>
+
+            <div class="table-responsive mt-3">
+              <table class="table data-table align-middle mb-0">
+                <caption class="visually-hidden">Qué comprobar al validar una interpolación</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Qué comprobar</th>
+                    <th scope="col">Por qué importa</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Error en un punto retenido</th><td>Es la única medida honesta: el punto no se usó para construir la curva.</td></tr>
+                  <tr><th scope="row">Comportamiento en los extremos</th><td>Los bordes son donde el polinomio global falla primero.</td></tr>
+                  <tr><th scope="row">Oscilación</th><td>Extremos locales que los datos no sugieren indican una curva poco creíble.</td></tr>
+                  <tr><th scope="row">Extrapolación</th><td>Fuera de los nodos el error crece muy rápido: no se debe estimar allí.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+        <!-- 2. CASO PRÁCTICO -->
+    <section id="caso-practico" class="section">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-badge">Caso Práctico en Ingeniería</span>
+          <h2>Reconstrucción Continua de Telemetría Térmica</h2>
+          <p>
+            Un sensor en una estación remota registra la temperatura ambiente cada pocas horas para ahorrar batería. El objetivo de ingeniería es reconstruir la curva continua completa hora a hora, validar su fidelidad física y estimar con exactitud el instante del pico térmico.
+          </p>
+        </header>
+
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-shield-check text-primary me-2"></i>Validación Cruzada Leave-One-Out (LOO)</h3>
+              <p class="text-secondary small">
+                Un polinomio siempre coincide exactamente con los puntos con los que fue construido (residuo cero en los nodos). Para medir su error de predicción real, se retiene un nodo experimental <code>(t_val, T_val)</code>:
+              </p>
+              <div class="p-3 bg-light rounded-3 border mb-3 small">
+                <div class="fw-bold text-dark mb-1">Protocolo de Evaluación:</div>
+                Se construye el interpolante empleando únicamente los <em>N − 1</em> nodos restantes y se evalúa en el punto retenido:
+                <div class="math-box text-center my-2">
+                  $$E_{\text{LOO}} = |T_{\text{medido}} - P(t_{\text{retenido}})|$$
+                </div>
+              </div>
+              <p class="text-secondary small mb-0">
+                Esto revela inmediatamente si el modelo sufre de sobreajuste u oscilaciones espurias de Runge en los bordes.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-diagram-3 text-primary me-2"></i>Comparativa de Modelos de Reconstrucción</h3>
+              <dl class="method-list">
+                <div>
+                  <dt class="text-primary">1. Polinomio de Lagrange Pₙ(t)</dt>
+                  <dd>Construcción directa mediante bases cardinales ℓᵢ(t). Costo O(n²) por evaluación; sensible a Runge en grados altos.</dd>
+                </div>
+                <div>
+                  <dt class="text-indigo">2. Diferencias Divididas de Newton</dt>
+                  <dd>Produce matemáticamente el mismo polinomio pero permite añadir nuevos puntos de muestreo en O(n) sin recalcular desde cero.</dd>
+                </div>
+                <div>
+                  <dt class="text-success">3. Splines Cúbicos Naturales S(t)</dt>
+                  <dd>Interpolación por tramos de grado 3 con continuidad C² (función, pendiente y curvatura suaves). Resuelto eficientemente con el algoritmo de Thomas en O(n).</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SIMULADOR Y CALCULADORA -->
+    <section id="calculadora" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-badge">Calculadora Numérica</span>
+          <h2> Calculadora y Banco de Pruebas de Interpolación</h2>
+          <p>
+            Ingresa los vectores de tiempo y temperatura, selecciona el punto de validación retenido y reconstruye la señal continua con los tres algoritmos.
+          </p>
+        </header>
+
+        <div class="row g-5">
+
+          <!-- Contexto -->
+          <div class="col-lg-5">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-gear-wide-connected text-primary me-2"></i>Flujo del Algoritmo</h3>
+              <dl class="method-list">
+                <div><dt>1. Ordenamiento y Depuración</dt><dd>Los nodos se ordenan temporalmente y se descartan duplicados inconsistentes.</dd></div>
+                <div><dt>2. Aislamiento del Punto Retenido</dt><dd>La muestra de control se aparta exclusivamente para certificar el error de generalización.</dd></div>
+                <div><dt>3. Ensamble de Ecuaciones</dt><dd>Cálculo de la tabla triangular de diferencias divididas y la matriz tridiagonal del spline.</dd></div>
+                <div><dt>4. Búsqueda de Extremos</dt><dd>Localización numérica del valor máximo continuo y la hora exacta de ocurrencia.</dd></div>
+              </dl>
+            </div>
+          </div>
+
+          <!-- Parámetros -->
+          <div class="col-lg-7">
+            <form id="formSim" class="panel" novalidate>
+              <h3 class="panel-title"><i class="bi bi-sliders text-primary me-2"></i>Datos de Medición</h3>
+
+              <div class="row g-3">
+                <div class="col-12">
+                  <label for="calcT" class="form-label">Horas Medidas <em>t</em> (h)</label>
+                  <input type="text" id="calcT" class="form-control" value="0, 4, 8, 12, 16, 20, 24" autocomplete="off">
+                  <div class="form-text">Valores separados por comas.</div>
+                </div>
+
+                <div class="col-12">
+                  <label for="calcY" class="form-label">Temperaturas Medidas <em>T</em> (°C)</label>
+                  <input type="text" id="calcY" class="form-control" value="22, 21, 24, 31, 34, 28, 23" autocomplete="off">
+                  <div class="form-text">Mismo orden y cantidad que las horas.</div>
+                </div>
+
+                <div class="col-sm-6">
+                  <label for="calcRet" class="form-label">Hora Retenida (Validación LOO)</label>
+                  <input type="number" id="calcRet" class="form-control" value="12" step="any">
+                  <div class="form-text">Punto interior reservado.</div>
+                </div>
+
+                <div class="col-sm-6">
+                  <label for="calcPaso" class="form-label">Paso de Muestreo Continuo (h)</label>
+                  <input type="number" id="calcPaso" class="form-control" value="1" min="0.05" step="any">
+                  <div class="form-text">Resolución de reconstrucción.</div>
+                </div>
+              </div>
+
+              <div id="calcError" class="form-error" role="alert" hidden></div>
+
+              <div class="d-flex flex-wrap gap-2 mt-4">
+                <button type="submit" class="btn btn-primary" id="btnEjecutar">
+                  <i class="bi bi-play-fill me-1" aria-hidden="true"></i>Reconstruir Señal Continua
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnReset">
+                  <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Restablecer
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnCsv" disabled>
+                  <i class="bi bi-filetype-csv me-1" aria-hidden="true"></i>Exportar CSV
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnInforme" disabled>
+                  <i class="bi bi-download me-1" aria-hidden="true"></i>Informe
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- RESULTADOS -->
+        <div id="simResultados" class="results" hidden>
+
+          <!-- 1. Preparación -->
+          <article class="panel mb-4">
+            <div class="block-head">
+              <span class="role-tag">Fase 1</span>
+              <h4 class="mb-0">Muestras experimentales y punto de control retenido</h4>
+            </div>
+
+            <div class="table-responsive mb-3">
+              <table class="table data-table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Nodo</th>
+                    <th scope="col" class="num">Hora <em>t</em> (h)</th>
+                    <th scope="col" class="num">Temperatura <em>T</em> (°C)</th>
+                    <th scope="col">Rol en el Algoritmo</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaNodos"></tbody>
+              </table>
+            </div>
+
+            <p id="logDatos" class="text-secondary small mb-0"></p>
+          </article>
+
+          <!-- 2. Diferencias divididas -->
+          <article class="panel mb-4">
+            <div class="block-head">
+              <span class="role-tag">Fase 2</span>
+              <h4 class="mb-0">Tabla de Diferencias Divididas de Newton</h4>
+            </div>
+
+            <p class="text-secondary small">
+              Los coeficientes del polinomio de Newton se leen directamente de la diagonal superior:
+              <code>P(t) = f[t₀] + f[t₀,t₁](t-t₀) + f[t₀,t₁,t₂](t-t₀)(t-t₁) + ...</code>
+            </p>
+
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0">
+                <thead id="theadDD"></thead>
+                <tbody id="tablaDD"></tbody>
+              </table>
+            </div>
+            <p id="textoPoli" class="table-note mt-2 mb-0"></p>
+          </article>
+
+          <!-- 3. Splines cúbicos -->
+          <article class="panel mb-4">
+            <div class="block-head">
+              <span class="role-tag">Fase 3</span>
+              <h4 class="mb-0">Polinomios segmentarios del Spline Cúbico Natural</h4>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <span class="badge bg-success" id="badgeC2">Continuidad C² Certificada</span>
+              <span class="text-secondary small" id="textoC2"></span>
+            </div>
+
+            <div class="table-responsive mb-3">
+              <table class="table data-table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Tramo [tᵢ, tᵢ₊₁]</th>
+                    <th scope="col" class="num">aᵢ</th>
+                    <th scope="col" class="num">bᵢ</th>
+                    <th scope="col" class="num">cᵢ</th>
+                    <th scope="col" class="num">dᵢ</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaSegmentos"></tbody>
+              </table>
+            </div>
+
+            <h5 class="minor-head">Continuidad C² en nodos interiores</h5>
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Nodo Interior</th>
+                    <th scope="col" class="num">Salto S(x)</th>
+                    <th scope="col" class="num">Salto S'(x)</th>
+                    <th scope="col" class="num">Salto S''(x)</th>
+                    <th scope="col">Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaC2"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <!-- 4. Comparación de rendimiento -->
+          <article class="panel mb-4">
+            <div class="block-head">
+              <span class="role-tag">Fase 4</span>
+              <h4 class="mb-0">Comparativa técnica y certificación de error LOO</h4>
+            </div>
+
+            <div class="table-responsive mb-3">
+              <table class="table data-table results-table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Método</th>
+                    <th scope="col" class="num">Valor Retenido (°C)</th>
+                    <th scope="col" class="num">Error (°C) / Rel.</th>
+                    <th scope="col" class="num">Desv. Extremos</th>
+                    <th scope="col" class="num">Desborde</th>
+                    <th scope="col" class="num">Extremos Loc.</th>
+                    <th scope="col" class="num">Coste (C/E)</th>
+                    <th scope="col" class="num">Tiempo (ms)</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaComparacion"></tbody>
+              </table>
+            </div>
+            <p id="notaComparacion" class="table-note mb-4"></p>
+
+            <h5 class="minor-head">Validación cruzada dejando uno fuera (Leave-One-Out)</h5>
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col" class="num">Hora <em>t</em> (h)</th>
+                    <th scope="col" class="num">Polinomio (°C)</th>
+                    <th scope="col" class="num">Spline (°C)</th>
+                    <th scope="col" class="num">Lineal (°C)</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaLOO"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <!-- 5. Estimación del Pico Máximo -->
+          <article class="panel mb-4">
+            <div class="block-head">
+              <span class="role-tag">Fase 5</span>
+              <h4 class="mb-0">Localización del Máximo Térmico</h4>
+            </div>
+
+            <div class="table-responsive mb-2">
+              <table class="table data-table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col">Método</th>
+                    <th scope="col" class="num">Hora Estimada</th>
+                    <th scope="col" class="num">Temperatura Pico</th>
+                    <th scope="col">Validez Física</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaMaximo"></tbody>
+              </table>
+            </div>
+            <p id="textoMaximo" class="text-secondary small mb-0"></p>
+          </article>
+
+          <!-- 6. Evaluación Horaria Malla Regular -->
+          <article class="panel mb-4">
+            <div class="block-head">
+              <span class="role-tag">Fase 6</span>
+              <h4 class="mb-0">Evaluación Horaria en Malla Completa</h4>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th scope="col" class="num">Hora <em>t</em> (h)</th>
+                    <th scope="col" class="num">Lagrange (°C)</th>
+                    <th scope="col" class="num">Newton (°C)</th>
+                    <th scope="col" class="num">Spline (°C)</th>
+                    <th scope="col">Nota Técnica</th>
+                  </tr>
+                </thead>
+                <tbody id="tablaHoraria"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <!-- 7. Diagnóstico Técnico -->
+          <article class="panel mb-4">
+            <div class="block-head">
+              <span class="role-tag">Diagnóstico</span>
+              <h4 class="mb-0">Dictamen Técnico y Criterios Numéricos</h4>
+            </div>
+
+            <ul id="diagnostico" class="evidence mb-0"></ul>
+          </article>
+
+          <!-- 8. Recomendación Operativa -->
+          <article class="panel">
+            <div class="block-head">
+              <span class="role-tag">Recomendación</span>
+              <h4 class="mb-0">Dictamen Final de Operación</h4>
+            </div>
+
+            <div id="recomendacion" class="prose"></div>
+          </article>
+        </div>
+
+      </div>
+    </section>
+<!-- GRÁFICO -->
+    <section id="grafico" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <h2>La señal reconstruida</h2>
+          <p>
+            Cuatro vistas del mismo experimento: las curvas junto a los datos, las derivadas
+            del spline que prueban la continuidad, la diferencia entre métodos y el error de
+            la validación cruzada.
+          </p>
+        </header>
+
+        <div class="panel">
+          <div class="chart-controls">
+            <div>
+              <label for="modoGrafico" class="form-label">Vista</label>
+              <select id="modoGrafico" class="form-select">
+                <option value="curvas">Curvas y datos medidos</option>
+                <option value="derivadas">Spline: función y derivadas (C²)</option>
+                <option value="diferencia">Diferencia polinomio − spline</option>
+                <option value="loo">Error de validación cruzada</option>
+              </select>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="btnGrafico">
+              <i class="bi bi-graph-up me-2" aria-hidden="true"></i>Actualizar gráfico
+            </button>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="errorChart" role="img" aria-label="Gráfico de la señal reconstruida por interpolación"></canvas>
+            <p id="chartVacio" class="chart-empty">Pulsa «Actualizar gráfico» para dibujar la vista elegida.</p>
+          </div>
+
+          <p id="notaGrafico" class="table-note mb-0"></p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- EJERCICIO -->
+    <section id="ejercicios" class="section">
+      <div class="container">
+
+        <header class="section-head">
+          <h2>Ejercicios Propuestos</h2>
+          <p>
+            Un problema en cinco apartados, con datos distintos cada vez. Tienes
+            tres intentos por apartado y puedes usar calculadora.
+          </p>
+        </header>
+
+        <div class="row justify-content-center">
+          <div class="col-xl-10">
+
+            <div class="panel scenario" id="escenarioEjercicio"></div>
+
+            <div class="exercise-bar">
+              <div class="progress" role="progressbar" aria-label="Progreso del ejercicio" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" id="barraProgreso">
+                <div class="progress-bar" id="barraProgresoRelleno" style="width: 0%"></div>
+              </div>
+              <span id="progresoTexto" class="progress-text">0 de 5 apartados</span>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="btnNuevoCaso">
+                <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>Nuevo caso
+              </button>
+            </div>
+
+            <ol id="partesEjercicio" class="steps"></ol>
+
+            <div id="resumenEjercicio" class="panel summary" hidden aria-live="polite"></div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+      </main>
+
+  <!-- PIE DE PÁGINA -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="fw-bold mb-0 text-dark">MetNum · Métodos Numéricos para Ingeniería</p>
+        <small class="text-muted">Módulo 06: Interpolación Numérica, Polinomios de Newton y Splines Cúbicos Naturales.</small>
+      </div>
+      <div class="d-flex gap-3 text-muted small align-items-center">
+        <a href="../index.html" class="text-decoration-none text-muted">← Volver al Portal de Cursos</a>
+        <span>•</span>
+        <a href="#hero" class="text-decoration-none text-muted">Volver al Inicio ↑</a>
+      </div>
+    </div>
+  </footer>
+<!-- BOTÓN VOLVER ARRIBA -->
+  <a href="#hero" id="scrollTopBtn" class="back-to-top" aria-label="Volver al inicio">
+    <i class="bi bi-arrow-up-short" aria-hidden="true"></i>
+  </a>
+
+  <!-- LIBRERÍAS EXTERNAS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Nuestro JavaScript -->
+  <script src="interpolacion.js" defer></script>
+
+</body>
+</html>

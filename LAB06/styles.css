@@ -1,0 +1,37 @@
+/* ===================================================
+   LAB06 - INTERPOLACIÓN Y APROXIMACIÓN NUMÉRICA
+   Importa estilos base compartidos y agrega específicos
+=================================================== */
+
+@import "../shared/base.css";
+
+/* Resaltado de nodos retenidos para validación cruzada (LOO) */
+.results-table tbody tr.is-held,
+.data-table tbody tr.is-held {
+  background: #fdf3e7;
+  color: #7a4f00;
+  font-style: italic;
+}
+
+/* Resaltado del punto máximo / pico de interpolación */
+.results-table tbody tr.is-peak,
+.data-table tbody tr.is-peak {
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+/* Fila de totales y métricas globales */
+.results-table tr.is-total,
+.data-table tr.is-total {
+  font-weight: 700;
+  border-top: 2px solid var(--line);
+  background: var(--canvas);
+}
+
+/* Tabla de Diferencias Divididas y Segmentos */
+#tablaDD td, #tablaDD th,
+#tablaSegmentos td, #tablaC2 td {
+  padding: 0.35rem 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
