@@ -1,0 +1,14 @@
+@import "../shared/base.css";
+
+.formula-card{background:var(--canvas);border:1px solid var(--line);border-left:3px solid var(--brand-wine);border-radius:var(--radius-s);padding:1rem 1.1rem;margin:1rem 0;font:500 .95rem/1.8 var(--font-mono);overflow-wrap:anywhere}
+.math{font-family:var(--font-mono);color:var(--ink)}
+.callout-note{padding:1rem 1.2rem;background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:var(--radius-s)}
+.decision-box{display:grid;gap:.65rem;margin:1.2rem 0}.decision-box div{display:flex;justify-content:space-between;gap:1rem;padding:.75rem;background:var(--canvas);border-radius:var(--radius-s)}.decision-box span{color:var(--muted)}.decision-box strong{text-align:right}
+.chart-wrap{position:relative;min-height:290px}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem}
+.summary-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:1rem;box-shadow:var(--shadow-sm)}
+.summary-card h3{font-size:1rem;font-weight:700}.summary-card dl{margin:0}.summary-card dl div{display:flex;justify-content:space-between;gap:.75rem;padding:.3rem 0;border-bottom:1px solid var(--line)}.summary-card dt{color:var(--muted);font-weight:500}.summary-card dd{margin:0;text-align:right;font-family:var(--font-mono);font-size:.88rem}.summary-card.is-error{border-color:var(--bad-border);background:var(--bad-soft)}
+.footer{padding:1.5rem 0;background:#0b1830;color:#dbe4f0}.footer-inner{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}.footer p{margin:0}.footer a{color:#fff}
+details summary{cursor:pointer;color:var(--accent-strong);font-weight:600}details p{color:var(--ink-soft)}
+.assessment-card{display:flex;flex-direction:column}.assessment-feedback{min-height:1.5rem;margin-bottom:.5rem}.assessment-solution{padding:.85rem 1rem;background:var(--accent-soft);border:1px solid var(--accent-border);border-radius:var(--radius-s);line-height:1.65}
+@media(max-width:575px){.decision-box div{display:block}.decision-box strong{display:block;text-align:left;margin-top:.2rem}.chart-wrap{min-height:240px}}
