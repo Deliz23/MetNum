@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -63,7 +63,7 @@
             <li class="nav-item"><a href="#caso-practico" class="nav-link">Caso Práctico</a></li>
             <li class="nav-item"><a href="#calculadora" class="nav-link">Calculadora</a></li>
             <li class="nav-item"><a href="#grafico" class="nav-link">Gráfica</a></li>
-            <li class="nav-item"><a href="#ejercicios" class="nav-link">Problemas</a></li>
+            <li class="nav-item"><a href="#ejercicios" class="nav-link">Autoevaluación</a></li>
 
           </ul>
         </div>
@@ -241,8 +241,8 @@
                 <thead>
                   <tr>
                     <th scope="col">Método</th>
-                    <th scope="col">Cota del error</th>
-                    <th scope="col">Cuándo conviene</th>
+                    <th scope="col" class="num">Cota del error</th>
+                    <th>Cuándo conviene</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -259,7 +259,7 @@
       </div>
     </section>
 
-        <!-- 2. CASO PRÁCTICO -->
+    <!-- 2. CASO PRÁCTICO -->
     <section id="caso-practico" class="section">
       <div class="container">
         <header class="section-head">
@@ -429,7 +429,8 @@
 
       </div>
     </section>
-<!-- GRÁFICO -->
+
+    <!-- GRÁFICO -->
     <section id="grafico" class="section section-alt">
       <div class="container">
 
@@ -470,44 +471,52 @@
       </div>
     </section>
 
-    <!-- EJERCICIO -->
+    <!-- EJERCICIOS -->
     <section id="ejercicios" class="section">
       <div class="container">
 
         <header class="section-head">
-          <span class="section-badge">Problemas de Ingeniería</span>
-          <h2>Problemas Propuestos </h2>
+          <span class="section-badge">Autoevaluación de conocimientos</span>
+          <h2>Problemas de Aplicación Práctica</h2>
           <p>
-            Un problema en cinco apartados, con datos distintos cada vez. Tienes
-            tres intentos por apartado y puedes usar calculadora.
+            Dos ejercicios independientes basados en los casos de estudio de la guía oficial de laboratorio.
+            Las preguntas son 100% autónomas, con datos aleatorios y sin dependencias entre sí.
           </p>
         </header>
 
         <div class="row justify-content-center">
           <div class="col-xl-10">
 
-            <div class="panel scenario" id="escenarioEjercicio"></div>
-
-            <div class="exercise-bar">
-              <div class="progress" role="progressbar" aria-label="Progreso del ejercicio" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" id="barraProgreso">
-                <div class="progress-bar" id="barraProgresoRelleno" style="width: 0%"></div>
+            <!-- Selector de Ejercicio Independiente (No secuencial) -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+              <div id="selectorEjercicios" class="btn-group shadow-sm" role="group" aria-label="Selector de Ejercicio">
+                <button type="button" class="btn btn-primary" data-ej-i="0">
+                  <i class="bi bi-speedometer2 me-1"></i> Cancelación en Latencias
+                </button>
+                <button type="button" class="btn btn-outline-primary" data-ej-i="1">
+                  <i class="bi bi-calculator me-1"></i> Raíz Cuadrática y Reformulación
+                </button>
               </div>
-              <span id="progresoTexto" class="progress-text">0 de 5 apartados</span>
+
               <button type="button" class="btn btn-outline-secondary btn-sm" id="btnNuevoCaso">
-                <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>Nuevo caso
+                <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>Generar nuevos valores aleatorios
               </button>
             </div>
 
-            <ol id="partesEjercicio" class="steps"></ol>
+            <!-- Contexto del Ejercicio Seleccionado -->
+            <div class="panel scenario mb-4" id="escenarioEjercicio"></div>
 
-            <div id="resumenEjercicio" class="panel summary" hidden aria-live="polite"></div>
+            <!-- Contenedor de Preguntas Autónomas (2 por ejercicio) -->
+            <div id="preguntasContainer" class="d-flex flex-column gap-4"></div>
+
+            <div id="resumenEjercicio" class="panel summary mt-4" hidden aria-live="polite"></div>
 
           </div>
         </div>
       </div>
     </section>
 
-      </main>
+  </main>
 
   <!-- PIE DE PÁGINA -->
   <footer class="footer">
@@ -523,7 +532,8 @@
       </div>
     </div>
   </footer>
-<!-- BOTÓN VOLVER ARRIBA -->
+
+  <!-- BOTÓN VOLVER ARRIBA -->
   <a href="#hero" id="scrollTopBtn" class="back-to-top" aria-label="Volver al inicio">
     <i class="bi bi-arrow-up-short" aria-hidden="true"></i>
   </a>
