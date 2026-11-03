@@ -839,496 +839,584 @@ function dibujarGrafico() {
 }
 
 // ========================================
-// 10. EJERCICIO: DERIVA DEL RELOJ DE UN CONTROLADOR
+// 10. EJERCICIOS AUTÓNOMOS E INDEPENDIENTES
 // ========================================
 
-const MAX_INTENTOS = 3;
-const TOLERANCIA_RELATIVA = 0.005;
+const TOLERANCIA_RELATIVA = 0.01;
 
-let caso = null;
+let ejercicios = [];
+let ejercicioActivo = 0; // 0: Cancelación en Latencias, 1: Raíz Cuadrática
 
 function elegir(lista) {
   return lista[Math.floor(Math.random() * lista.length)];
 }
 
 function configurarEjercicio() {
-  const contenedor = $("partesEjercicio");
+  const contenedor = $("preguntasContainer");
+  const selector = $("selectorEjercicios");
 
   if (!contenedor) return;
 
-  $("btnNuevoCaso").addEventListener("click", iniciarEjercicio);
+  $("btnNuevoCaso").addEventListener("click", () => {
+    inicializarEjercicios();
+    renderizarEjercicioActual();
+  });
 
+  if (selector) {
+    selector.addEventListener("click", evento => {
+      const boton = evento.target.closest("[data-ej-i]");
+      if (!boton) return;
+      cambiarEjercicio(Number(boton.dataset.ejI));
+    });
+  }
+
+  // Delegación de eventos para las preguntas
   contenedor.addEventListener("click", evento => {
     const boton = evento.target.closest("[data-action]");
-
     if (!boton) return;
 
-    const i = Number(boton.dataset.i);
+    const pIdx = Number(boton.dataset.p);
+    const accion = boton.dataset.action;
 
-    if (boton.dataset.action === "comprobar") comprobar(i);
-    if (boton.dataset.action === "pista") alternarPista(i);
-    if (boton.dataset.action === "simular") simularRelojFloat32(i);
+    if (accion === "comprobar") comprobarRespuesta(pIdx);
+    if (accion === "pista") alternarPista(pIdx);
+    if (accion === "toggle-solucion") alternarSolucion(pIdx);
+  });
+
+  contenedor.addEventListener("change", evento => {
+    const select = evento.target.closest("select[data-action='seleccionar-metodo']");
+    if (!select) return;
+
+    const pIdx = Number(select.dataset.p);
+    seleccionarMetodo(pIdx, select.value);
   });
 
   contenedor.addEventListener("input", evento => {
-    const campo = evento.target.closest("input[data-i]");
-
-    if (campo) caso.partes[Number(campo.dataset.i)].entrada = campo.value;
+    const campo = evento.target.closest("input[data-p]");
+    if (campo) {
+      const pIdx = Number(campo.dataset.p);
+      ejercicios[ejercicioActivo].preguntas[pIdx].entrada = campo.value;
+    }
   });
 
   contenedor.addEventListener("keydown", evento => {
-    const campo = evento.target.closest("input[data-i]");
-
+    const campo = evento.target.closest("input[data-p]");
     if (campo && evento.key === "Enter") {
       evento.preventDefault();
-      comprobar(Number(campo.dataset.i));
+      comprobarRespuesta(Number(campo.dataset.p));
     }
   });
 
-  iniciarEjercicio();
+  inicializarEjercicios();
+  renderizarEjercicioActual();
 }
 
-// Genera un caso con datos aleatorios y calcula todas las respuestas esperadas
-function crearCaso() {
-  const k = elegir([18, 19, 20, 21, 22]);
-  const horas = elegir([48, 72, 96, 120]);
-  const v = elegir([250, 340, 680, 850]);
-  const tolMs = elegir([5, 10, 20]);
+function inicializarEjercicios() {
+  ejercicios = generarDatosEjercicios();
+}
 
-  const dt = 0.1;
-  const ticks = horas * 3600 * 10;
+function cambiarEjercicio(idx) {
+  ejercicioActivo = idx;
+  const botones = document.querySelectorAll("#selectorEjercicios button");
+  botones.forEach((btn, i) => {
+    if (i === idx) {
+      btn.className = "btn btn-primary";
+    } else {
+      btn.className = "btn btn-outline-primary";
+    }
+  });
+  renderizarEjercicioActual();
+}
 
-  // 0.1·2^k = 2^k/10; su parte fraccionaria es (2^k mod 10)/10
-  const fraccion = [6, 2, 4, 8][k % 4] / 10;
-  const errorTick = fraccion / 2 ** k;
-  const errorNs = errorTick * 1e9;
-  const deriva = ticks * errorTick;
-  const posicion = v * deriva;
+// Genera datos aleatorios independientes para cada uno de los 2 ejercicios
+function generarDatosEjercicios() {
+  // EJERCICIO 1: Cancelación al medir latencia pequeña (Ejemplo 1 de la Guía)
+  const t1 = elegir([1000000.0, 2000000.0, 4000000.0]); // s
+  const delta = elegir([0.05, 0.1, 0.15, 0.2]); // s
+  const t2 = t1 + delta;
 
-  const tau = tolMs / 1000;
-  const kMin = Math.floor(Math.log2(ticks / tau)) + 1;
+  const t1_32 = Math.fround(t1);
+  const t2_32 = Math.fround(t2);
+  const diff_32 = Math.fround(t2_32 - t1_32);
+  const errAbs = Math.abs(diff_32 - delta);
+  const errRelPct = (errAbs / delta) * 100;
 
-  // Congelamiento en float32: Δt < ½·ulp(t) = 2^(e−24)
-  const eCongela = Math.floor(Math.log2(Math.fround(dt) * 2 ** 24)) + 1;
-  const tCongela = 2 ** eCongela;
-  const dias = tCongela / 86400;
+  // Exponente y ulp de t1
+  const exp_t1 = Math.floor(Math.log2(t1));
+  const ulp_t1 = 2 ** (exp_t1 - 23);
 
-  const p = { k, horas, v, tolMs, dt, ticks, fraccion, errorTick, errorNs, deriva, posicion, tau, kMin, eCongela, tCongela, dias };
+  // EJERCICIO 2: Raíz pequeña de una cuadrática (Ejemplo 2 de la Guía)
+  const b = elegir([10000000.0, 20000000.0, 50000000.0, 100000000.0]); // 10^7 a 10^8
+  const c = elegir([1.0, 2.0, 4.0]);
+  const x1_aprox = b;
+  const x2_exacto = c / b;
 
-  const partes = [
+  const lista = [
     {
-      titulo: "Error de representación de Δt",
-      enunciado:
-        `<p>¿Qué error absoluto comete el registro al almacenar Δt = 0.1 s truncado a ` +
-        `<strong>k = ${k}</strong> bits fraccionarios? Exprésalo en nanosegundos.</p>`,
-      unidad: "ns",
-      esperado: errorNs,
-      decimales: 2,
-      tipo: "real",
-      pista:
-        `El registro guarda ⌊Δt·2<sup>k</sup>⌋ pasos de tamaño 2<sup>−k</sup>. ` +
-        `El error es la parte fraccionaria de Δt·2<sup>k</sup>, dividida entre 2<sup>k</sup>.`,
-      solucion: [
-        { txt: "El registro guarda un número entero de pasos de tamaño 2<sup>−k</sup>; el truncamiento descarta la parte fraccionaria de Δt·2<sup>k</sup>." },
-        { tex: `0.1\\cdot 2^{${k}}=${(2 ** k / 10).toFixed(1)}\\;\\Rightarrow\\;\\lfloor 0.1\\cdot 2^{${k}}\\rfloor=${Math.floor(2 ** k / 10)}` },
-        { tex: `e_{\\Delta t}=\\frac{${fraccion.toFixed(1)}}{2^{${k}}}=${texSci(errorTick)}\\ \\text{s}=${errorNs.toFixed(2)}\\ \\text{ns}` }
+      id: "ej1",
+      titulo: "Ejercicio 1: Cancelación Catastrófica en Medición de Latencias de Red",
+      icono: "bi-speedometer2",
+      badge: "Ejemplo 1 de la Guía Oficial",
+      contexto: `
+        <h3>Cancelación al medir latencias de red en un servidor</h3>
+        <p>Un sistema de telemetría registra marcas de tiempo en segundos para auditar el SLA de un servicio web.
+        Se capturan dos eventos consecutivos: <strong>t₁ = ${t1.toLocaleString("es-PE")} s</strong> y <strong>t₂ = ${t2.toLocaleString("es-PE", { minimumFractionDigits: 2 })} s</strong>.
+        La latencia real exacta entre ambos eventos es <strong>Δt = t₂ − t₁ = ${delta} s</strong>.</p>
+        <p class="mb-0 text-secondary small">En float32 (24 bits de precisión), el espaciado alrededor de ${t1.toLocaleString("es-PE")} s es grande, por lo que <code>t₂</code> se aproxima a <code>${t2_32.toFixed(3)} s</code> y la resta directa arroja <code>fl(Δt) = ${diff_32.toFixed(3)} s</code>.</p>
+        <dl class="givens mt-3">
+          <div><dt>Marca de inicio</dt><dd>t₁ = ${t1.toLocaleString("es-PE")} s</dd></div>
+          <div><dt>Marca final</dt><dd>t₂ = ${t2.toLocaleString("es-PE", { minimumFractionDigits: 2 })} s</dd></div>
+          <div><dt>Latencia exacta</dt><dd>Δt = ${delta} s</dd></div>
+          <div><dt>Resta float32</dt><dd>fl(Δt) = ${diff_32.toFixed(3)} s</dd></div>
+        </dl>
+      `,
+      preguntas: [
+        {
+          id: "p1_1",
+          numero: "Pregunta 1.1 ",
+          titulo: "Cálculo del error relativo porcentual por resta directa",
+          enunciado: `
+            <p>Con los datos del escenario: latencia exacta <strong>Δt = ${delta} s</strong> y latencia calculada directamente en float32 <strong>fl(Δt) = ${diff_32.toFixed(3)} s</strong>.
+            ¿Cuál es el <strong>error relativo porcentual (%)</strong> que comete la resta directa debido a la cancelación catastrófica?</p>
+          `,
+          unidad: "%",
+          esperado: errRelPct,
+          decimales: 2,
+          tipo: "real",
+          metodoOpciones: [
+            {
+              id: "directa",
+              nombre: "A) Resta directa de marcas de tiempo absolutas: fl(t₂) − fl(t₁)",
+              esOptimo: false,
+              analisis: "⚠️ <strong>Cancelación Catastrófica:</strong> Al restar dos magnitudes casi idénticas del orden de 10⁶ s con float32, se cancelan los dígitos más significativos y los bits restantes son únicamente ruido de redondeo. ¡El error relativo se dispara al 25% o más!",
+              recomendacion: "El método más apropiado es el <strong>Centrado de Marcas de Tiempo (B)</strong> o el uso de enteros de microsegundos, reduciendo el error relativo prácticamente a 0%."
+            },
+            {
+              id: "centrado",
+              nombre: "B) Centrado previo de datos respecto a una base: τ = t − t₀",
+              esOptimo: true,
+              analisis: "✅ <strong>¡Método recomendado por la guía!</strong> Al restar una base entera común t₀ antes del cálculo en float32, la latencia se almacena cerca de cero, donde float32 posee su máxima resolución y no sufre cancelación.",
+              recomendacion: "Es la solución estándar de ingeniería de sistemas para telemetría de alta resolución."
+            }
+          ],
+          pista: `Aplica la fórmula clásica de error relativo: Er = |Valor Real − Valor Calculado| / |Valor Real|. Para expresarlo en porcentaje (εt), multiplica el resultado por 100: |${delta} − ${diff_32.toFixed(3)}| / ${delta} × 100.`,
+          solucion: [
+            { txt: "1. Calculamos el error absoluto cometido por la resta directa en float32:" },
+            { tex: `E_a = |\\Delta t - \\text{fl}(\\Delta t)| = |${delta} - ${diff_32.toFixed(3)}| = ${errAbs.toFixed(4)}\\ \\text{s}` },
+            { txt: "2. Dividimos entre el valor real exacto y multiplicamos por 100 para obtener el porcentaje:" },
+            { tex: `\\varepsilon_t = \\frac{E_a}{|\\Delta t|} \\times 100\\% = \\frac{${errAbs.toFixed(4)}}{${delta}} \\times 100\\% = ${errRelPct.toFixed(2)}\\%` },
+            { txt: `Resultado: Una diferencia aparentemente pequeña produce un error relativo inaceptable del ${errRelPct.toFixed(2)}% debido a la escala del dato base.` }
+          ]
+        },
+        {
+          id: "p1_2",
+          numero: "Pregunta 1.2 ",
+          titulo: "Espaciado de máquina (ulp) alrededor de la base t₁",
+          enunciado: `
+            <p>La precisión en coma flotante no es continua: depende del espaciado entre números representables consecutivos (<code>ulp</code>).
+            Para la base <strong>t₁ = ${t1.toLocaleString("es-PE")} s</strong> (cuyo exponente binario es <code>e = ${exp_t1}</code> pues <code>2^${exp_t1} ≤ t₁ < 2^${exp_t1 + 1}</code>),
+            ¿cuál es el espaciado <strong>ulp(t₁) = 2^(e−23)</strong> en float32? Expresa tu resultado en segundos.</p>
+          `,
+          unidad: "s",
+          esperado: ulp_t1,
+          decimales: 4,
+          tipo: "real",
+          metodoOpciones: [
+            {
+              id: "resta_empirica",
+              nombre: "A) Estimación por diferencia empírica entre dos números de prueba",
+              esOptimo: false,
+              analisis: "⚠️ <strong>Aproximación empírica:</strong> Depende de que los números elegidos caigan en el mismo intervalo binario y puede verse afectada por redondeos intermedios.",
+              recomendacion: "El método más apropiado es el <strong>Cálculo Analítico del Estándar IEEE 754 (B)</strong> mediante la fórmula cerrada ulp = 2^(e−23)."
+            },
+            {
+              id: "formula_ulp",
+              nombre: "B) Fórmula analítica del estándar IEEE 754: ulp(x) = 2^(e−23)",
+              esOptimo: true,
+              analisis: "✅ <strong>¡Método riguroso y exacto!</strong> Determina con exactitud de hardware la distancia discreta mínima representable para esa potencia de dos.",
+              recomendacion: "Permite diagnosticar exactamente cuándo una fluctuación será absorbida por el hardware."
+            }
+          ],
+          pista: `En float32 (23 bits fraccionarios + 1 bit implícito = 24 bits), ulp = 2^(e−23). Para e = ${exp_t1}, calcula 2^(${exp_t1} − 23) = 2^(${exp_t1 - 23}). Por ejemplo, 2^(−4) = 0.0625 s.`,
+          solucion: [
+            { txt: `1. Identificamos el intervalo de potencias de 2 en el que se ubica t₁ = ${t1.toLocaleString("es-PE")}:` },
+            { tex: `2^{${exp_t1}} = ${texInt(2 ** exp_t1)} \\le ${texInt(t1)} < 2^{${exp_t1 + 1}} = ${texInt(2 ** (exp_t1 + 1))} \\implies e = ${exp_t1}` },
+            { txt: "2. Evaluamos la fórmula del ulp para coma flotante simple (float32):" },
+            { tex: `\\text{ulp}(t_1) = 2^{e-23} = 2^{${exp_t1} - 23} = 2^{${exp_t1 - 23}} = ${ulp_t1}\\ \\text{s}` },
+            { txt: `Interpretación: Cualquier incremento menor a la mitad del ulp (${(ulp_t1 / 2).toFixed(5)} s) se redondea a cero (absorción completa).` }
+          ]
+        }
       ]
     },
     {
-      titulo: "Deriva acumulada del reloj",
-      enunciado:
-        `<p>Cada ciclo arrastra ese error y el contador se atrasa un poco más. ¿Cuánto se atrasa el reloj ` +
-        `tras <strong>T = ${horas} h</strong> de funcionamiento continuo, a 10 ciclos por segundo? Responde en segundos.</p>`,
-      unidad: "s",
-      esperado: deriva,
-      decimales: 4,
-      tipo: "real",
-      pista:
-        `Primero cuenta los ciclos: horas × 3600 s/h × 10 ciclos/s. Después multiplica por el error de un ciclo ` +
-        `(en segundos, no en nanosegundos).`,
-      solucion: [
-        { tex: `N=T\\cdot 3600\\cdot 10=${horas}\\cdot 36000=${texInt(ticks)}\\ \\text{ciclos}` },
-        { tex: `D=N\\cdot e_{\\Delta t}=${texInt(ticks)}\\cdot ${texSci(errorTick)}=${deriva.toFixed(4)}\\ \\text{s}` }
+      id: "ej2",
+      titulo: "Ejercicio 2: Raíz Pequeña de una Cuadrática y Reformulación Algebraica",
+      icono: "bi-calculator",
+      badge: "Ejemplo 2 de la Guía Oficial",
+      contexto: `
+        <h3>Raíz pequeña de una cuadrática sin pérdida de significancia</h3>
+        <p>En el modelado dinámico de buffers se obtiene la ecuación cuadrática <strong>x² − bx + c = 0</strong> con 
+        <strong>b = ${b.toLocaleString("es-PE")}</strong> y <strong>c = ${c}</strong>.
+        Esta ecuación posee dos raíces reales positivas: una raíz grande <code>x₁</code> y una raíz extremadamente pequeña <code>x₂</code>.</p>
+        <p class="mb-0 text-secondary small">Al calcular <code>x₂</code> con la fórmula general clásica, se resta <code>b − √(b² − 4c)</code>. Como <code>b² ≫ 4c</code>, la raíz cuadrada da aproximadamente <code>b</code> y la resta directa produce <strong>0</strong> por cancelación catastrófica.</p>
+        <dl class="givens mt-3">
+          <div><dt>Coeficiente lineal</dt><dd>b = ${b.toLocaleString("es-PE")}</dd></div>
+          <div><dt>Término independiente</dt><dd>c = ${c}</dd></div>
+          <div><dt>Ecuación cuadrática</dt><dd>x² − (${b.toLocaleString("es-PE")})x + ${c} = 0</dd></div>
+          <div><dt>Fórmula estándar</dt><dd>x = [b ± √(b² − 4c)] / 2</dd></div>
+        </dl>
+      `,
+      preguntas: [
+        {
+          id: "p2_1",
+          numero: "Pregunta 2.1 ",
+          titulo: "Valor asintótico de la raíz mayor x₁",
+          enunciado: `
+            <p>Para la ecuación <strong>x² − (${b.toLocaleString("es-PE")})x + ${c} = 0</strong>, analiza la raíz mayor dada por la fórmula general:
+            <strong>x₁ = [b + √(b² − 4c)] / 2</strong>.
+            Dado que <code>b² = ${(b ** 2).toExponential(0)}</code> es órdenes de magnitud superior a <code>4c = ${4 * c}</code>, la raíz cuadrada es indistinguible de <code>b</code>.
+            ¿A qué valor equivale aproximadamente la raíz mayor <strong>x₁</strong>?</p>
+          `,
+          unidad: "unidades",
+          esperado: x1_aprox,
+          decimales: 0,
+          tipo: "real",
+          metodoOpciones: [
+            {
+              id: "suma_directa",
+              nombre: "A) Suma estándar en la fórmula cuadrática: [b + √(b² − 4c)] / 2",
+              esOptimo: true,
+              analisis: "✅ <strong>¡Método numéricamente estable para x₁!</strong> Al sumar dos cantidades positivas de magnitudes similares (b + b), no existe resta destructiva ni cancelación. El resultado es totalmente confiable.",
+              recomendacion: "La fórmula estándar es perfectamente válida para la raíz del mismo signo que b."
+            },
+            {
+              id: "aproximacion",
+              nombre: "B) Aproximación asintótica de primer orden: x₁ ≈ b",
+              esOptimo: true,
+              analisis: "✅ <strong>¡Correcto analíticamente!</strong> Demuestra que el término dominante b absorbe el efecto de c en la raíz grande.",
+              recomendacion: "Permite simplificar cálculos analíticos sin pérdida perceptible de exactitud."
+            }
+          ],
+          pista: `Como b² − 4c ≈ b², la raíz cuadrada da prácticamente b. Entonces x₁ ≈ (b + b) / 2 = 2b / 2 = b. Sustituye el valor de b: ${b.toLocaleString("es-PE")}.`,
+          solucion: [
+            { txt: `1. Evaluamos el radicando con b = ${b.toLocaleString("es-PE")} y c = ${c}:` },
+            { tex: `b^2 - 4ac = (${texSci(b)})^2 - 4(1)(${c}) = ${texSci(b ** 2)} - ${4 * c} \\approx ${texSci(b ** 2)}` },
+            { txt: "2. Calculamos la raíz cuadrada y evaluamos la raíz positiva:" },
+            { tex: `\\sqrt{b^2 - 4ac} \\approx b = ${texSci(b)}` },
+            { tex: `x_1 = \\frac{b + \\sqrt{b^2 - 4ac}}{2} \\approx \\frac{${texSci(b)} + ${texSci(b)}}{2} = ${texSci(b)}` },
+            { txt: `Conclusión: La raíz mayor x₁ es numéricamente igual a ${b.toLocaleString("es-PE")}.` }
+          ]
+        },
+        {
+          id: "p2_2",
+          numero: "Pregunta 2.2",
+          titulo: "Raíz pequeña exacta mediante reformulación algebraica",
+          enunciado: `
+            <p>Para evitar que la raíz pequeña <code>x₂</code> se anule por cancelación catastrófica (<code>b − b = 0</code>),
+            la guía oficial establece usar el producto de raíces de Viète: <strong>x₁ · x₂ = c ⟹ x₂ = c / x₁</strong>,
+            o la forma racionalizada de Citardauq: <strong>x₂ = 2c / [b + √(b² − 4c)]</strong>.
+            Con <strong>b = ${b.toLocaleString("es-PE")}</strong> y <strong>c = ${c}</strong>, calcula el valor exacto de la raíz pequeña <strong>x₂</strong> (puedes usar notación científica como <code>1e-7</code> o decimal).</p>
+          `,
+          unidad: "unidades",
+          esperado: x2_exacto,
+          decimales: 10,
+          tipo: "real",
+          metodoOpciones: [
+            {
+              id: "cuadratica_clasica",
+              nombre: "A) Fórmula cuadrática tradicional: x₂ = [b − √(b² − 4c)] / 2",
+              esOptimo: false,
+              analisis: "❌ <strong>Fallo Crítico por Cancelación:</strong> Como √(b² − 4c) se evalúa como b dentro de la precisión finita, la resta hace b − b = 0, destruyendo completamente la raíz pequeña y devolviendo x₂ = 0.",
+              recomendacion: "El método más apropiado es la <strong>Reformulación Algebraica Racionalizada (B)</strong>, que convierte la resta destructiva en una suma en el denominador."
+            },
+            {
+              id: "reformulacion",
+              nombre: "B) Reformulación Racionalizada (Viète): x₂ = c / x₁ = 2c / [b + √(b² − 4c)]",
+              esOptimo: true,
+              analisis: "✅ <strong>¡Método recomendado por la guía docente!</strong> Al racionalizar el numerador multiplicando por el conjugado [b + √(b² − 4c)], la resta desaparece y el denominador suma dos números positivos, conservando todas las cifras significativas.",
+              recomendacion: "Es la técnica estándar enseñada en análisis numérico para resolver ecuaciones cuadráticas mal condicionadas."
+            }
+          ],
+          pista: `Aprovecha la propiedad de las raíces: x₁ · x₂ = c / a. Como a = 1 y x₁ ≈ b, se tiene directamente: x₂ = c / b. Divide c = ${c} entre b = ${b.toLocaleString("es-PE")}. Por ejemplo: ${c} / ${b.toLocaleString("es-PE")} = ${(c / b).toExponential(2)}.`,
+          solucion: [
+            { txt: "1. Mostramos la reformulación algebraica racionalizada (multiplicando por el conjugado):" },
+            { tex: `x_2 = \\frac{b - \\sqrt{b^2 - 4c}}{2} \\cdot \\frac{b + \\sqrt{b^2 - 4c}}{b + \\sqrt{b^2 - 4c}} = \\frac{b^2 - (b^2 - 4c)}{2(b + \\sqrt{b^2 - 4c})} = \\frac{2c}{b + \\sqrt{b^2 - 4c}}` },
+            { txt: "2. Como b + √(b² − 4c) ≈ 2b, la expresión equivale exactamente a la relación de Viète:" },
+            { tex: `x_2 = \\frac{2c}{2b} = \\frac{c}{b} = \\frac{${c}}{${texSci(b)}} = ${texSci(x2_exacto)}` },
+            { txt: `Resultado: La raíz pequeña es x₂ = ${x2_exacto.toExponential(4)}. Se conservan todas las cifras significativas sin cancelación.` }
+          ]
+        }
       ]
-    },
-    {
-      titulo: "Propagación al error de posición",
-      enunciado:
-        `<p>El sistema extrapola la posición del objetivo con ese reloj. Si el objetivo se mueve a ` +
-        `<strong>v = ${v} m/s</strong>, ¿qué error de posición produce la deriva del apartado anterior? Responde en metros.</p>`,
-      unidad: "m",
-      esperado: posicion,
-      decimales: 1,
-      tipo: "real",
-      pista: "El error de posición es la distancia que recorre el objetivo durante el tiempo que el reloj se atrasó: velocidad × deriva.",
-      solucion: [
-        { tex: `\\Delta x=v\\cdot D=${v}\\cdot ${deriva.toFixed(4)}=${posicion.toFixed(1)}\\ \\text{m}` },
-        { txt: "Un error de redondeo diminuto por ciclo se convierte en un error físico apreciable porque se acumula millones de veces y se multiplica por una velocidad alta." }
-      ]
-    },
-    {
-      titulo: "Dimensionamiento del registro",
-      enunciado:
-        `<p>Para <strong>garantizar</strong> una deriva menor que <strong>${tolMs} ms</strong> tras ${horas} h, ` +
-        `¿cuántos bits fraccionarios <em>k</em> mínimos necesita el registro? Usa la cota de peor caso del truncamiento, ` +
-        `<em>e</em> &lt; 2<sup>−k</sup>, que vale para cualquier Δt.</p>`,
-      unidad: "bits",
-      esperado: kMin,
-      decimales: 0,
-      tipo: "entero",
-      pista:
-        `Exige N·2<sup>−k</sup> &lt; τ y despeja k con logaritmo en base 2. Como la desigualdad es estricta, ` +
-        `k debe ser el menor entero mayor que log<sub>2</sub>(N/τ).`,
-      solucion: [
-        { txt: "Con truncamiento el error por ciclo es menor que un paso completo, así que la deriva máxima garantizada es N·2<sup>−k</sup>." },
-        { tex: `N\\cdot 2^{-k}<\\tau\\;\\Rightarrow\\;k>\\log_2\\frac{N}{\\tau}=\\log_2\\frac{${texInt(ticks)}}{${tau}}=${Math.log2(ticks / tau).toFixed(2)}` },
-        { tex: `k_{\\min}=${kMin}\\ \\text{bits}` },
-        { txt: "Para Δt = 0.1 s el error real puede ser menor que la cota, pero la cota es la que asegura el requisito sin depender del valor concreto de Δt." }
-      ]
-    },
-    {
-      titulo: "El mismo reloj en float32",
-      enunciado:
-        `<p>Un equipo alternativo acumula <em>t</em> ← <em>t</em> + Δt en <strong>float32</strong>, con Δt = 0.1 s y sin reiniciarse. ` +
-        `Llega un momento en que <em>t</em> + Δt = <em>t</em> y el reloj se congela. ¿Qué lectura marca el reloj en ese instante? Responde en días.</p>`,
-      unidad: "días",
-      esperado: dias,
-      decimales: 2,
-      tipo: "real",
-      pista:
-        `En float32, ulp(t) = 2<sup>e−23</sup> cuando 2<sup>e</sup> ≤ t &lt; 2<sup>e+1</sup>. El reloj se congela cuando Δt es ` +
-        `menor que la mitad del ulp. Busca el menor exponente e que lo cumple y pásalo a días (86 400 s).`,
-      solucion: [
-        { tex: `\\mathrm{ulp}(t)=2^{e-23}\\quad\\text{y se congela si}\\quad \\Delta t<\\tfrac12\\mathrm{ulp}(t)=2^{e-24}` },
-        { tex: `2^{e}>\\Delta t\\cdot 2^{24}=0.1\\cdot 2^{24}=1677721.6\\;\\Rightarrow\\;e\\ge ${eCongela}` },
-        { tex: `t^{*}=2^{${eCongela}}\\ \\text{s}=${texInt(tCongela)}\\ \\text{s}=${dias.toFixed(2)}\\ \\text{días}` }
-      ],
-      simulable: true
     }
   ];
 
-  partes.forEach(parte => {
-    parte.estado = "bloqueada";
-    parte.intentos = 0;
-    parte.entrada = "";
-    parte.feedback = null;
-    parte.pistaVisible = false;
-    parte.simulacion = null;
-  });
-
-  partes[0].estado = "activa";
-
-  return { p, partes };
-}
-
-function iniciarEjercicio() {
-  caso = crearCaso();
-
-  renderEscenario();
-
-  const lista = $("partesEjercicio");
-  lista.innerHTML = "";
-
-  caso.partes.forEach((_, i) => {
-    const li = document.createElement("li");
-    li.id = "paso-" + i;
-    lista.appendChild(li);
-    renderParte(i);
-  });
-
-  $("resumenEjercicio").hidden = true;
-  renderProgreso();
-}
-
-function renderEscenario() {
-  const { k, horas, v, tolMs } = caso.p;
-
-  $("escenarioEjercicio").innerHTML = `
-    <h3>Deriva del reloj de un controlador digital</h3>
-    <p>
-      Un controlador de seguimiento mide el tiempo contando ciclos de Δt = 0.1 s (10 Hz). Para ahorrar hardware,
-      Δt se guarda en un registro de punto fijo con <strong>k bits fraccionarios</strong> y se obtiene por
-      <strong>truncamiento</strong>: los bits sobrantes se descartan. En cada ciclo el contador suma el valor almacenado.
-      El equipo trabaja sin reiniciarse y sigue un objetivo en movimiento.
-    </p>
-    <dl class="givens">
-      <div><dt>Periodo de ciclo</dt><dd>Δt = 0.1 s</dd></div>
-      <div><dt>Bits fraccionarios</dt><dd>k = ${k}</dd></div>
-      <div><dt>Operación continua</dt><dd>T = ${horas} h</dd></div>
-      <div><dt>Velocidad del objetivo</dt><dd>v = ${v} m/s</dd></div>
-      <div><dt>Deriva admisible</dt><dd>${tolMs} ms</dd></div>
-    </dl>`;
-}
-
-function renderProgreso() {
-  const resueltas = caso.partes.filter(p => p.estado === "correcta" || p.estado === "fallida").length;
-  const total = caso.partes.length;
-
-  $("barraProgresoRelleno").style.width = (resueltas / total) * 100 + "%";
-  $("barraProgreso").setAttribute("aria-valuenow", resueltas);
-  $("progresoTexto").textContent = `${resueltas} de ${total} apartados`;
-
-  if (resueltas === total) renderResumen();
-}
-
-function renderResumen() {
-  const correctas = caso.partes.filter(p => p.estado === "correcta").length;
-  const primera = caso.partes.filter(p => p.estado === "correcta" && p.intentos === 1).length;
-  const total = caso.partes.length;
-
-  let comentario;
-
-  if (correctas === total) {
-    comentario = "Dominas el hilo completo: representación, acumulación, propagación y dimensionamiento.";
-  } else if (correctas >= 3) {
-    comentario = "Buen resultado. Repasa los apartados marcados en rojo y pulsa «Nuevo caso» para practicar con otros datos.";
-  } else {
-    comentario = "Revisa el desarrollo de cada apartado y la teoría sobre error absoluto y coma flotante; después prueba con un caso nuevo.";
-  }
-
-  const caja = $("resumenEjercicio");
-
-  caja.innerHTML = `
-    <h3>Resultado</h3>
-    <p>Resolviste <strong>${correctas} de ${total}</strong> apartados, ${primera} de ellos al primer intento.</p>
-    <p>${comentario}</p>`;
-
-  caja.hidden = false;
-}
-
-function marcadorParte(parte, i) {
-  if (parte.estado === "bloqueada") return '<i class="bi bi-lock-fill"></i>';
-  if (parte.estado === "correcta") return '<i class="bi bi-check-lg"></i>';
-  if (parte.estado === "fallida") return '<i class="bi bi-x-lg"></i>';
-
-  return String(i + 1);
-}
-
-function renderParte(i) {
-  const parte = caso.partes[i];
-  const li = $("paso-" + i);
-
-  const claseEstado = {
-    bloqueada: "is-locked",
-    activa: "is-active",
-    correcta: "is-correct",
-    fallida: "is-failed"
-  }[parte.estado];
-
-  li.className = "step " + claseEstado;
-
-  let html = `<div class="step-marker" aria-hidden="true">${marcadorParte(parte, i)}</div><div class="step-body">`;
-
-  html += `<h3 class="step-title">${parte.titulo}</h3>`;
-
-  if (parte.estado === "bloqueada") {
-    html += `<p class="step-text mb-0">Se desbloquea al terminar el apartado anterior.</p></div>`;
-    li.innerHTML = html;
-    return;
-  }
-
-  html += `<div class="step-text">${parte.enunciado}</div>`;
-
-  if (parte.estado === "activa") {
-    html += `
-      <div class="step-form">
-        <label class="visually-hidden" for="resp-${i}">Respuesta del apartado ${i + 1}</label>
-        <div class="input-group">
-          <input id="resp-${i}" data-i="${i}" type="text" inputmode="decimal" autocomplete="off"
-                 class="form-control" placeholder="Tu respuesta" value="${parte.entrada.replace(/"/g, "&quot;")}">
-          <span class="input-group-text">${parte.unidad}</span>
-          <button type="button" class="btn btn-primary" data-action="comprobar" data-i="${i}">Comprobar</button>
-        </div>
-        <div class="step-meta">
-          <span>Intentos restantes: ${MAX_INTENTOS - parte.intentos} de ${MAX_INTENTOS}</span>
-          <button type="button" class="link-button" data-action="pista" data-i="${i}">
-            ${parte.pistaVisible ? "Ocultar pista" : "Ver pista"}
-          </button>
-        </div>
-      </div>`;
-  }
-
-  if (parte.feedback) {
-    html += `<div class="step-feedback ${parte.feedback.clase}" role="status">${parte.feedback.texto}</div>`;
-  }
-
-  if (parte.pistaVisible && parte.estado === "activa") {
-    html += `<div class="step-hint"><strong>Pista:</strong> ${parte.pista}</div>`;
-  }
-
-  if (parte.estado === "correcta" || parte.estado === "fallida") {
-    html += `<div class="step-solution math-box"><h4>Desarrollo</h4>`;
-
-    parte.solucion.forEach((linea, j) => {
-      if (linea.tex) html += `<div class="sol-tex" data-i="${i}" data-j="${j}"></div>`;
-      else html += `<p class="sol-text">${linea.txt}</p>`;
+  lista.forEach(ej => {
+    ej.preguntas.forEach(p => {
+      p.estado = "pendiente";
+      p.intentos = 0;
+      p.entrada = "";
+      p.feedback = null;
+      p.pistaVisible = false;
+      p.metodoSeleccionado = null;
+      p.solucionVisible = false;
     });
+  });
+
+  return lista;
+}
+
+function renderizarEjercicioActual() {
+  const ej = ejercicios[ejercicioActivo];
+  const escenario = $("escenarioEjercicio");
+  const contenedor = $("preguntasContainer");
+
+  if (!ej || !escenario || !contenedor) return;
+
+  // 1. Renderizar escenario del ejercicio
+  escenario.innerHTML = ej.contexto;
+
+  // 2. Renderizar las preguntas independientes
+  contenedor.innerHTML = "";
+
+  ej.preguntas.forEach((pregunta, pIdx) => {
+    const card = document.createElement("div");
+    card.id = `pregunta-card-${pIdx}`;
+    card.className = "panel" + (pregunta.estado === "correcta" ? " border-success bg-white" : " bg-white");
+
+    let markerClass = pregunta.estado === "correcta" ? "badge bg-success" : "badge bg-primary";
+    let statusText = pregunta.estado === "correcta" ? "Resuelto con éxito ✓":"";
+
+    let html = `
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
+        <div>
+          <span class="${markerClass} me-2">${pregunta.numero}</span>
+          <h4 class="d-inline h5 fw-bold text-dark mb-0">${pregunta.titulo}</h4>
+        </div>
+        <span class="badge bg-light text-secondary border">${statusText}</span>
+      </div>
+
+      <div class="mb-3">${pregunta.enunciado}</div>
+
+      <!-- 1. ASESOR DE MÉTODOS -->
+      <div class="method-consultation-box mb-3">
+        <div class="method-header">
+          <span class="fw-bold text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-compass text-primary"></i> ¿Qué método o enfoque piensas emplear?
+          </span>
+        </div>
+        <p class="small text-muted mb-2">
+          Selecciona una alternativa. La plataforma evaluará si el método es propenso a error numérico o te justificará cuál es la mejor opción.
+        </p>
+        <select class="form-select form-select-sm" data-action="seleccionar-metodo" data-p="${pIdx}">
+          <option value="">-- Elige un método para esta pregunta --</option>`;
+
+    pregunta.metodoOpciones.forEach(m => {
+      const selected = pregunta.metodoSeleccionado === m.id ? " selected" : "";
+      html += `<option value="${m.id}"${selected}>${m.nombre}</option>`;
+    });
+
+    html += `</select>`;
+
+    // Feedback del método seleccionado
+    if (pregunta.metodoSeleccionado) {
+      const opt = pregunta.metodoOpciones.find(m => m.id === pregunta.metodoSeleccionado);
+      if (opt) {
+        const claseCard = opt.esOptimo ? "is-optimal" : "is-warning";
+        html += `
+          <div class="method-feedback-card ${claseCard}">
+            <p class="mb-1">${opt.analisis}</p>
+            <p class="mb-0 small"><strong>Conclusión técnica:</strong> ${opt.recomendacion}</p>
+          </div>`;
+      }
+    }
 
     html += `</div>`;
 
-    if (parte.simulable) {
-      html += `
-        <div class="sim-box">
-          <button type="button" class="btn btn-outline-primary btn-sm" data-action="simular" data-i="${i}">
-            <i class="bi bi-play-fill me-1" aria-hidden="true"></i>Verificar con simulación
+    // 2. PISTA PREVIA PLEGABLE
+    html += `
+      <div class="mb-3">
+        <button type="button" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1" data-action="pista" data-p="${pIdx}">
+          <i class="bi bi-lightbulb"></i>
+          <span>${pregunta.pistaVisible ? "Ocultar pista" : "💡 ¿Necesitas una pista?"}</span>
+        </button>
+        ${pregunta.pistaVisible ? `<div class="step-hint-box mt-2"><i class="bi bi-info-circle-fill me-1"></i><strong>Pista orientativa:</strong> ${pregunta.pista}</div>` : ""}
+      </div>`;
+
+    // 3. FORMULARIO DE RESPUESTA
+    html += `
+      <div class="step-form">
+        <label class="form-label small fw-semibold text-secondary mb-1" for="resp-${pIdx}">Tu respuesta numérica:</label>
+        <div class="input-group">
+          <input id="resp-${pIdx}" data-p="${pIdx}" type="text" inputmode="decimal" autocomplete="off"
+                 class="form-control" placeholder="Escribe tu resultado numérico" value="${pregunta.entrada.replace(/"/g, "&quot;")}">
+          <span class="input-group-text">${pregunta.unidad}</span>
+          <button type="button" class="btn btn-primary" data-action="comprobar" data-p="${pIdx}">
+            <i class="bi bi-check2 me-1"></i>Comprobar
           </button>
-          <p class="sim-output" id="sim-${i}" aria-live="polite">${parte.simulacion || ""}</p>
+        </div>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
+          <span class="small text-muted">
+            <i class="bi bi-arrow-repeat me-1"></i>Intentos realizados: <strong>${pregunta.intentos}</strong> (Intentos ilimitados)
+          </span>
+          <button type="button" class="btn btn-link btn-sm text-decoration-none p-0" data-action="toggle-solucion" data-p="${pIdx}">
+            <i class="bi bi-journal-text me-1"></i>${pregunta.solucionVisible ? "Ocultar solución paso a paso" : "Ver solución paso a paso"}
+          </button>
+        </div>
+      </div>`;
+
+    // 4. FEEDBACK DE FELICITACIÓN O ÁNIMO
+    if (pregunta.feedback) {
+      const esExito = pregunta.feedback.tipo === "exito";
+      html += `
+        <div class="feedback-cheer ${esExito ? 'is-success' : 'is-encouraging'}" role="status">
+          <i class="bi ${esExito ? 'bi-check-circle-fill fs-5 text-success' : 'bi-emoji-smile fs-5 text-warning'}"></i>
+          <div>
+            <strong>${esExito ? '¡Excelente trabajo! 🎉' : '¡Ánimo, no te rindas! 💪'}</strong>
+            <p class="mb-0 mt-1 small">${pregunta.feedback.texto}</p>
+          </div>
         </div>`;
     }
-  }
 
-  html += `</div>`;
+    // 5. SOLUCIÓN PASO A PASO DESPLEGABLE
+    if (pregunta.solucionVisible) {
+      html += `
+        <div class="step-solution-box">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+            <h5 class="h6 mb-0 text-dark fw-bold">
+              <i class="bi bi-calculator text-primary me-2"></i>Desarrollo paso a paso:
+            </h5>
+            <span class="badge bg-light text-secondary border">Resolución</span>
+          </div>`;
 
-  li.innerHTML = html;
+      pregunta.solucion.forEach((linea, j) => {
+        if (linea.tex) {
+          html += `<div class="sol-step-item"><div class="sol-tex" data-p="${pIdx}" data-j="${j}"></div></div>`;
+        } else {
+          html += `<div class="sol-step-item"><p class="sol-text small text-secondary mb-0">${linea.txt}</p></div>`;
+        }
+      });
 
-  // Fórmulas de la solución
-  li.querySelectorAll(".sol-tex").forEach(elemento => {
-    const linea = caso.partes[Number(elemento.dataset.i)].solucion[Number(elemento.dataset.j)];
-
-    if (typeof katex !== "undefined") {
-      katex.render(linea.tex, elemento, { throwOnError: false, displayMode: true });
-    } else {
-      elemento.textContent = linea.tex;
+      html += `</div>`;
     }
+
+    card.innerHTML = html;
+    contenedor.appendChild(card);
+
+    // Renderizar KaTeX
+    card.querySelectorAll(".sol-tex").forEach(elem => {
+      const pIdxElem = Number(elem.dataset.p);
+      const jElem = Number(elem.dataset.j);
+      const linea = ej.preguntas[pIdxElem].solucion[jElem];
+
+      if (typeof katex !== "undefined") {
+        katex.render(linea.tex, elem, { throwOnError: false, displayMode: true });
+      } else {
+        elem.textContent = linea.tex;
+      }
+    });
   });
+
+  // Verificar si ambas preguntas de este ejercicio están resueltas
+  const resueltas = ej.preguntas.filter(p => p.estado === "correcta").length;
+  const resumen = $("resumenEjercicio");
+  if (resueltas === ej.preguntas.length) {
+    resumen.innerHTML = `
+      <h3>¡Felicitaciones! Has completado el ${ej.titulo}</h3>
+      <p>Has resuelto las 2 preguntas de forma autónoma con total precisión. Puedes cambiar de ejercicio arriba o pulsar <strong>«Generar nuevos valores aleatorios»</strong> para seguir practicando.</p>
+    `;
+    resumen.hidden = false;
+  } else {
+    resumen.hidden = true;
+  }
 }
 
-function alternarPista(i) {
-  caso.partes[i].pistaVisible = !caso.partes[i].pistaVisible;
-  renderParte(i);
-
-  const campo = $("resp-" + i);
-  if (campo) campo.focus();
+function seleccionarMetodo(pIdx, metodoId) {
+  ejercicios[ejercicioActivo].preguntas[pIdx].metodoSeleccionado = metodoId;
+  renderizarEjercicioActual();
 }
 
-// Detecta si el valor del estudiante coincide con el correcto en otra unidad
-function detectarOtraUnidad(valor, esperado) {
-  const factores = [1e3, 1e-3, 1e6, 1e-6, 1e9, 1e-9, 24, 1 / 24, 3600, 1 / 3600, 86400, 1 / 86400];
-
-  return factores.some(f => Math.abs(valor * f - esperado) / Math.abs(esperado) < 0.01);
+function alternarPista(pIdx) {
+  const p = ejercicios[ejercicioActivo].preguntas[pIdx];
+  p.pistaVisible = !p.pistaVisible;
+  renderizarEjercicioActual();
+  const input = $("resp-" + pIdx);
+  if (input) input.focus();
 }
 
-function comprobar(i) {
-  const parte = caso.partes[i];
+function alternarSolucion(pIdx) {
+  const p = ejercicios[ejercicioActivo].preguntas[pIdx];
+  p.solucionVisible = !p.solucionVisible;
+  renderizarEjercicioActual();
+}
 
-  if (parte.estado !== "activa") return;
-
-  const texto = parte.entrada.trim().replace(/\s/g, "").replace(",", ".");
+function comprobarRespuesta(pIdx) {
+  const pregunta = ejercicios[ejercicioActivo].preguntas[pIdx];
+  const texto = pregunta.entrada.trim().replace(/\s/g, "").replace(",", ".");
 
   if (texto === "") {
-    parte.feedback = { clase: "fb-warn", texto: "Escribe tu respuesta numérica antes de comprobar." };
-    renderParte(i);
-    $("resp-" + i).focus();
+    pregunta.feedback = {
+      tipo: "animo",
+      texto: "Por favor, ingresa tu respuesta numérica antes de comprobar."
+    };
+    renderizarEjercicioActual();
+    const input = $("resp-" + pIdx);
+    if (input) input.focus();
     return;
   }
 
   const valor = Number(texto);
 
   if (!Number.isFinite(valor)) {
-    parte.feedback = { clase: "fb-warn", texto: "Escribe un número válido, por ejemplo 12.5 o 1.2e-6." };
-    renderParte(i);
-    $("resp-" + i).focus();
+    pregunta.feedback = {
+      tipo: "animo",
+      texto: "Ingresa un número válido (por ejemplo: 25.0 o 1e-7)."
+    };
+    renderizarEjercicioActual();
+    const input = $("resp-" + pIdx);
+    if (input) input.focus();
     return;
   }
 
-  parte.intentos++;
+  pregunta.intentos++;
 
-  const acierto = parte.tipo === "entero"
-    ? valor === parte.esperado
-    : Math.abs(valor - parte.esperado) / Math.abs(parte.esperado) <= TOLERANCIA_RELATIVA;
+  const acierto = pregunta.tipo === "entero"
+    ? valor === pregunta.esperado
+    : Math.abs(valor - pregunta.esperado) / Math.abs(pregunta.esperado) <= TOLERANCIA_RELATIVA;
 
   const respuestaTexto =
-    parte.esperado.toLocaleString("es-PE", { minimumFractionDigits: parte.decimales, maximumFractionDigits: parte.decimales }) +
-    " " + parte.unidad;
+    pregunta.esperado.toLocaleString("es-PE", { minimumFractionDigits: pregunta.decimales, maximumFractionDigits: pregunta.decimales }) +
+    " " + pregunta.unidad;
 
   if (acierto) {
-    parte.estado = "correcta";
-    parte.feedback = {
-      clase: "fb-ok",
-      texto: parte.intentos === 1
-        ? "Correcto, a la primera."
-        : `Correcto, en ${parte.intentos} intentos.`
+    pregunta.estado = "correcta";
+    pregunta.feedback = {
+      tipo: "exito",
+      texto: pregunta.intentos === 1
+        ? `Has obtenido la respuesta exacta (<strong>${respuestaTexto}</strong>) al primer intento. ¡Excelente criterio numérico!`
+        : `¡Correcto! La respuesta exacta es <strong>${respuestaTexto}</strong> (alcanzada tras ${pregunta.intentos} intentos). ¡Gran perseverancia!`
     };
 
-    desbloquearSiguiente(i);
-    renderParte(i);
-    renderProgreso();
+    renderizarEjercicioActual();
     return;
   }
 
-  if (parte.intentos >= MAX_INTENTOS) {
-    parte.estado = "fallida";
-    parte.feedback = {
-      clase: "fb-bad",
-      texto: `Agotaste los intentos. La respuesta era <strong>${respuestaTexto}</strong>; revisa el desarrollo.`
-    };
+  // Intento no coincidente (sin bloqueos ni penalización)
+  let ayuda = "El resultado no coincide todavía.";
 
-    desbloquearSiguiente(i);
-    renderParte(i);
-    renderProgreso();
-    return;
+  if (Math.abs(valor - pregunta.esperado) / Math.abs(pregunta.esperado) < 0.1) {
+    ayuda = "¡Estás muy cerca! Revisa los decimales o el redondeo del cálculo.";
   }
 
-  // Intento fallido con orientación según el tipo de error
-  let ayuda = "No coincide.";
+  pregunta.feedback = {
+    tipo: "animo",
+    texto: `${ayuda} Consulta la pista orientativa arriba o revisa las fórmulas e inténtalo de nuevo.`
+  };
 
-  if (parte.tipo === "entero" && !Number.isInteger(valor)) {
-    ayuda = "No coincide: el número de bits debe ser entero.";
-  } else if (parte.tipo === "entero" && Math.abs(valor - parte.esperado) === 1) {
-    ayuda = "Casi. Revisa si la desigualdad es estricta y si debes redondear hacia arriba.";
-  } else if (detectarOtraUnidad(valor, parte.esperado)) {
-    ayuda = `Tu cifra parece correcta pero en otra unidad. Responde en ${parte.unidad}.`;
-  } else if (parte.tipo === "real" && Math.abs(valor - parte.esperado) / Math.abs(parte.esperado) < 0.05) {
-    ayuda = "Estás cerca. Revisa el redondeo de los pasos intermedios; conviene arrastrar más cifras.";
-  }
-
-  parte.feedback = { clase: "fb-bad", texto: ayuda };
-
-  renderParte(i);
-  $("resp-" + i).focus();
+  renderizarEjercicioActual();
+  const input = $("resp-" + pIdx);
+  if (input) input.focus();
 }
 
-function desbloquearSiguiente(i) {
-  const siguiente = caso.partes[i + 1];
-
-  if (siguiente && siguiente.estado === "bloqueada") {
-    siguiente.estado = "activa";
-    renderParte(i + 1);
-  }
-}
-
-// Simula el reloj float32 con Δt = 0.1 s hasta que se congela
-function simularRelojFloat32(i) {
-  const dt = Math.fround(0.1);
-  const limite = 200000000;
-
-  let t = 0;
-  let pasos = 0;
-
-  while (pasos < limite) {
-    const siguiente = Math.fround(t + dt);
-
-    if (siguiente === t) break;
-
-    t = siguiente;
-    pasos++;
-  }
-
-  const diasReloj = t / 86400;
-  const diasReales = (pasos * 0.1) / 86400;
-  const adelanto = diasReloj - diasReales;
-
-  const parte = caso.partes[i];
-
-  parte.simulacion =
-    `El reloj se congeló en <strong>t = ${t.toLocaleString("es-PE")} s</strong> (${diasReloj.toFixed(2)} días) ` +
-    `tras ${pasos.toLocaleString("es-PE")} ciclos. En tiempo real esos ciclos duran ${diasReales.toFixed(2)} días, ` +
-    `así que antes de congelarse el reloj ya iba <strong>${adelanto.toFixed(2)} días adelantado</strong>. ` +
-    `El motivo es el redondeo de cada suma: entre 2<sup>19</sup> s y 2<sup>21</sup> s el reloj avanza 0.125 s por ciclo en lugar de 0.1 s.`;
-
-  const salida = $("sim-" + i);
-  if (salida) salida.innerHTML = parte.simulacion;
-}
 
 // ========================================
 // 11. FORMULARIO DE CONTACTO
