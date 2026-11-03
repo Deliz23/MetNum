@@ -1,6 +1,159 @@
-/* ===================================================
-   LAB01 - TEORÍA DE ERRORES Y ESTABILIDAD NUMÉRICA
-   Importa la hoja de estilos compartida del proyecto MetNum
-=================================================== */
 
 @import "../shared/base.css";
+
+/* ===================================================
+   MEJORAS PEDAGÓGICAS PARA LA SECCIÓN DE EJERCICIOS
+   - Navegación libre por pestañas (Opción B)
+   - Asesor interactivo de selección de métodos
+   - Pistas desplegables antes de responder
+   - Solución paso a paso y mensajes de aliento
+=================================================== */
+
+/* Navegación por pestañas de apartados */
+.exercise-nav-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.exercise-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.exercise-tab-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  transform: translateY(-1px);
+}
+
+.exercise-tab-btn.is-active {
+  border-color: var(--brand-wine);
+  background: var(--brand-wine-soft);
+  color: var(--brand-wine);
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(114, 47, 55, 0.12);
+}
+
+.exercise-tab-btn.is-solved {
+  border-color: #10b981;
+}
+
+.exercise-tab-btn .tab-badge-ok {
+  color: #10b981;
+}
+
+/* Caja del Asesor de Métodos */
+.method-consultation-box {
+  background: var(--canvas);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 1.1rem;
+  margin-bottom: 1.25rem;
+}
+
+.method-consultation-box .method-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.method-feedback-card {
+  padding: 0.9rem 1.1rem;
+  border-radius: 8px;
+  margin-top: 0.9rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+.method-feedback-card.is-optimal {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  color: #166534;
+}
+
+.method-feedback-card.is-warning {
+  background: #fffbeb;
+  border: 1.5px solid #fde68a;
+  color: #92400e;
+}
+
+/* Caja de Pista previa */
+.step-hint-box {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  padding: 0.85rem 1.1rem;
+  font-size: 0.9rem;
+  color: #78350f;
+  margin-bottom: 1.1rem;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+/* Despliegue de Solución Paso a Paso */
+.step-solution-box {
+  background: #f8fafc;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+.step-solution-box .sol-step-item {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px dashed var(--line);
+}
+
+.step-solution-box .sol-step-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/* Alertas de felicitación y ánimo */
+.feedback-cheer {
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+  margin-top: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+.feedback-cheer.is-success {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  color: #14532d;
+}
+
+.feedback-cheer.is-encouraging {
+  background: #fff7ed;
+  border: 1.5px solid #fed7aa;
+  color: #9a3412;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
