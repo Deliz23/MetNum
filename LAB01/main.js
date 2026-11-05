@@ -846,6 +846,7 @@ const TOLERANCIA_RELATIVA = 0.01;
 
 let ejercicios = [];
 let ejercicioActivo = 0; // 0: Cancelación en Latencias, 1: Raíz Cuadrática
+let guiaActiva = null;
 
 function elegir(lista) {
   return lista[Math.floor(Math.random() * lista.length)];
@@ -857,7 +858,33 @@ function configurarEjercicio() {
 
   if (!contenedor) return;
 
+  contenedor.addEventListener("click", evento => {
+    if (evento.target.closest("[data-guide-action='close']")) cerrarGuiaInteractiva();
+    if (evento.target.closest("[data-guide-action='check']")) comprobarPasoGuia();
+    if (evento.target.closest("[data-guide-action='next']")) avanzarPasoGuia();
+    if (evento.target.closest("[data-guide-action='reveal']")) revelarPasoGuia();
+    const opcion = evento.target.closest("[data-guide-option]");
+    if (opcion && guiaActiva) {
+      guiaActiva.valor = opcion.dataset.guideOption;
+      guiaActiva.feedback = null;
+      renderizarPanelGuia();
+    }
+  });
+  contenedor.addEventListener("input", evento => {
+    if (evento.target.matches("[data-guide-answer]") && guiaActiva) {
+      guiaActiva.valor = evento.target.value;
+      guiaActiva.feedback = null;
+    }
+  });
+  contenedor.addEventListener("keydown", evento => {
+    if (evento.key === "Enter" && evento.target.matches("[data-guide-answer]")) {
+      evento.preventDefault();
+      comprobarPasoGuia();
+    }
+  });
+
   $("btnNuevoCaso").addEventListener("click", () => {
+    cerrarGuiaInteractiva();
     inicializarEjercicios();
     renderizarEjercicioActual();
   });
@@ -881,6 +908,7 @@ function configurarEjercicio() {
     if (accion === "comprobar") comprobarRespuesta(pIdx);
     if (accion === "pista") alternarPista(pIdx);
     if (accion === "toggle-solucion") alternarSolucion(pIdx);
+    if (accion === "guia-interactiva") abrirGuiaInteractiva(pIdx);
   });
 
   contenedor.addEventListener("change", evento => {
@@ -916,6 +944,7 @@ function inicializarEjercicios() {
 }
 
 function cambiarEjercicio(idx) {
+  cerrarGuiaInteractiva();
   ejercicioActivo = idx;
   const botones = document.querySelectorAll("#selectorEjercicios button");
   botones.forEach((btn, i) => {
@@ -1000,6 +1029,14 @@ function generarDatosEjercicios() {
             }
           ],
           pista: `Aplica la fórmula clásica de error relativo: Er = |Valor Real − Valor Calculado| / |Valor Real|. Para expresarlo en porcentaje (εt), multiplica el resultado por 100: |${delta} − ${diff_32.toFixed(3)}| / ${delta} × 100.`,
+          guiaInteractiva: {
+            final: `El error relativo porcentual de esta resta directa es ${errRelPct.toFixed(2)}%. Para futuras mediciones, el método apropiado es centrar las marcas de tiempo (restarlas de una base común antes de convertirlas a float32) o almacenar ticks enteros; así se evita restar números absolutos casi iguales.`,
+            pasos: [
+              { tipo: "seleccion", enunciado: "Antes del porcentaje, ¿qué magnitud calculamos primero?", opciones: [{ valor: "abs", texto: "Error absoluto entre la latencia real y la calculada" }, { valor: "ulp", texto: "El ulp de la latencia" }, { valor: "base", texto: "El valor de la marca de tiempo inicial" }], correcto: ["abs"], pista: "Compara primero Δt exacta con fl(Δt); el porcentaje se calcula después.", explicacion: `Eₐ = |${delta} − ${diff_32.toFixed(3)}| = ${errAbs.toFixed(4)} s. Esta diferencia conserva unidades de segundos.` },
+              { tipo: "numero", etiqueta: "Error relativo porcentual", unidad: "%", enunciado: "Divide el error absoluto entre la latencia exacta y multiplica por 100.", correcto: errRelPct, pista: `Usa Eₐ / |Δt| × 100, con Eₐ = ${errAbs.toFixed(4)} s y Δt = ${delta} s.`, explicacion: `εₜ = (${errAbs.toFixed(4)} / ${delta}) × 100% = ${errRelPct.toFixed(2)}%.` },
+              { tipo: "seleccion", enunciado: "¿Qué estrategia evita mejor la cancelación al calcular latencias pequeñas?", opciones: [{ valor: "directa", texto: "Seguir restando las marcas absolutas directamente en float32" }, { valor: "centrado", texto: "Centrar las marcas con una base común o guardar ticks enteros" }], correcto: ["centrado"], pista: "Busca que la resta ocurra cerca de cero o representa el tiempo como un contador exacto.", explicacion: "Al centrar primero, los datos operan en una escala pequeña y se conservan más bits útiles. Para este problema, centrar las marcas o usar enteros de tiempo es más apropiado que la resta directa." }
+            ]
+          },
           solucion: [
             { txt: "1. Calculamos el error absoluto cometido por la resta directa en float32:" },
             { tex: `E_a = |\\Delta t - \\text{fl}(\\Delta t)| = |${delta} - ${diff_32.toFixed(3)}| = ${errAbs.toFixed(4)}\\ \\text{s}` },
@@ -1038,6 +1075,14 @@ function generarDatosEjercicios() {
             }
           ],
           pista: `En float32 (23 bits fraccionarios + 1 bit implícito = 24 bits), ulp = 2^(e−23). Para e = ${exp_t1}, calcula 2^(${exp_t1} − 23) = 2^(${exp_t1 - 23}). Por ejemplo, 2^(−4) = 0.0625 s.`,
+          guiaInteractiva: {
+            final: `Alrededor de t₁ = ${t1.toLocaleString("es-PE")} s, el espaciado float32 es ulp = ${ulp_t1} s. Un incremento menor que la mitad de este valor puede desaparecer al sumarse.`,
+            pasos: [
+              { tipo: "seleccion", enunciado: "¿En qué intervalo de potencias de 2 cae t₁?", opciones: [{ valor: String(exp_t1 - 1), texto: `[2^${exp_t1 - 1}, 2^${exp_t1})` }, { valor: String(exp_t1), texto: `[2^${exp_t1}, 2^${exp_t1 + 1})` }, { valor: String(exp_t1 + 1), texto: `[2^${exp_t1 + 1}, 2^${exp_t1 + 2})` }], correcto: [String(exp_t1)], pista: `Busca el e que cumple 2^e ≤ ${t1} < 2^(e+1).`, explicacion: `Como 2^${exp_t1} ≤ ${t1.toLocaleString("es-PE")} < 2^${exp_t1 + 1}, el exponente es e = ${exp_t1}.` },
+              { tipo: "numero", etiqueta: "Exponente de ulp", unidad: "exponente", enunciado: "En float32, ulp(x) = 2^(e−23). ¿Qué exponente queda al sustituir e?", correcto: exp_t1 - 23, pista: `Sustituye e = ${exp_t1} en e − 23 y conserva el signo.`, explicacion: `e − 23 = ${exp_t1} − 23 = ${exp_t1 - 23}. Por tanto, ulp(t₁) = 2^${exp_t1 - 23}.` },
+              { tipo: "numero", etiqueta: "Espaciado ulp", unidad: "s", enunciado: `Calcula 2^${exp_t1 - 23} en segundos.`, correcto: ulp_t1, pista: "Evalúa la potencia de dos del paso anterior. Si el exponente es negativo, el resultado es menor que 1.", explicacion: `ulp(t₁) = 2^(${exp_t1}−23) = 2^${exp_t1 - 23} = ${ulp_t1} s. El umbral de absorción para redondeo al más cercano es aproximadamente ½·ulp = ${(ulp_t1 / 2).toPrecision(4)} s.` }
+            ]
+          },
           solucion: [
             { txt: `1. Identificamos el intervalo de potencias de 2 en el que se ubica t₁ = ${t1.toLocaleString("es-PE")}:` },
             { tex: `2^{${exp_t1}} = ${texInt(2 ** exp_t1)} \\le ${texInt(t1)} < 2^{${exp_t1 + 1}} = ${texInt(2 ** (exp_t1 + 1))} \\implies e = ${exp_t1}` },
@@ -1098,6 +1143,14 @@ function generarDatosEjercicios() {
             }
           ],
           pista: `Como b² − 4c ≈ b², la raíz cuadrada da prácticamente b. Entonces x₁ ≈ (b + b) / 2 = 2b / 2 = b. Sustituye el valor de b: ${b.toLocaleString("es-PE")}.`,
+          guiaInteractiva: {
+            final: `La raíz grande es aproximadamente x₁ ≈ ${b.toLocaleString("es-PE")}. La fórmula estándar es estable para esta raíz porque suma dos cantidades positivas; la cancelación afecta principalmente a la raíz pequeña.`,
+            pasos: [
+              { tipo: "seleccion", enunciado: "Dado que b² ≫ 4c, ¿a qué se aproxima √(b²−4c)?", opciones: [{ valor: "b", texto: "A b, porque 4c es diminuto frente a b²" }, { valor: "c", texto: "A c" }, { valor: "cero", texto: "A cero" }], correcto: ["b"], pista: `Compara b² = ${(b ** 2).toExponential(0)} con 4c = ${4 * c}. El término 4c apenas cambia el radicando relativo a b².`, explicacion: "Como 4c es insignificante frente a b², √(b²−4c) ≈ √(b²) = b, ya que b es positivo." },
+              { tipo: "numero", etiqueta: "Raíz mayor aproximada", unidad: "unidades", enunciado: "Sustituye esa aproximación en x₁ = [b + √(b²−4c)]/2.", correcto: x1_aprox, pista: `Con √(b²−4c) ≈ b, calcula (b+b)/2. Aquí b = ${b.toLocaleString("es-PE")}.`, explicacion: `x₁ ≈ (b+b)/2 = b = ${b.toLocaleString("es-PE")}.` },
+              { tipo: "seleccion", enunciado: "¿Por qué la fórmula estándar funciona bien para esta raíz grande?", opciones: [{ valor: "suma", texto: "Suma dos cantidades positivas similares, sin resta destructiva" }, { valor: "resta", texto: "Resta dos cantidades casi iguales" }], correcto: ["suma"], pista: "Mira el signo ±: para la raíz grande se usa el signo más.", explicacion: "La cancelación aparece al restar cantidades casi iguales. Para la raíz grande se suman b y una cantidad cercana a b, así que la fórmula estándar es apropiada." }
+            ]
+          },
           solucion: [
             { txt: `1. Evaluamos el radicando con b = ${b.toLocaleString("es-PE")} y c = ${c}:` },
             { tex: `b^2 - 4ac = (${texSci(b)})^2 - 4(1)(${c}) = ${texSci(b ** 2)} - ${4 * c} \\approx ${texSci(b ** 2)}` },
@@ -1138,6 +1191,13 @@ function generarDatosEjercicios() {
             }
           ],
           pista: `Aprovecha la propiedad de las raíces: x₁ · x₂ = c / a. Como a = 1 y x₁ ≈ b, se tiene directamente: x₂ = c / b. Divide c = ${c} entre b = ${b.toLocaleString("es-PE")}. Por ejemplo: ${c} / ${b.toLocaleString("es-PE")} = ${(c / b).toExponential(2)}.`,
+          guiaInteractiva: {
+            final: `La raíz pequeña es x₂ ≈ ${x2_exacto.toExponential(4)}. El enfoque apropiado es la reformulación de Viète o racionalizar con el conjugado: evita restar dos números casi iguales y conserva la raíz pequeña.`,
+            pasos: [
+              { tipo: "seleccion", enunciado: "¿Qué forma conviene para obtener la raíz pequeña sin cancelar cifras?", opciones: [{ valor: "clasica", texto: "Fórmula clásica: (b−√(b²−4c))/2" }, { valor: "viete", texto: "Viète x₂=c/x₁ o forma racionalizada con suma en el denominador" }], correcto: ["viete"], pista: "La forma problemática contiene la resta b − √(b²−4c), donde ambos términos son casi iguales.", explicacion: "Viète y la forma racionalizada reemplazan la resta destructiva por una división que mantiene la información significativa." },
+              { tipo: "numero", etiqueta: "Raíz pequeña", unidad: "unidades", enunciado: `Como x₁ ≈ b y x₁·x₂ = c, calcula x₂ ≈ c/b con c = ${c} y b = ${b.toLocaleString("es-PE")}.`, correcto: x2_exacto, pista: `Divide ${c} entre ${b}. También puedes escribir el resultado en notación científica.`, explicacion: `x₂ = c/x₁ ≈ c/b = ${c}/${b} = ${x2_exacto.toExponential(4)}. Al no restar números casi iguales, esta reformulación conserva la raíz pequeña.` }
+            ]
+          },
           solucion: [
             { txt: "1. Mostramos la reformulación algebraica racionalizada (multiplicando por el conjugado):" },
             { tex: `x_2 = \\frac{b - \\sqrt{b^2 - 4c}}{2} \\cdot \\frac{b + \\sqrt{b^2 - 4c}}{b + \\sqrt{b^2 - 4c}} = \\frac{b^2 - (b^2 - 4c)}{2(b + \\sqrt{b^2 - 4c})} = \\frac{2c}{b + \\sqrt{b^2 - 4c}}` },
@@ -1258,9 +1318,14 @@ function renderizarEjercicioActual() {
           <span class="small text-muted">
             <i class="bi bi-arrow-repeat me-1"></i>Intentos realizados: <strong>${pregunta.intentos}</strong> (Intentos ilimitados)
           </span>
-          <button type="button" class="btn btn-link btn-sm text-decoration-none p-0" data-action="toggle-solucion" data-p="${pIdx}">
-            <i class="bi bi-journal-text me-1"></i>${pregunta.solucionVisible ? "Ocultar solución paso a paso" : "Ver solución paso a paso"}
-          </button>
+          <div class="d-flex flex-wrap gap-3">
+            <button type="button" class="btn btn-link btn-sm text-decoration-none p-0" data-action="toggle-solucion" data-p="${pIdx}">
+              <i class="bi bi-journal-text me-1"></i>${pregunta.solucionVisible ? "Ocultar desarrollo completo" : "Leer desarrollo completo"}
+            </button>
+            <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 fw-semibold" data-action="guia-interactiva" data-p="${pIdx}">
+              <i class="bi bi-stars me-1"></i>Practicar desarrollo guiado
+            </button>
+          </div>
         </div>
       </div>`;
 
@@ -1299,8 +1364,13 @@ function renderizarEjercicioActual() {
       html += `</div>`;
     }
 
-    card.innerHTML = html;
+    const guiaAbierta = guiaActiva?.ejercicio === ejercicioActivo && guiaActiva?.pregunta === pIdx;
+    card.innerHTML = guiaAbierta
+      ? `<div class="guided-exercise-layout"><div class="guided-exercise-main">${html}</div><aside class="guided-panel" aria-labelledby="guiaDesarrolloTitulo"><div class="guided-header"><div><span class="guided-kicker"><i class="bi bi-stars me-1"></i>Aprendizaje paso a paso</span><h2 class="h4 mb-0" id="guiaDesarrolloTitulo">Desarrollo guiado</h2></div><button type="button" class="btn-close btn-close-white" data-guide-action="close" aria-label="Cerrar guía"></button></div><div class="guided-panel-body" id="guiaDesarrolloContenido"></div></aside></div>`
+      : html;
     contenedor.appendChild(card);
+
+    if (guiaAbierta) renderizarPanelGuia();
 
     // Renderizar KaTeX
     card.querySelectorAll(".sol-tex").forEach(elem => {
@@ -1347,6 +1417,138 @@ function alternarSolucion(pIdx) {
   const p = ejercicios[ejercicioActivo].preguntas[pIdx];
   p.solucionVisible = !p.solucionVisible;
   renderizarEjercicioActual();
+}
+
+function abrirGuiaInteractiva(pIdx) {
+  const pregunta = ejercicios[ejercicioActivo].preguntas[pIdx];
+  if (!pregunta?.guiaInteractiva) return;
+  guiaActiva = { ejercicio: ejercicioActivo, pregunta: pIdx, paso: 0, valor: "", feedback: null, completada: false, intentosPaso: 0 };
+  renderizarEjercicioActual();
+  const destino = window.matchMedia("(max-width: 991.98px)").matches
+    ? document.querySelector(`#pregunta-card-${pIdx} .guided-panel`)
+    : document.getElementById(`pregunta-card-${pIdx}`);
+  destino?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function cerrarGuiaInteractiva() {
+  guiaActiva = null;
+  if (ejercicios.length) renderizarEjercicioActual();
+}
+
+function datosGuiaActual() {
+  if (!guiaActiva) return null;
+  const pregunta = ejercicios[guiaActiva.ejercicio]?.preguntas[guiaActiva.pregunta];
+  return pregunta ? { pregunta, guia: pregunta.guiaInteractiva } : null;
+}
+
+function renderizarPanelGuia() {
+  const datos = datosGuiaActual();
+  const panel = $("guiaDesarrolloContenido");
+  if (!datos || !panel) return;
+  const { pregunta, guia } = datos;
+  const { paso, completada, feedback, intentosPaso } = guiaActiva;
+  const total = guia.pasos.length;
+  const pasoCorrecto = feedback?.correcto === true;
+
+  if (completada) {
+    const resultado = Math.abs(pregunta.esperado) < 1e-4 || Math.abs(pregunta.esperado) >= 1e7
+      ? pregunta.esperado.toExponential(5)
+      : pregunta.esperado.toLocaleString("es-PE", { maximumSignificantDigits: 8 });
+    panel.innerHTML = `
+      <div class="guided-progress mb-4" role="progressbar" aria-label="Progreso del desarrollo guiado" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${total}"><div class="progress-bar" style="width:100%"></div></div>
+      <div class="guided-finish">
+        <div class="guided-step-number mb-3"><i class="bi bi-check-lg"></i></div>
+        <h3 class="h5 fw-bold">¡Lo lograste, llegaste al resultado! 🎉</h3>
+        <p class="mb-2">Respuesta final: <strong class="text-primary">${resultado} ${pregunta.unidad}</strong></p>
+        <p class="mb-0">${guia.final}</p>
+      </div>
+      <p class="small text-secondary mt-3 mb-0">También puedes cerrar esta práctica y leer el desarrollo completo desde la pregunta.</p>`;
+    return;
+  }
+
+  const actual = guia.pasos[paso];
+  const opcionesHTML = actual.tipo === "seleccion"
+    ? `<div class="d-grid gap-2 mt-3">${actual.opciones.map(opcion => `<button type="button" class="btn guided-choice ${guiaActiva.valor === opcion.valor ? "is-selected" : ""}" data-guide-option="${opcion.valor}" ${pasoCorrecto ? "disabled" : ""}><span>${guiaActiva.valor === opcion.valor ? "●" : "○"}</span> ${opcion.texto}</button>`).join("")}</div>`
+    : `<label class="form-label fw-semibold mt-3" for="guidedAnswer">${actual.etiqueta}</label><div class="input-group"><input id="guidedAnswer" data-guide-answer type="text" inputmode="decimal" autocomplete="off" class="form-control" placeholder="Escribe tu respuesta" value="${String(guiaActiva.valor).replace(/"/g, "&quot;")}" ${pasoCorrecto ? "disabled" : ""}><span class="input-group-text">${actual.unidad || ""}</span></div>`;
+
+  let response = "";
+  if (feedback) {
+    response = feedback.correcto
+      ? `<div class="guided-feedback is-correct mt-3"><strong>${feedback.revelado ? "Aquí tienes este paso 📘" : "¡Sí, vas muy bien! ✨"}</strong><p class="mb-2 mt-1">${feedback.texto}</p>${feedback.revelado ? `<p class="mb-2"><strong>Respuesta:</strong> ${respuestaCorrectaPaso(actual)}</p>` : ""}<div class="guided-explanation">${actual.explicacion}</div><button type="button" class="btn btn-success mt-3" data-guide-action="next">${paso + 1 === total ? "Llegar al resultado final" : "Continuar al siguiente paso"} <i class="bi bi-arrow-right ms-1"></i></button></div>`
+      : `<div class="guided-feedback is-try mt-3"><strong>¡Vas avanzando, inténtalo otra vez! 💪</strong><p class="mb-1 mt-1">${feedback.texto}</p><span>${actual.pista}</span>${intentosPaso >= 3 ? `<div class="guided-stuck mt-3"><p class="mb-2"><strong>¿Te está costando este paso?</strong> Puedes revisar la respuesta explicada y continuar cuando quieras.</p><button type="button" class="btn btn-outline-primary btn-sm" data-guide-action="reveal"><i class="bi bi-lightbulb me-1"></i>Ver explicación y continuar</button></div>` : ""}</div>`;
+  }
+
+  panel.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center mb-2"><span class="small fw-semibold text-secondary">${pregunta.titulo}</span><span class="badge rounded-pill text-bg-light">${paso + 1} de ${total}</span></div>
+    <div class="guided-progress mb-4" role="progressbar" aria-label="Progreso del desarrollo guiado" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${paso}"><div class="progress-bar" style="width:${paso / total * 100}%"></div></div>
+    <article class="guided-step-card">
+      <div class="guided-step-number mb-3">${paso + 1}</div>
+      <h3 class="h5 fw-bold">Resolvamos este paso</h3>
+      <p class="mb-2">${actual.enunciado}</p>
+      ${opcionesHTML}
+      ${pasoCorrecto ? "" : `<button type="button" class="btn btn-primary w-100 mt-3" data-guide-action="check"><i class="bi bi-check2-circle me-1"></i>Comprobar este paso</button>`}
+      ${response}
+    </article>
+    <p class="small text-secondary mt-3"><i class="bi bi-heart-fill text-danger me-1"></i>No te preocupes si fallas: la pista te orientará y puedes volver a intentarlo.</p>`;
+}
+
+function comprobarPasoGuia() {
+  const datos = datosGuiaActual();
+  if (!datos) return;
+  const { guia } = datos;
+  const paso = guia.pasos[guiaActiva.paso];
+  const valor = String(guiaActiva.valor ?? "").trim().replace(",", ".");
+  if (!valor) {
+    guiaActiva.feedback = { correcto: false, texto: "Primero elige una alternativa o escribe tu resultado." };
+    renderizarPanelGuia();
+    return;
+  }
+  const acierto = paso.tipo === "seleccion"
+    ? paso.correcto.includes(valor)
+    : (() => {
+        const numero = Number(valor);
+        const tolerancia = Math.max(Math.abs(paso.correcto) * (paso.tolerancia ?? 0.005), 1e-10);
+        return Number.isFinite(numero) && Math.abs(numero - paso.correcto) <= tolerancia;
+      })();
+  if (!acierto) guiaActiva.intentosPaso++;
+  guiaActiva.feedback = acierto
+    ? { correcto: true, texto: paso.exito || "¡Correcto! Ya tienes la idea clave. Observa cómo se usa en el cálculo." }
+    : { correcto: false, texto: "Ese resultado todavía no coincide. Revisa la pista y prueba otra vez." };
+  renderizarPanelGuia();
+}
+
+function respuestaCorrectaPaso(paso) {
+  if (paso.tipo === "seleccion") {
+    return paso.opciones.find(opcion => paso.correcto.includes(opcion.valor))?.texto || paso.correcto[0];
+  }
+  const numero = Math.abs(paso.correcto) < 1e-4 || Math.abs(paso.correcto) >= 1e7
+    ? paso.correcto.toExponential(5)
+    : paso.correcto.toLocaleString("es-PE", { maximumSignificantDigits: 8 });
+  return `${numero} ${paso.unidad || ""}`.trim();
+}
+
+function revelarPasoGuia() {
+  if (!guiaActiva) return;
+  guiaActiva.feedback = {
+    correcto: true,
+    revelado: true,
+    texto: "No pasa nada si este paso necesitó una ayuda extra. Revisa por qué se hace así y luego continúa a tu ritmo."
+  };
+  renderizarPanelGuia();
+}
+
+function avanzarPasoGuia() {
+  const datos = datosGuiaActual();
+  if (!datos || !guiaActiva.feedback?.correcto) return;
+  if (guiaActiva.paso + 1 >= datos.guia.pasos.length) {
+    guiaActiva.completada = true;
+  } else {
+    guiaActiva.paso++;
+  }
+  guiaActiva.valor = "";
+  guiaActiva.feedback = null;
+  guiaActiva.intentosPaso = 0;
+  renderizarPanelGuia();
 }
 
 function comprobarRespuesta(pIdx) {

@@ -152,6 +152,28 @@
   color: #9a3412;
 }
 
+.guided-exercise-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(340px,.85fr);gap:1.25rem;align-items:start}
+.guided-exercise-main{min-width:0;animation:guidedShiftIn .35s ease both}
+.guided-panel{position:sticky;top:88px;min-width:0;overflow:hidden;border:1px solid #eadde0;border-radius:18px;background:#fff;box-shadow:0 16px 42px rgba(65,32,42,.13);animation:guidedPanelIn .35s ease both}
+.guided-header{display:flex;justify-content:space-between;align-items:center;gap:1rem;background:linear-gradient(135deg,#722f37,#4b2634);color:#fff;padding:1.1rem 1.25rem}
+.guided-panel-body{padding:1.25rem;max-height:calc(100vh - 170px);overflow-y:auto}
+.guided-kicker{display:block;color:#f8dbe0;font-size:.76rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.35rem}
+.guided-progress{height:.55rem;border-radius:999px;background:#f1e8e9;overflow:hidden}
+.guided-progress .progress-bar{background:linear-gradient(90deg,#722f37,#d17b77);transition:width .3s ease}
+.guided-step-card{border:1px solid #eadde0;border-radius:16px;padding:1.2rem;background:#fff;box-shadow:0 10px 28px rgba(65,32,42,.08)}
+.guided-step-number{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:50%;background:#f8e9ec;color:#722f37;font-weight:800}
+.guided-feedback{border-radius:12px;padding:.85rem 1rem;line-height:1.55;animation:fadeIn .25s ease-in-out}
+.guided-feedback.is-correct{background:#effaf3;border:1px solid #b7e4c7;color:#17633b}
+.guided-feedback.is-try{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412}
+.guided-explanation{border-left:4px solid #722f37;background:#f8f3f4;padding:1rem;border-radius:8px;line-height:1.65}
+.guided-finish{background:linear-gradient(145deg,#f0fdf4,#fff);border:1px solid #b7e4c7;border-radius:16px;padding:1.2rem}
+.guided-stuck{border-top:1px solid #fed7aa;padding-top:.8rem}
+@media(max-width:991.98px){.guided-exercise-layout{grid-template-columns:minmax(0,1fr)}.guided-panel{position:relative;top:auto}.guided-panel-body{max-height:none}}
+@media(max-width:575px){.guided-header{padding:1rem}.guided-panel-body{padding:1rem}.guided-step-card{padding:1rem}}
+
+@keyframes guidedShiftIn{from{opacity:.85;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+@keyframes guidedPanelIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-3px); }
   to { opacity: 1; transform: translateY(0); }
