@@ -179,3 +179,17 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Corrección de conceptos teóricos */
+.bg-success-subtle {
+  background-color: #f0fdf4 !important;
+  border-color: #86efac !important;
+}
+
+.bg-danger-subtle {
+  background-color: #fef2f2 !important;
+  border-color: #fca5a5 !important;
+}
+
+.transition-all {
+  transition: all 0.25s ease-in-out;
+}

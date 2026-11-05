@@ -75,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   configurarGrafico();
   configurarEjercicio();
   configurarFormulario();
+  inicializarTestTeorico();
 });
 
 // ========================================
@@ -1649,4 +1650,255 @@ function configurarFormulario() {
     feedback.textContent = "Se abrió tu aplicación de correo con el mensaje listo para enviar.";
     feedback.className = "is-ok";
   });
+}
+
+// ========================================
+// TEST TEÓRICO SECUENCIAL (RELACIÓN DE CONCEPTOS)
+// ========================================
+
+const bancoPreguntasTeoricas = [
+  {
+    id: "t1",
+    titulo: "Fuentes de Error y Aritmética de Máquina",
+    instruccion: "Asocia cada concepto con su definición técnica exacta:",
+    pares: [
+      {
+        id: "p1",
+        termino: "Error de Truncamiento",
+        definicion: "Aparece al cortar un proceso infinito por uno finito (ej. truncar una serie o aproximar derivadas).",
+        explicacion: "El error de truncamiento depende del algoritmo/modelo, no de los bits del procesador."
+      },
+      {
+        id: "p2",
+        termino: "Absorción Numérica",
+        definicion: "Ocurre cuando |δ| < 0.5 · ulp(x), provocando que fl(x + δ) = x y el sumando se pierda por completo.",
+        explicacion: "El incremento es menor que la mitad de la distancia entre representables contiguos."
+      },
+      {
+        id: "p3",
+        termino: "Cancelación Catastrófica",
+        definicion: "Pérdida severa de cifras significativas al restar dos magnitudes casi idénticas.",
+        explicacion: "Al cancelarse los dígitos más significativos, los bits restantes son mero ruido de redondeo."
+      },
+      {
+        id: "p4",
+        termino: "Épsilon de Máquina (ε)",
+        definicion: "Distancia entre 1.0 y el siguiente flotante representable (2^(1−p)); cota de error relativo.",
+        explicacion: "En float32 (precisión p=24) equivale a 2^(-23) ≈ 1.19 × 10^(-7)."
+      }
+    ]
+  },
+  {
+    id: "t2",
+    titulo: "Estrategias de Suma y Estabilidad Algorítmica",
+    instruccion: "Relaciona cada algoritmo con su mecanismo de control de error y cota teórica:",
+    pares: [
+      {
+        id: "p5",
+        termino: "Suma de Kahan",
+        definicion: "Suma compensada que arrastra un residuo 'c' con los bits perdidos; cota O(2·u·S).",
+        explicacion: "Corrige activamente la absorción en float32 sin recurrir a hardware de doble precisión."
+      },
+      {
+        id: "p6",
+        termino: "Suma por Pares (Pairwise)",
+        definicion: "Divide el arreglo recursivamente en árbol binario; reduce la cota a O(log₂ N · u · S).",
+        explicacion: "Al sumar bloques balanceados, las sumas parciales mantienen magnitudes comparables."
+      },
+      {
+        id: "p7",
+        termino: "Datos Centrados",
+        definicion: "Calcula N · base por separado y solo acumula las variaciones δ en el rango de alta precisión.",
+        explicacion: "Elimina la absorción causada por un valor base grande constante en telemetría."
+      },
+      {
+        id: "p8",
+        termino: "Suma Recursiva Directa",
+        definicion: "Acumulación lineal clásica en un bucle; su cota de error crece linealmente: O(N·u·S).",
+        explicacion: "Es altamente vulnerable a la absorción cuando el acumulador supera 2^24."
+      }
+    ]
+  }
+];
+
+let indiceTeoriaActual = 0;
+let respuestasTeoria = {};
+let estadoTeoriaRevisado = false;
+
+function inicializarTestTeorico() {
+  const contenedor = $("cajaTestTeorico");
+  if (!contenedor) return;
+
+  // Mezclar opciones de respuesta una sola vez para que no coincidan en orden
+  bancoPreguntasTeoricas.forEach(pregunta => {
+    if (!pregunta.opcionesBarajadas) {
+      pregunta.opcionesBarajadas = [...pregunta.pares]
+        .map(p => ({ id: p.id, texto: p.definicion }))
+        .sort(() => Math.random() - 0.5);
+    }
+  });
+
+  renderizarPreguntaTeorica();
+}
+
+function renderizarPreguntaTeorica() {
+  const contenedor = $("cajaTestTeorico");
+  if (!contenedor) return;
+
+  const total = bancoPreguntasTeoricas.length;
+
+  const q = bancoPreguntasTeoricas[indiceTeoriaActual];
+  const seleccionadas = respuestasTeoria[q.id] || {};
+
+  let filasHTML = q.pares.map((par, i) => {
+    const valorActual = seleccionadas[par.id] || "";
+    let claseCorreccion = "";
+    let iconoCorreccion = "";
+
+    if (estadoTeoriaRevisado) {
+      if (valorActual === par.id) {
+        claseCorreccion = "border-success bg-success-subtle";
+        iconoCorreccion = '<span class="badge bg-success ms-2"><i class="bi bi-check-lg"></i> Correcto</span>';
+      } else {
+        claseCorreccion = "border-danger bg-danger-subtle";
+        iconoCorreccion = '<span class="badge bg-danger ms-2"><i class="bi bi-x-lg"></i> Incorrecto</span>';
+      }
+    }
+
+    return `
+      <div class="p-3 mb-3 rounded-3 border ${claseCorreccion} transition-all">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label class="fw-bold text-dark mb-0">
+            <span class="badge bg-primary me-2">${i + 1}</span> ${par.termino}
+          </label>
+          ${iconoCorreccion}
+        </div>
+        <select class="form-select select-teoria" data-term="${par.id}" ${estadoTeoriaRevisado ? "disabled" : ""}>
+          <option value="">-- Selecciona la definición correspondiente --</option>
+          ${q.opcionesBarajadas.map(opc => `
+            <option value="${opc.id}" ${valorActual === opc.id ? "selected" : ""}>
+              ${opc.texto}
+            </option>
+          `).join("")}
+        </select>
+        ${estadoTeoriaRevisado && valorActual !== par.id ? `
+          <div class="small text-danger mt-2">
+            <i class="bi bi-info-circle me-1"></i><strong>Correcto:</strong> ${par.definicion}
+          </div>
+        ` : ""}
+      </div>
+    `;
+  }).join("");
+
+  // Cabecera de progreso
+  let html = `
+    <div class="d-flex justify-content-between align-items-center pb-2 border-bottom mb-3">
+      <span class="badge bg-light text-primary border fw-semibold">
+        Pregunta ${indiceTeoriaActual + 1} de ${total}
+      </span>
+    </div>
+
+    <h4 class="h5 fw-bold text-dark mb-1">${q.titulo}</h4>
+    <p class="text-secondary small mb-3">${q.instruccion}</p>
+
+    <div class="mb-4">${filasHTML}</div>
+
+    <div id="teoriaFeedbackArea"></div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+      <span class="small text-muted" id="teoriaContadorMsg"></span>
+      <div>
+        ${!estadoTeoriaRevisado ? `
+          <button type="button" class="btn btn-primary" id="btnComprobarTeoria">
+            <i class="bi bi-check2-circle me-1"></i>Comprobar Respuestas
+          </button>
+        ` : `
+          <button type="button" class="btn btn-success" id="btnSiguienteTeoria">
+            Siguiente Pregunta <i class="bi bi-arrow-right ms-1"></i>
+          </button>
+        `}
+      </div>
+    </div>
+  `;
+
+  contenedor.innerHTML = html;
+  enlazarEventosTeoria();
+}
+
+function enlazarEventosTeoria() {
+  const q = bancoPreguntasTeoricas[indiceTeoriaActual];
+  if (!respuestasTeoria[q.id]) respuestasTeoria[q.id] = {};
+
+  // Guardar selecciones
+  document.querySelectorAll(".select-teoria").forEach(sel => {
+    sel.addEventListener("change", e => {
+      respuestasTeoria[q.id][e.target.dataset.term] = e.target.value;
+    });
+  });
+
+  // Botón Comprobar
+  const btnComprobar = $("btnComprobarTeoria");
+  if (btnComprobar) {
+    btnComprobar.addEventListener("click", () => {
+      const seleccionadas = respuestasTeoria[q.id];
+      const faltan = q.pares.some(p => !seleccionadas[p.id]);
+
+      if (faltan) {
+        alert("Por favor relaciona todos los conceptos antes de comprobar.");
+        return;
+      }
+
+      let aciertos = 0;
+      q.pares.forEach(p => {
+        if (seleccionadas[p.id] === p.id) aciertos++;
+      });
+
+      estadoTeoriaRevisado = true;
+      renderizarPreguntaTeorica();
+
+      const fb = $("teoriaFeedbackArea");
+      const nota = (aciertos / q.pares.length) * 20;
+
+      if (aciertos === q.pares.length) {
+        fb.innerHTML = `
+          <div class="alert alert-success d-flex align-items-center mb-0">
+            <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+            <div>
+              <strong>¡Excelente calificación: ${nota.toFixed(1)} / 20!</strong>
+              <p class="mb-0 small">Todos los conceptos teóricos han sido relacionados con precisión matemática.</p>
+            </div>
+          </div>
+        `;
+      } else {
+        fb.innerHTML = `
+          <div class="alert alert-warning d-flex align-items-center mb-0">
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+            <div>
+              <strong>Calificación obtenida: ${nota.toFixed(1)} / 20 (${aciertos} de ${q.pares.length} correctas)</strong>
+              <p class="mb-0 small">Revisa las correcciones marcadas en rojo antes de avanzar.</p>
+            </div>
+          </div>
+        `;
+      }
+    });
+  }
+
+  // Botón Siguiente
+  const btnSiguiente = $("btnSiguienteTeoria");
+  if (btnSiguiente) {
+    btnSiguiente.addEventListener("click", () => {
+      indiceTeoriaActual++;
+      estadoTeoriaRevisado = false;
+      renderizarPreguntaTeorica();
+    });
+  }
+
+  // Botón Reintentar
+  const btnReintentar = $("btnReintentarTeoria");
+  if (btnReintentar) {
+    btnReintentar.addEventListener("click", () => {
+      estadoTeoriaRevisado = false;
+      renderizarPreguntaTeorica();
+    });
+  }
 }
