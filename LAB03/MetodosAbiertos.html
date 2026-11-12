@@ -2,70 +2,694 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Módulo interactivo de punto fijo, Newton-Raphson y secante con análisis de convergencia, salvaguardas y rescate por bisección.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Métodos abiertos para ecuaciones no lineales: Punto Fijo, Newton-Raphson, Secante y Algoritmos Híbridos de Rescate. Saturación de la función sigmoide, desvanecimiento de derivada y cuencas de atracción.">
   <meta name="theme-color" content="#0b1830">
+
   <title>Rapidez y riesgo: métodos abiertos | Métodos Numéricos</title>
+
+  <!-- Fuentes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+
+  <!-- CSS del Módulo -->
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
+
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
-  <header class="header sticky-top"><nav class="navbar navbar-expand-xl" aria-label="Navegación principal"><div class="container-xl header-inner">
-    <a href="#hero" class="navbar-brand logo text-decoration-none"><span class="brand-icon"><i class="bi bi-lightning-charge"></i></span><span class="sitename">Met<span>Num</span></span></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Abrir menú"><span class="navbar-toggler-icon"></span></button>
-    <div class="collapse navbar-collapse" id="navmenu"><ul class="navbar-nav ms-auto align-items-xl-center"><li class="nav-item nav-course-item"><a href="../index.html" class="course-link"><i class="bi bi-arrow-left me-1"></i>Cursos</a></li><li class="nav-item"><a href="#teoria" class="nav-link">Teoría</a></li><li class="nav-item"><a href="#ejemplo" class="nav-link">Ejemplos</a></li><li class="nav-item"><a href="#caso-practico" class="nav-link">Aplicación</a></li><li class="nav-item"><a href="#calculadora" class="nav-link">Simulador</a></li><li class="nav-item"><a href="#ejercicios" class="nav-link">Autoevaluación</a></li></ul></div>
-  </div></nav></header>
+
+  <!-- ENCABEZADO Y MENÚ ADAPTABLE -->
+  <header id="header" class="header sticky-top">
+    <nav class="navbar navbar-expand-xl" aria-label="Navegación principal">
+      <div class="container-xl header-inner">
+
+        <a href="#hero" class="navbar-brand logo text-decoration-none">
+          <span class="brand-icon" aria-hidden="true"><i class="bi bi-lightning-charge"></i></span>
+          <span class="sitename">Met<span>Num</span></span>
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navmenu"
+          aria-controls="navmenu"
+          aria-expanded="false"
+          aria-label="Abrir menú">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navmenu">
+          <ul class="navbar-nav ms-auto align-items-xl-center">
+
+            <li class="nav-item nav-course-item">
+              <a href="../index.html" class="course-link">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Cursos
+              </a>
+            </li>
+
+            <li class="nav-item"><a href="#hero" class="nav-link active">Inicio</a></li>
+            <li class="nav-item"><a href="#teoria" class="nav-link">Teoría</a></li>
+            <li class="nav-item"><a href="#caso-practico" class="nav-link">Caso Práctico</a></li>
+            <li class="nav-item"><a href="#calculadora" class="nav-link">Calculadora</a></li>
+            <li class="nav-item"><a href="#grafico" class="nav-link">Gráfica</a></li>
+            <li class="nav-item"><a href="#ejercicios" class="nav-link">Autoevaluación</a></li>
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
   <main id="contenido">
-    <section id="hero" class="hero"><div class="container"><div class="row gy-5 align-items-center">
-    <div class="col-lg-6"><h1>Rapidez y riesgo: métodos abiertos</h1><p class="lead mt-3">Compara punto fijo, Newton y secante. Cambia los valores iniciales, observa las iteraciones y activa una recuperación segura cuando el proceso se desestabiliza.</p><div class="hero-buttons mt-4"><a href="#calculadora" class="btn btn-light btn-lg"><i class="bi bi-play-circle me-2"></i>Probar métodos</a><a href="#teoria" class="btn btn-outline-light btn-lg">Leer la teoría</a></div></div>
-      <div class="col-lg-6"><div class="readout"><h2 class="readout-title">Reto: calibrar una probabilidad</h2><p class="mb-2">Encuentra el umbral <span class="math">z</span> para que la probabilidad logística sea 0.83.</p><div class="formula-card">f(z) = 1/(1 + e<sup>−z</sup>) − 0.83 = 0<br>z ∈ [−10, 10]</div><dl class="readout-rows"><div><dt>Raíz de referencia</dt><dd>ln(0.83/0.17) ≈ 1.5856</dd></div><div><dt>Inicios de la guía</dt><dd>−8, 0 y 8</dd></div><div><dt>Recuperación</dt><dd>bisección en [−10, 10]</dd></div></dl></div></div>
-    </div></div></section>
 
-    <section id="teoria" class="section"><div class="container"><div class="section-head"><span class="section-badge">01 · Fundamento</span><h2>Tres métodos, distintas condiciones</h2><p>Los métodos abiertos no necesitan conservar un intervalo con cambio de signo. Pueden avanzar deprisa cerca de la raíz, pero su comportamiento depende del inicio y de la forma de la iteración.</p></div>
-      <div class="row g-4"><div class="col-lg-4"><article class="panel h-100"><h3 class="panel-title">Newton-Raphson</h3><div class="formula-card">zₖ₊₁ = zₖ − f(zₖ)/f′(zₖ)</div><p>Usa la tangente a la curva para estimar dónde cruza el eje. Cerca de una raíz simple <span class="math">z*</span>, con <span class="math">f′(z*)≠0</span> y un inicio suficientemente cercano, el error suele satisfacer <span class="math">|eₖ₊₁|≈C|eₖ|²</span>.</p><p class="mb-0"><strong>Riesgo:</strong> una derivada pequeña o un inicio lejano puede producir un salto enorme. En raíces múltiples la convergencia normalmente se vuelve lineal.</p></article></div>
-      <div class="col-lg-4"><article class="panel h-100"><h3 class="panel-title">Secante</h3><div class="formula-card">zₖ₊₁ = zₖ − f(zₖ)(zₖ−zₖ₋₁)/(f(zₖ)−f(zₖ₋₁))</div><p>Aproxima la derivada con dos puntos. No requiere calcular <span class="math">f′</span>; su orden local suele ser φ ≈ 1.618.</p><p class="mb-0"><strong>Riesgo:</strong> el denominador puede ser casi cero y los pasos pueden salir del dominio.</p></article></div>
-      <div class="col-lg-4"><article class="panel h-100"><h3 class="panel-title">Punto fijo</h3><div class="formula-card">zₖ₊₁ = g(zₖ)<br>|g′(z*)| &lt; 1</div><p>Reescribe la ecuación como <span class="math">z = g(z)</span>. Si <span class="math">g</span> lleva un intervalo cerrado a sí mismo y <span class="math">|g′(z)|≤L&lt;1</span> en todo ese intervalo, la iteración converge a un punto fijo único.</p><p class="mb-0"><strong>Elección del mapa:</strong> distintas formas de <span class="math">g</span> pueden converger o divergir; verifica el dominio y la contracción antes de iterar.</p></article></div></div>
-      <article class="panel mt-4"><h3 class="panel-title">Comparación de convergencia y datos requeridos</h3><div class="table-responsive"><table class="results-table"><thead><tr><th>Método</th><th>Datos por iteración</th><th>Orden local típico</th><th>Señal de riesgo</th></tr></thead><tbody><tr><td>Newton-Raphson</td><td>Un inicio y f′(z)</td><td>Cuadrático cerca de raíz simple</td><td>f′ pequeña o salto fuera del dominio</td></tr><tr><td>Secante</td><td>Dos inicios; solo f(z)</td><td>≈ 1.618</td><td>f(zₖ)−f(zₖ₋₁) casi cero</td></tr><tr><td>Punto fijo</td><td>Un inicio y mapa g</td><td>Lineal si 0&lt;|g′(z*)|&lt;1</td><td>|g′|≥1 o g(z) sale del intervalo</td></tr></tbody></table></div><p class="small mb-0">El orden describe el comportamiento local al acercarse a una raíz; no promete convergencia desde cualquier punto inicial.</p></article>
-      <div class="callout-note mt-4"><strong>Salvaguarda del simulador:</strong> Newton y secante amortiguan sus pasos. Si un paso sale del dominio, el denominador o la derivada se vuelven inestables, o el método no converge, se intenta un rescate por bisección sobre [−10, 10]. El rescate se registra en el historial.</div>
-    </div></section>
+    <!-- INICIO / HERO -->
+    <section id="hero" class="hero">
+      <div class="container">
+        <div class="row gy-5 align-items-center">
 
-    <section id="ejemplo" class="section section-alt"><div class="container"><div class="section-head"><span class="section-badge">02 · Ejemplos guiados</span><h2>Lee la convergencia, no solo la raíz</h2><p>Los ejemplos muestran qué información aporta el análisis de cada iteración.</p></div><div class="row g-4">
-      <div class="col-lg-6"><article class="panel h-100"><h3 class="panel-title">Newton para z³ − z − 2 = 0</h3><div class="formula-card">f(z)=z³−z−2 &nbsp;&nbsp; f′(z)=3z²−1<br>z₀=1.5 → z₁≈1.521739 → z₂≈1.521380</div><div class="table-responsive"><table class="results-table"><thead><tr><th>k</th><th>zₖ</th><th>f(zₖ)</th><th>Interpretación</th></tr></thead><tbody><tr><td>0</td><td>1.500000</td><td>−0.125000</td><td>Inicio</td></tr><tr><td>1</td><td>1.521739</td><td>≈0.002137</td><td>La tangente acerca la raíz</td></tr><tr><td>2</td><td>1.521380</td><td>≈5.9×10⁻⁷</td><td>El residuo cae rápidamente</td></tr><tr><td>3</td><td>1.52137971</td><td>&lt;10⁻¹²</td><td>Convergencia alcanzada</td></tr></tbody></table></div><p>El inicio está cerca de la raíz y la derivada no es pequeña; por eso los pasos se estabilizan con rapidez.</p><details><summary>Ver la actualización del primer paso</summary><p class="mt-2 mb-0">f(1.5)=−0.125 y f′(1.5)=5.75. Entonces z₁=1.5−(−0.125/5.75)≈1.52173913.</p></details></article></div>
-      <div class="col-lg-6"><article class="panel h-100"><h3 class="panel-title">Punto fijo para z = cos(z)</h3><div class="formula-card">g(z)=cos(z), &nbsp; z₀=0.7<br>z₁≈0.764842, z₂≈0.721492, z₃≈0.750821</div><p>Las aproximaciones oscilan y se acercan a 0.739085. En la raíz, <span class="math">|g′(z*)|=|−sin(z*)|≈0.674&lt;1</span>, así que la convergencia local es lineal.</p><details><summary>¿Qué revisar?</summary><p class="mt-2 mb-0">El cambio entre iteraciones y el residuo <span class="math">|cos(z)−z|</span>. También conviene comprobar que la forma elegida para <span class="math">g</span> realmente sea contractiva cerca de la raíz.</p></details></article></div></div>
-      <article class="panel mt-4"><h3 class="panel-title">Primer paso de la secante en el reto</h3><p>Usa los dos inicios z₀=0 y z₁=1 para la ecuación logística.</p><div class="formula-card">f(0)=−0.33, &nbsp; f(1)≈−0.098941<br>z₂=1−f(1)(1−0)/(f(1)−f(0))≈1.428209<br>f(z₂)≈−0.023378</div><p class="mb-0">El cálculo anterior muestra el paso puro de secante. El simulador aplica además el factor de amortiguamiento α, por lo que su siguiente aproximación puede ser más corta.</p></article>
-</div></section>
+          <div class="col-lg-6">
+            
+            <h1>Rapidez y riesgo: métodos abiertos</h1>
 
-    <section id="caso-practico" class="section"><div class="container"><div class="section-head"><span class="section-badge">03 · Aplicación de ingeniería</span><h2>Calibración de un umbral probabilístico</h2><p>El modelo logístico transforma un puntaje en probabilidad. Se busca el puntaje que alcanza la probabilidad objetivo.</p></div><div class="row g-4"><div class="col-lg-7"><article class="panel h-100"><h3 class="panel-title">Modelo, raíz y derivada</h3><div class="formula-card">σ(z)=1/(1+e<sup>−z</sup>)<br>f(z)=σ(z)−0.83=0, &nbsp; z∈[−10,10]<br>f′(z)=σ(z)(1−σ(z))</div><p>Al despejar la ecuación se obtiene <span class="math">z*=ln(0.83/0.17)≈1.58563</span>. Esta raíz de referencia permite medir el error de los métodos, aunque la simulación se detiene con el residuo y el cambio entre iteraciones.</p><p class="mb-0">La derivada es positiva, pero se aproxima a cero en los extremos del dominio. Allí Newton puede proponer pasos muy grandes; esa es la razón para estudiar los inicios −8, 0 y 8 y registrar cuándo hace falta recuperar por bisección.</p></article></div><div class="col-lg-5"><article class="panel h-100"><h3 class="panel-title">Un mapa de punto fijo verificable</h3><div class="formula-card">g(z)=z−λf(z)<br>g′(z)=1−λf′(z)</div><p>Para este modelo, <span class="math">0&lt;f′(z)≤1/4</span>. Al elegir <span class="math">λ=6</span>, se obtiene <span class="math">−1/2≤g′(z)&lt;1</span>, así que el mapa es contractivo en el intervalo de trabajo. El valor de λ afecta la rapidez y debe respetar el rango <span class="math">0&lt;λ&lt;8</span>.</p><p class="small text-secondary mb-0">En otros problemas no se puede asumir esta propiedad: se debe analizar <span class="math">g′</span> y comprobar que las iteraciones permanezcan en un intervalo válido.</p></article></div></div><div class="callout-note mt-4"><strong>Evaluación estable:</strong> el código calcula la sigmoide con una forma distinta según el signo de z. Esto evita desbordar <span class="math">e<sup>−z</sup></span> al probar valores extremos.</div></div></section>
+            <p class="lead mt-3">
+              Punto fijo, Newton-Raphson y secante. Experimenta la impresionante velocidad
+              cuadrática cuando estás cerca de la raíz y aprende a controlar el riesgo de
+              catapulta cuando la derivada se desvanece en colas de saturación.
+            </p>
 
-    <section id="calculadora" class="section"><div class="container"><div class="section-head"><span class="section-badge">04 · Simulador</span><h2>Mapa de inicio y método</h2><p>Elige un inicio y compara los tres métodos sobre el mismo problema logístico de la guía.</p></div>
-      <div class="row g-4"><div class="col-lg-4"><form id="formSim" class="panel" novalidate><h3 class="panel-title">Parámetros</h3>
-        <label class="form-label" for="startZ">Inicio z₀</label><div class="input-group mb-3"><input class="form-control" id="startZ" type="number" value="0" min="-10" max="10" step="any"><button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Guía</button><ul class="dropdown-menu dropdown-menu-end"><li><button class="dropdown-item preset-start" type="button" data-value="-8">z₀ = −8</button></li><li><button class="dropdown-item preset-start" type="button" data-value="0">z₀ = 0</button></li><li><button class="dropdown-item preset-start" type="button" data-value="8">z₀ = 8</button></li></ul></div>
-        <label class="form-label" for="startZ1">Segundo inicio para secante z₁</label><input class="form-control mb-3" id="startZ1" type="number" value="1" min="-10" max="10" step="any">
-        <label class="form-label" for="damping">Amortiguamiento Newton/secante α</label><input class="form-control mb-1" id="damping" type="number" value="0.5" min="0.05" max="1" step="0.05"><div class="form-text mb-3">Cada paso se multiplica por α, con 0 &lt; α ≤ 1.</div>
-        <label class="form-label" for="lambda">Parámetro del mapa de punto fijo λ</label><input class="form-control mb-1" id="lambda" type="number" value="6" min="0.1" max="7.9" step="0.1"><div class="form-text mb-3">Se usa g(z)=z−λf(z), un mapa distinto de Newton.</div>
-        <label class="form-label" for="tolX">Tolerancia en z</label><input class="form-control mb-3" id="tolX" type="number" value="0.000001" min="0.0000000001" step="any">
-        <label class="form-label" for="tolF">Tolerancia en f(z)</label><input class="form-control mb-3" id="tolF" type="number" value="0.000001" min="0.0000000001" step="any">
-        <label class="form-label" for="maxIter">Máximo de iteraciones</label><input class="form-control mb-3" id="maxIter" type="number" value="100" min="1" max="2000" step="1">
-        <button class="btn btn-primary w-100" type="submit"><i class="bi bi-play-fill me-1"></i>Comparar métodos para z₀</button><button class="btn btn-outline-primary w-100 mt-2" id="mapBtn" type="button"><i class="bi bi-grid-3x3-gap me-1"></i>Generar mapa −8, 0 y 8</button><p id="errorMsg" class="form-error mt-3" role="alert" hidden></p>
-      </form><div class="panel mt-4"><h3 class="panel-title">Función y derivada</h3><div class="formula-card">f(z)=σ(z)−0.83<br>f′(z)=σ(z)(1−σ(z))<br>σ(z)=1/(1+e<sup>−z</sup>)</div><p class="small mb-0">El cálculo de σ(z) cambia de forma según el signo de z para evitar desbordamiento exponencial.</p></div></div>
-      <div class="col-lg-8"><div id="summary" class="results mb-4" aria-live="polite"></div><div id="mapPanel" class="panel mb-4" hidden><h3 class="panel-title">Mapa inicio–método–resultado</h3><p class="small text-secondary">Secante usa los pares (−8,−7), (0,1) y (8,7), como en la guía.</p><div class="table-responsive"><table class="results-table"><thead><tr><th>Inicio</th><th>Método</th><th>Raíz</th><th>|f(z)|</th><th>Iteraciones</th><th>Resultado</th></tr></thead><tbody id="mapBody"></tbody></table></div></div><div class="panel mb-4"><h3 class="panel-title">Convergencia y rescate</h3><div class="chart-wrap"><canvas id="convergenceChart" aria-label="Gráfica del residuo de cada método por iteración"></canvas></div></div><div class="panel"><div class="d-flex flex-wrap justify-content-between align-items-center gap-2"><h3 class="panel-title mb-0">Historial del método</h3><label class="small">Ver <select id="historyMethod" class="form-select form-select-sm d-inline-block w-auto"><option value="newton">Newton-Raphson</option><option value="secante">Secante</option><option value="fijo">Punto fijo</option></select></label></div><div class="table-responsive mt-3"><table class="results-table"><thead><tr><th>k</th><th>Tipo de paso</th><th>zₖ</th><th>f(zₖ)</th><th>|Δz|</th><th>Estado</th></tr></thead><tbody id="historyBody"></tbody></table></div></div><div class="callout-note mt-4">La referencia exacta del reto es <span class="math">z* = ln(0.83/0.17)</span>. Úsala para interpretar el error, pero el simulador decide convergencia con las tolerancias configuradas.</div></div></div>
-    </div></section>
+            <div class="hero-buttons mt-4">
+              <a href="#calculadora" class="btn btn-light btn-lg">
+                <i class="bi bi-calculator me-2" aria-hidden="true"></i>Abrir el simulador
+              </a>
+              <a href="#teoria" class="btn btn-outline-light btn-lg">Leer la teoría</a>
+            </div>
+          </div>
 
-    <section id="ejercicios" class="section section-alt"><div class="container"><div class="section-head"><span class="section-badge">05 · Autoevaluación</span><h2>Piensa, calcula y corrige</h2><p>Responde primero. La corrección te orienta sobre el concepto que conviene repasar y luego puedes contrastar el desarrollo.</p></div><div class="row g-4">
-      <div class="col-md-6"><article class="panel h-100 assessment-card" data-assessment="newton"><h3 class="panel-title">1. Paso amortiguado de Newton</h3><p>Para <span class="math">f(z)=σ(z)−0.83</span>, desde <span class="math">z₀=0</span>, calcula <span class="math">z₁</span> con <span class="math">α=0.5</span>.</p><label class="form-label" for="answer-newton">Valor de z₁</label><input class="form-control assessment-input" id="answer-newton" type="number" step="any" inputmode="decimal" placeholder="Aproximación"><button class="btn btn-primary mt-3 assess-check" type="button">Corregir</button><p class="assessment-feedback mt-3" aria-live="polite"></p><div class="assessment-solution" hidden>σ(0)=0.5, f(0)=−0.33 y f′(0)=0.25. El paso de Newton es 1.32; al amortiguarlo, z₁=0+0.5(1.32)=0.66.</div></article></div>
-      <div class="col-md-6"><article class="panel h-100 assessment-card" data-assessment="fixed"><h3 class="panel-title">2. Convergencia de punto fijo</h3><p>¿Qué condición local favorece la convergencia de <span class="math">zₖ₊₁=g(zₖ)</span>?</p><label class="form-label" for="answer-fixed">Elige una respuesta</label><select class="form-select assessment-input" id="answer-fixed"><option value="">Selecciona…</option><option value="contract">|g′(z*)| &lt; 1 en un entorno de la raíz</option><option value="continuous">Que g sea continua, sin más condiciones</option><option value="large">Que |g′(z*)| &gt; 1</option></select><button class="btn btn-primary mt-3 assess-check" type="button">Corregir</button><p class="assessment-feedback mt-3" aria-live="polite"></p><div class="assessment-solution" hidden>La contracción local reduce los errores sucesivos. También se debe comprobar que el mapa mantenga las iteraciones dentro de un intervalo válido.</div></article></div>
-      <div class="col-md-6"><article class="panel h-100 assessment-card" data-assessment="secant"><h3 class="panel-title">3. Salvaguarda de secante</h3><p>Si <span class="math">f(zₖ)−f(zₖ₋₁)</span> es casi cero, ¿qué riesgo aparece y qué conviene hacer?</p><label class="form-label" for="answer-secant">Elige una respuesta</label><select class="form-select assessment-input" id="answer-secant"><option value="">Selecciona…</option><option value="jump">El salto puede ser enorme; detectar el denominador pequeño y amortiguar o volver a un intervalo seguro</option><option value="safe">La aproximación es necesariamente exacta; detenerse</option><option value="ignore">Ignorar el denominador y continuar</option></select><button class="btn btn-primary mt-3 assess-check" type="button">Corregir</button><p class="assessment-feedback mt-3" aria-live="polite"></p><div class="assessment-solution" hidden>El cociente de secante puede dispararse cuando el denominador es pequeño. Una salvaguarda evita aceptar un paso inestable y debe quedar registrada.</div></article></div>
-      <div class="col-md-6"><article class="panel h-100 assessment-card" data-assessment="choice"><h3 class="panel-title">4. Elegir un método con garantía</h3><p>Necesitas una raíz encerrada con garantía de convergencia y puedes encontrar un intervalo con cambio de signo. ¿Qué estrategia prioriza esa garantía?</p><label class="form-label" for="answer-choice">Elige una respuesta</label><select class="form-select assessment-input" id="answer-choice"><option value="">Selecciona…</option><option value="bisection">Bisección, conservando el intervalo con cambio de signo</option><option value="newton">Newton sin revisar la derivada ni el inicio</option><option value="fixed">Punto fijo con cualquier mapa g</option></select><button class="btn btn-primary mt-3 assess-check" type="button">Corregir</button><p class="assessment-feedback mt-3" aria-live="polite"></p><div class="assessment-solution" hidden>Bisección conserva el encierro y reduce el intervalo. Puede ser más lenta que un método abierto, pero ofrece una cota de error bajo las hipótesis de continuidad y cambio de signo.</div></article></div>
-    </div><div class="callout-note mt-4"><strong>Después de corregir:</strong> compara tu respuesta con la solución y prueba cómo cambian los resultados al variar los inicios en el simulador.</div></div></section>
+          <div class="col-lg-6">
+            <div class="readout" role="group" aria-labelledby="readoutTitulo">
+              <h2 id="readoutTitulo" class="readout-title">
+                <span>Prueba el efecto catapulta de Newton</span>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-mono small">f(z) = σ(z) − 0.83</span>
+              </h2>
+
+              <div class="readout-inputs single">
+                <label for="heroZ0">Valor inicial z₀
+                  <input id="heroZ0" type="number" step="any" value="-8" inputmode="decimal">
+                </label>
+              </div>
+
+              <dl class="readout-rows">
+                <div><dt>Residuo f(z₀)</dt><dd id="heroF" class="font-mono">—</dd></div>
+                <div><dt>Derivada f′(z₀)</dt><dd id="heroDeriv" class="font-mono">—</dd></div>
+                <div><dt>Paso de Newton Δz = −f/f′</dt><dd id="heroDelta" class="font-mono">—</dd></div>
+                <div><dt>Siguiente iteración z₁ = z₀ + Δz</dt><dd id="heroZ1" class="font-mono">—</dd></div>
+              </dl>
+
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <span class="small text-secondary">Diagnóstico inicial:</span>
+                <span id="heroStatus" class="status status-bad">Catapulta crítica</span>
+              </div>
+              <p id="heroMsg" class="readout-msg mt-2" aria-live="polite"></p>
+
+              <div class="readout-presets mt-3" aria-label="Valores de prueba sugeridos">
+                <button type="button" class="preset" data-z="-8">z₀ = −8 (Saturación baja)</button>
+                <button type="button" class="preset" data-z="0">z₀ = 0 (Zona lineal óptima)</button>
+                <button type="button" class="preset" data-z="8">z₀ = 8 (Saturación alta)</button>
+                <button type="button" class="preset" data-z="1.5856">z₀ ≈ 1.58 (Cerca de raíz)</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. TEORÍA GENERAL -->
+    <section id="teoria" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-badge">Fundamentos Matemáticos</span>
+          <h2>Teoría de Métodos Abiertos y Patologías de Convergencia</h2>
+          <p>
+            A diferencia de los métodos cerrados, los métodos abiertos no exigen un intervalo inicial
+            que encierre la raíz (f(a)·f(b) &lt; 0). Utilizan información local de la función y sus pendientes.
+            Son órdenes de magnitud más veloces, pero carecen de garantía absoluta de convergencia.
+          </p>
+        </header>
+
+        <!-- Fuentes / Principios clave -->
+        <dl class="sources">
+          <div>
+            <dt><i class="bi bi-speedometer text-primary me-2"></i>¿Por qué son más rápidos?</dt>
+            <dd>Newton posee <strong>convergencia cuadrática</strong>: el número de dígitos significativos correctos se duplica en cada paso cerca de la raíz (orden p = 2). La Secante alcanza orden superlineal áureo (p ≈ 1.618).</dd>
+          </div>
+          <div>
+            <dt><i class="bi bi-exclamation-triangle text-danger me-2"></i>¿Cuál es el riesgo crítico?</dt>
+            <dd>Si la derivada <strong>f′(x) ≈ 0</strong> (mesetas o saturación), el paso de Newton <code>−f/f′</code> se divide por casi cero, catapultando el siguiente punto a cientos de unidades de distancia o provocando ciclo límite.</dd>
+          </div>
+          <div>
+            <dt><i class="bi bi-shield-check text-success me-2"></i>¿Cómo garantizar robustez?</dt>
+            <dd>Mediante <strong>estrategias híbridas protegidas</strong> (tipo Brent): si el paso de Newton intenta saltar fuera del intervalo seguro o no reduce el residuo a la mitad, se aplica un paso de Bisección de rescate.</dd>
+          </div>
+        </dl>
+
+        <!-- Tarjetas de Métodos -->
+        <div class="concepts">
+
+          <article class="concept">
+            <h3>Newton-Raphson</h3>
+            <p>
+              Modela localmente la función por su recta tangente. Requiere calcular y evaluar
+              analíticamente la primera derivada f′(x).
+            </p>
+            <div class="math-box"><div id="math-newton"></div></div>
+          </article>
+
+          <article class="concept">
+            <h3>Método de la Secante</h3>
+            <p>
+              Aproxima la tangente mediante una secante entre los dos últimos puntos conocidos.
+              No requiere calcular f′(x), requiriendo 2 valores de arranque.
+            </p>
+            <div class="math-box"><div id="math-secante"></div></div>
+          </article>
+
+          <article class="concept">
+            <h3>Iteración de Punto Fijo</h3>
+            <p>
+              Reformula f(z) = 0 en la forma equivalente z = g(z). Converge linealmente si y solo si
+              la derivada satisface la condición de Lipschitz |g′(z*)| &lt; 1 en la raíz.
+            </p>
+            <div class="math-box"><div id="math-punto-fijo"></div></div>
+          </article>
+
+        </div>
+
+        <!-- Tabla comparativa y Fenómeno de Desvanecimiento -->
+        <div class="row g-5 mt-1">
+
+          <div class="col-lg-6">
+            <h3 class="subhead"><i class="bi bi-table text-primary me-2"></i>Comparación de Algoritmos Abiertos</h3>
+            <p class="text-secondary small">
+              Resumen de orden de convergencia, requerimiento por paso y vulnerabilidades numéricas:
+            </p>
+
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0">
+                <caption class="visually-hidden">Comparación de métodos abiertos</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Método</th>
+                    <th scope="col">Orden (p)</th>
+                    <th scope="col">Evaluaciones / paso</th>
+                    <th scope="col">Vulnerabilidad Principal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Newton-Raphson</th>
+                    <td>Cuadrático (p = 2)</td>
+                    <td>2 (f y f′)</td>
+                    <td>f′(x) ≈ 0 (catapulta / división por cero)</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Secante</th>
+                    <td>Superlineal (p ≈ 1.618)</td>
+                    <td>1 (reutiliza previa)</td>
+                    <td>f(xₖ) ≈ f(xₖ₋₁) (cancelación catastrófica)</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Punto Fijo</th>
+                    <td>Lineal (p = 1)</td>
+                    <td>1 (g)</td>
+                    <td>Divergencia si |g′(x)| ≥ 1</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Newton Híbrido</th>
+                    <td>p = 2 / 1 (adaptable)</td>
+                    <td>2 + rescate</td>
+                    <td>Ninguna: Bisección rescata si Newton falla</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="math-box mt-3"><div id="math-orden"></div></div>
+          </div>
+
+          <div class="col-lg-6">
+            <h3 class="subhead"><i class="bi bi-shield-slash text-danger me-2"></i>Desvanecimiento de Derivada y Amortiguamiento</h3>
+            <p class="text-secondary small">
+              En funciones de activación y modelos de saturación, las asíntotas provocan que <code>f′(z) = σ(z)(1 − σ(z)) → 0</code>.
+              Para prevenir la explosión numérica se implementa control de paso amortiguado y rescate:
+            </p>
+
+            <div class="math-box">
+              <div id="math-sigmoide"></div>
+              <div id="math-hibrido"></div>
+            </div>
+
+            <div class="table-responsive mt-3">
+              <table class="table data-table align-middle mb-0">
+                <caption class="visually-hidden">Técnicas de protección de métodos abiertos</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Mecanismo de Control</th>
+                    <th scope="col">Acción Numérica</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Amortiguamiento (Damping)</th>
+                    <td>Si |Δz| &gt; Δ_max, acotar el paso para no saltar a la zona asintótica.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Guarda de Intervalo (Bracket)</th>
+                    <td>Rechazar zₖ₊₁ si cae fuera del intervalo de búsqueda admisible.</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Rescate por Bisección</th>
+                    <td>Si el error no disminuye en dos pasos seguidos, ejecutar c = (a + b) / 2.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2. CASO PRÁCTICO -->
+    <section id="caso-practico" class="section">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-badge">Caso Práctico en Ingeniería</span>
+          <h2>Umbral de Activación en Clasificación Logística (Machine Learning)</h2>
+          <p>
+            En modelos de regresión logística, redes neuronales y circuitos de conmutación electrónica, la probabilidad
+            de clase se modela con la función sigmoide continua <code>σ(z) = 1 / (1 + exp(−z))</code>.
+            El problema de ingeniería consiste en determinar el umbral de activación exacto <code>z*</code> donde la confianza
+            alcanza el <strong>83% (p = 0.83)</strong>, resolviendo <code>f(z) = σ(z) − 0.83 = 0</code> en el dominio <code>z ∈ [−10, 10]</code>.
+          </p>
+        </header>
+
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-cpu text-primary me-2"></i>Modelo Matemático y Solución Analítica</h3>
+              <p class="text-secondary small">
+                La ecuación no lineal <code>f(z) = 0</code> posee una solución analítica exacta de referencia mediante la inversa de la función logística (función logit):
+              </p>
+              <div class="p-3 bg-light rounded-3 border mb-3">
+                <div class="fw-bold text-dark small mb-1">Ecuación y Solución Analítica Exacta:</div>
+                <div class="small font-mono text-dark">
+                  σ(z) = 1 / (1 + e<sup>−z</sup>) = 0.83 &nbsp;⟹&nbsp; e<sup>−z</sup> = (1 − 0.83) / 0.83 = 17 / 83
+                </div>
+                <div class="small text-primary mt-1 font-mono fw-bold">
+                  z* = ln(83 / 17) = ln(4.882353) ≈ 1.58563065...
+                </div>
+              </div>
+              <p class="text-secondary small mb-0">
+                <strong>Análisis de derivada:</strong> <code>f′(z) = σ(z)(1 − σ(z)) = e<sup>−z</sup> / (1 + e<sup>−z</sup>)²</code>.
+                Su valor máximo es <code>f′(0) = 0.25</code>. En <code>z = −8</code> y <code>z = 8</code>, la derivada cae a <code>f′(±8) ≈ 0.000335</code>,
+                lo que amplifica el paso de Newton por un factor de casi 3,000 provocando la catapulta.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-diagram-3 text-primary me-2"></i>Distribución de Tareas del Equipo</h3>
+              <dl class="method-list">
+                <div>
+                  <dt class="text-primary">1. Rol Modelador</dt>
+                  <dd>Calcula f′(z), demuestra que f′(z) &gt; 0 (monótona creciente, raíz única), analiza el desvanecimiento de gradiente en z = ±8 y formula la iteración de punto fijo g(z) verificando |g′(z*)| &lt; 1.</dd>
+                </div>
+                <div>
+                  <dt class="text-indigo">2. Rol Programador</dt>
+                  <dd>Implementa Newton-Raphson, Secante y Punto Fijo. Diseña la rutina de protección híbrida que detecta desbordes (|Δz| &gt; 3) y conmuta automáticamente a bisección si el residuo crece.</dd>
+                </div>
+                <div>
+                  <dt class="text-success">3. Rol Verificador / QA</dt>
+                  <dd>Ejecuta los tres métodos desde los tres arranques obligatorios (z₀ = −8, 0, 8), registra los fallos por desborde y delimita el intervalo seguro de inicialización [−1.5, 3.5].</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 3. SIMULADOR Y CALCULADORA -->
+    <section id="calculadora" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-badge">Calculadora Numérica</span>
+          <h2>Simulador de Métodos Abiertos y Protección Híbrida</h2>
+          <p>
+            Compara simultáneamente Newton-Raphson, Secante, Punto Fijo y la versión Híbrida Protegida.
+            Evalúa la respuesta desde los tres puntos de inicio obligatorios y analiza las trazas de convergencia.
+          </p>
+        </header>
+
+        <div class="row g-4 align-items-stretch">
+          <div class="col-lg-12">
+            <form id="formSim" class="panel" novalidate>
+              <h3 class="panel-title"><i class="bi bi-sliders text-primary me-2"></i>Parámetros de Entrada</h3>
+
+              <div class="row g-3">
+                <div class="col-md-3 col-sm-6">
+                  <label for="calcZ0" class="form-label">Valor Inicial z₀ (Newton / PF)</label>
+                  <input type="number" id="calcZ0" class="form-control" value="0" step="any">
+                  <div class="form-text">Prueba con −8, 0 u 8.</div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                  <label for="calcZprev" class="form-label">Valor Auxiliar z₋₁ (Secante)</label>
+                  <input type="number" id="calcZprev" class="form-control" value="-0.5" step="any">
+                  <div class="form-text">Segundo punto para la secante.</div>
+                </div>
+
+                <div class="col-md-2 col-sm-6">
+                  <label for="calcTolX" class="form-label">Tolerancia en x</label>
+                  <input type="number" id="calcTolX" class="form-control" value="0.0001" min="1e-12" step="any">
+                  <div class="form-text">|zₖ₊₁ − zₖ| ≤ tol_x.</div>
+                </div>
+
+                <div class="col-md-2 col-sm-6">
+                  <label for="calcTolF" class="form-label">Tolerancia en f(x)</label>
+                  <input type="number" id="calcTolF" class="form-control" value="0.0001" min="1e-12" step="any">
+                  <div class="form-text">|f(zₖ)| ≤ tol_f.</div>
+                </div>
+
+                <div class="col-md-2 col-sm-6">
+                  <label for="calcMax" class="form-label">Máx. Iteraciones</label>
+                  <input type="number" id="calcMax" class="form-control" value="100" min="1" max="1000" step="10">
+                  <div class="form-text">Límite de salvaguarda.</div>
+                </div>
+              </div>
+
+              <!-- Presets rápidos -->
+              <div class="d-flex flex-wrap align-items-center gap-2 mt-3 pt-2 border-top">
+                <span class="small text-secondary fw-semibold">Escenarios del Laboratorio:</span>
+                <button type="button" class="btn btn-outline-secondary btn-sm preset-btn" data-z="-8" data-zp="-8.5">
+                  <i class="bi bi-arrow-left-circle me-1"></i>Inicio z₀ = −8 (Catapulta)
+                </button>
+                <button type="button" class="btn btn-outline-primary btn-sm preset-btn" data-z="0" data-zp="-0.5">
+                  <i class="bi bi-bullseye me-1"></i>Inicio z₀ = 0 (Óptimo)
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm preset-btn" data-z="8" data-zp="7.5">
+                  <i class="bi bi-arrow-right-circle me-1"></i>Inicio z₀ = 8 (Saturación)
+                </button>
+              </div>
+
+              <div id="calcError" class="form-error mt-3" role="alert" hidden></div>
+
+              <div class="d-flex flex-wrap gap-2 mt-4">
+                <button type="submit" class="btn btn-primary" id="btnEjecutar">
+                  <i class="bi bi-play-fill me-1" aria-hidden="true"></i>Ejecutar Simulación Comparativa
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnReset">
+                  <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Restablecer
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnCsv" disabled>
+                  <i class="bi bi-filetype-csv me-1" aria-hidden="true"></i>Exportar Traza CSV
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnInforme" disabled>
+                  <i class="bi bi-download me-1" aria-hidden="true"></i>Informe Técnico TXT
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- RESULTADOS -->
+        <div id="simResultados" class="results" hidden>
+
+          <h3 class="subhead"><i class="bi bi-speedometer2 text-primary me-2"></i>Resultados del Benchmark Numérico</h3>
+
+          <!-- Métricas Clave -->
+          <div class="metrics" aria-label="Métricas de convergencia">
+            <div class="metric">
+              <span class="metric-label">Raíz Analítica de Referencia z*</span>
+              <span class="metric-value" id="mRaizRef">1.58563</span>
+              <span class="metric-unit">ln(83/17) exacta</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Iteraciones Newton</span>
+              <span class="metric-value" id="mIterNewton">—</span>
+              <span class="metric-unit" id="mEstadoNewton">Evaluando</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Iteraciones Secante</span>
+              <span class="metric-value" id="mIterSecante">—</span>
+              <span class="metric-unit" id="mEstadoSecante">Evaluando</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Protección Híbrida</span>
+              <span class="metric-value" id="mIterHibrido">—</span>
+              <span class="metric-unit text-success fw-bold">Convergencia Garantizada</span>
+            </div>
+          </div>
+
+          <!-- Tabla de Resultados Comparativos -->
+          <div class="table-responsive">
+            <table class="table data-table results-table align-middle mb-0">
+              <caption class="visually-hidden">Resultados comparativos de métodos abiertos</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Método Algorítmico</th>
+                  <th scope="col" class="num">Raíz Estimada (z*)</th>
+                  <th scope="col" class="num">Iteraciones (k)</th>
+                  <th scope="col" class="num">Residuo Final |f(z)|</th>
+                  <th scope="col" class="num">Error Final |Δz|</th>
+                  <th scope="col" class="num">Tiempo (ms)</th>
+                  <th scope="col">Diagnóstico y Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tablaBenchmark"></tbody>
+            </table>
+          </div>
+
+          <p class="table-note mt-2">
+            <i class="bi bi-info-circle me-1"></i> El Punto Fijo emplea la función relajada <code>g(z) = z − 4·f(z)</code>, diseñada para cumplir la condición de contracción en la cuenca de atracción.
+          </p>
+
+          <div class="row g-4 mt-2">
+            <div class="col-lg-7">
+              <h3 class="subhead"><i class="bi bi-clipboard-pulse text-primary me-2"></i>Diagnóstico Numérico Detallado</h3>
+              <ul id="diagnostico" class="diagnosis mb-0"></ul>
+            </div>
+
+            <div class="col-lg-5">
+              <div class="panel h-100 bg-white">
+                <h3 class="subhead"><i class="bi bi-lightbulb text-warning me-2"></i>Recomendación para Ingeniería</h3>
+                <div id="cajaRecomendacion"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Historial de Iteraciones Detallado -->
+          <article class="panel mt-4">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+              <div>
+                <h4 class="panel-title mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Historial de Iteraciones Paso a Paso</h4>
+                <span class="text-secondary small">Traza completa con evaluación de derivadas, cocientes incrementales y banderas de rescate</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <label for="historyMethod" class="form-label mb-0 small text-secondary">Ver historial de:</label>
+                <select id="historyMethod" class="form-select form-select-sm font-mono" style="width: auto;">
+                  <option value="newton">Newton-Raphson</option>
+                  <option value="secante">Secante</option>
+                  <option value="puntofijo">Punto Fijo</option>
+                  <option value="hibrido">Newton Híbrido Protegido</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0" id="historyTable">
+                <thead>
+                  <tr>
+                    <th scope="col">k</th>
+                    <th scope="col" class="num">z_k</th>
+                    <th scope="col" class="num">f(z_k)</th>
+                    <th scope="col" class="num">f′(z_k) o Pendiente</th>
+                    <th scope="col" class="num">Paso Δz</th>
+                    <th scope="col" class="num">Error |z_k − z*|</th>
+                    <th scope="col">Operación / Nota</th>
+                  </tr>
+                </thead>
+                <tbody id="historyBody"></tbody>
+              </table>
+            </div>
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. GRÁFICA -->
+    <section id="grafico" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-badge">Análisis de Convergencia</span>
+          <h2>Curva Sigmoidal y Convergencia Logarítmica</h2>
+          <p>
+            Inspecciona visualmente la geometría del método: la recta tangente trazada en cada iteración
+            frente a la curva y la comparativa de velocidad de reducción del error en escala logarítmica.
+          </p>
+        </header>
+
+        <div class="panel">
+          <div class="chart-controls">
+            <div class="d-flex flex-wrap gap-3 align-items-center">
+              <div>
+                <label for="modoGrafico" class="form-label mb-0 small text-secondary me-2">Vista:</label>
+                <select id="modoGrafico" class="form-select form-select-sm d-inline-block w-auto">
+                  <option value="convergencia">Convergencia del Error |z_k − z*| por Iteración</option>
+                  <option value="funcion">Curva f(z) = σ(z) − 0.83 y Tangente Inicial</option>
+                </select>
+              </div>
+
+              <div class="form-check form-switch mb-0" id="contenedorLog">
+                <input class="form-check-input" type="checkbox" role="switch" id="logScale" checked>
+                <label class="form-check-label small" for="logScale">Escala logarítmica en el eje Y</label>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-sm" id="btnGrafico">
+              <i class="bi bi-graph-up me-2" aria-hidden="true"></i>Actualizar gráfico
+            </button>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="errorChart" role="img" aria-label="Gráfico de convergencia de métodos abiertos"></canvas>
+            <p id="chartVacio" class="chart-empty">Pulsa «Actualizar gráfico» para dibujar la vista elegida.</p>
+          </div>
+
+          <p class="table-note mb-0" id="notaGrafico">
+            La vista logarítmica permite evidenciar la pendiente duplicada característica de la convergencia cuadrática de Newton frente al avance lineal de Punto Fijo.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 5. TEST TEÓRICO PREVIO -->
+    <section id="test-teorico" class="section section-alt">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-badge">Cuestionario Teórico</span>
+          <h2>Relación de conceptos</h2>
+          <p>
+            Demuestra tu dominio conceptual sobre el comportamiento de convergencia, requerimientos y patologías numéricas de los métodos abiertos.
+          </p>
+        </header>
+        <div class="row justify-content-center">
+          <div class="col-xl-9 col-lg-10">
+            <div id="cajaTestTeorico" class="panel bg-white shadow-sm">
+              <!-- Inyectado dinámicamente desde main.js -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. AUTOEVALUACIÓN Y PROBLEMAS -->
+    <section id="ejercicios" class="section">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-badge">Autoevaluación de conocimientos</span>
+          <h2>Problemas de Aplicación Práctica</h2>
+          <p>
+            Dos ejercicios independientes basados en los casos de estudio de la guía oficial de laboratorio.
+            Las preguntas son autónomas, usan datos aleatorios y no dependen entre sí. En cada una puedes
+            leer todo el desarrollo o practicarlo en una guía interactiva por pasos.
+          </p>
+        </header>
+
+        <div class="row justify-content-center">
+          <div class="col-xl-10">
+
+            <!-- Selector de Ejercicio Independiente -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+              <div id="selectorEjercicios" class="btn-group shadow-sm" role="group" aria-label="Selector de Ejercicio">
+                <button type="button" class="btn btn-primary" data-ej-i="0">
+                  <i class="bi bi-lightning-charge me-1"></i> Paso de Newton y Riesgo de Catapulta
+                </button>
+                <button type="button" class="btn btn-outline-primary" data-ej-i="1">
+                  <i class="bi bi-arrow-repeat me-1"></i> Punto Fijo y Condición de Lipschitz
+                </button>
+              </div>
+
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="btnNuevoCaso">
+                <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>Generar nuevos valores aleatorios
+              </button>
+            </div>
+
+            <!-- Contexto del Ejercicio Seleccionado -->
+            <div class="panel scenario mb-4" id="escenarioEjercicio"></div>
+
+            <!-- Contenedor de Preguntas Autónomas (2 por ejercicio) -->
+            <div id="preguntasContainer" class="d-flex flex-column gap-4"></div>
+
+            <div id="resumenEjercicio" class="panel summary mt-4" hidden aria-live="polite"></div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
-  <footer class="footer"><div class="container footer-inner"><p>Métodos abiertos · Métodos Numéricos</p><a href="../index.html">Volver al portal de cursos</a></div></footer>
+
+  <!-- PIE DE PÁGINA -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="fw-bold mb-0 text-dark">MetNum · Métodos Numéricos para Ingeniería</p>
+        <small class="text-muted">Módulo 03: Rapidez y Riesgo: Métodos Abiertos, Punto Fijo, Newton-Raphson y Secante.</small>
+      </div>
+      <div class="d-flex gap-3 text-muted small align-items-center">
+        <a href="../index.html" class="text-decoration-none text-muted">← Volver al Portal de Cursos</a>
+        <span>•</span>
+        <a href="#hero" class="text-decoration-none text-muted">Volver al Inicio ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- BOTÓN VOLVER ARRIBA -->
+  <a href="#hero" id="scrollTopBtn" class="back-to-top" aria-label="Volver al inicio">
+    <i class="bi bi-arrow-up-short" aria-hidden="true"></i>
+  </a>
+
+  <!-- LIBRERÍAS EXTERNAS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Nuestro JavaScript -->
   <script src="main.js" defer></script>
+
 </body>
 </html>
