@@ -399,6 +399,9 @@ iterar(metodo, A, b, x0, {omega, tol, maxIter})
                 <button type="button" class="btn btn-outline-secondary" id="btnInforme" disabled>
                   <i class="bi bi-download me-1" aria-hidden="true"></i>Descargar Informe
                 </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnCsv" disabled>
+                  <i class="bi bi-filetype-csv me-1" aria-hidden="true"></i>Exportar CSV
+                </button>
               </div>
             </form>
           </div>
@@ -518,7 +521,7 @@ iterar(metodo, A, b, x0, {omega, tol, maxIter})
 
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
               <h5 class="minor-head mb-0">Ranking de eficiencia según criterio</h5>
-              <div class="d-flex align-items-center gap-2">
+              <div class="d-flex align-items-center gap-2 criterio-controls">
                 <label for="criterioReco" class="form-label mb-0 small text-secondary">Criterio:</label>
                 <select id="criterioReco" class="form-select form-select-sm" style="width: auto;">
                   <option value="rondas">Rondas de comunicación (iteraciones × rondas)</option>
@@ -670,10 +673,11 @@ iterar(metodo, A, b, x0, {omega, tol, maxIter})
         <p class="fw-bold mb-0 text-dark">MetNum · Métodos Numéricos para Ingeniería</p>
         <small class="text-muted">Módulo 05: Sistemas Lineales Iterativos, Jacobi, Gauss–Seidel, SOR y Radio Espectral.</small>
       </div>
-      <div class="d-flex gap-3 text-muted small align-items-center">
+      <div class="d-flex flex-wrap gap-3 text-muted small align-items-center">
         <a href="../index.html" class="text-decoration-none text-muted">← Volver al Portal de Cursos</a>
         <span>•</span>
         <a href="#hero" class="text-decoration-none text-muted">Volver al Inicio ↑</a>
+        <a href="iterativos.js" download class="btn btn-outline-primary btn-sm">Descargar código JavaScript</a>
       </div>
     </div>
   </footer>

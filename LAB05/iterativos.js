@@ -623,6 +623,7 @@ function configurarSimulador() {
   });
 
   $("btnInforme").addEventListener("click", descargarInforme);
+  $("btnCsv").addEventListener("click", descargarCsv);
 
   $("criterioReco").addEventListener("change", () => {
     if (ultimo) pintarRecomendacion(ultimo);
@@ -764,6 +765,7 @@ function ejecutarSimulador() {
     mostrarError("La matriz A es singular: el sistema no tiene solución única, así que no hay nada que converger.");
     $("simResultados").hidden = true;
     $("btnInforme").disabled = true;
+    $("btnCsv").disabled = true;
     ultimo = null;
     return;
   }
@@ -814,6 +816,7 @@ function ejecutarSimulador() {
 
   $("simResultados").hidden = false;
   $("btnInforme").disabled = false;
+  $("btnCsv").disabled = false;
 
   if ($("errorChart") && typeof Chart !== "undefined") generarGrafico();
 }
@@ -1222,6 +1225,54 @@ function pintarRecomendacion(d) {
 // ========================================
 // 9. INFORME DESCARGABLE
 // ========================================
+
+function descargarCsv() {
+  if (!ultimo) return;
+
+  const cabeceras = [
+    "Método", "ω", "Inicio",
+    "x0_1", "x0_2", "x0_3", "x0_4",
+    "Iteración", "Residuo relativo", "Cambio relativo",
+    "x_final_1", "x_final_2", "x_final_3", "x_final_4",
+    "Radio espectral", "Estado", "Iteraciones totales"
+  ];
+  const escapar = valor => `"${String(valor).replace(/"/g, '""')}"`;
+  const filas = [];
+
+  ultimo.configs.forEach(c => {
+    ultimo.corridas[c.id].forEach((r, inicio) => {
+      r.historial.forEach((paso, indice) => {
+        const esFinal = indice === r.historial.length - 1;
+        filas.push([
+          c.etiqueta,
+          c.omega,
+          inicio === 0 ? "A" : "B",
+          ...ultimo.inicios[inicio],
+          paso.k,
+          paso.residuo,
+          Number.isFinite(paso.cambio) ? paso.cambio : "",
+          ...(esFinal ? r.x : ["", "", "", ""]),
+          Number.isFinite(c.rho) ? c.rho : "",
+          r.converge ? "Converge" : r.diverge ? "Diverge" : "No converge",
+          r.iteraciones
+        ]);
+      });
+    });
+  });
+
+  const contenido = "\ufeff" + [cabeceras, ...filas]
+    .map(fila => fila.map(escapar).join(","))
+    .join("\r\n");
+  const enlace = document.createElement("a");
+  const url = URL.createObjectURL(new Blob([contenido], { type: "text/csv;charset=utf-8" }));
+
+  enlace.href = url;
+  enlace.download = "iteraciones_sistemas.csv";
+  document.body.appendChild(enlace);
+  enlace.click();
+  enlace.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 function descargarInforme() {
   if (!ultimo) return;

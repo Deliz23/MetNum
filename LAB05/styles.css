@@ -4,3 +4,20 @@
 =================================================== */
 
 @import "../shared/base.css";
+
+.criterio-controls {
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+
+#criterioReco {
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 767.98px) {
+  #criterioReco {
+    width: 100% !important;
+  }
+}

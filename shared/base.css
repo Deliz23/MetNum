@@ -983,6 +983,20 @@ code {
   border-bottom: 1px solid var(--line);
 }
 
+.chart-controls > .d-flex {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.chart-controls > .d-flex > div {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.chart-controls .form-select {
+  max-width: 100%;
+}
+
 .chart-container {
   position: relative;
   width: 100%;
@@ -1325,12 +1339,16 @@ code {
 .footer-inner {
   display: flex;
   flex-wrap: wrap;
+  min-width: 0;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
 }
 
 .footer p {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
   margin: 0;
   color: var(--ink-soft);
 }
@@ -1385,6 +1403,13 @@ code {
   .readout-inputs {
     grid-template-columns: 1fr;
   }
+  .footer-inner > .d-flex {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .footer-inner > .d-flex .btn {
+    white-space: normal;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1394,4 +1419,24 @@ code {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+.katex {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  vertical-align: bottom;
+}
+
+.katex-display {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.katex-display > .katex {
+  max-width: none;
+  overflow: visible;
 }

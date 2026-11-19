@@ -530,6 +530,7 @@ function configurarSimulador() {
   });
 
   $("btnInforme").addEventListener("click", descargarInforme);
+  $("btnCsv").addEventListener("click", descargarCsv);
 
   ejecutarSimulador();
 }
@@ -620,6 +621,7 @@ function ejecutarSimulador() {
     );
     $("simResultados").hidden = true;
     $("btnInforme").disabled = true;
+    $("btnCsv").disabled = true;
     ultimo = null;
     return;
   }
@@ -696,6 +698,7 @@ function ejecutarSimulador() {
 
   $("simResultados").hidden = false;
   $("btnInforme").disabled = false;
+  $("btnCsv").disabled = false;
 
   if ($("errorChart") && typeof Chart !== "undefined") generarGrafico();
 }
@@ -1014,6 +1017,44 @@ function pintarEvidencia(d) {
 // ========================================
 // 8. INFORME DESCARGABLE
 // ========================================
+
+function descargarCsv() {
+  if (!ultimo) return;
+
+  const cabeceras = [
+    "T (sol/s)",
+    ...ultimo.A.flatMap((fila, i) => fila.map((_, j) => `a${i + 1}${j + 1}`)),
+    "b1", "b2", "b3", "b4",
+    "x1 (sol/s)", "x2 (sol/s)", "x3 (sol/s)", "x4 (sol/s)",
+    "Residuo norma infinito", "Residuo relativo", "Diferencia Gauss-Jordan",
+    "Sensibilidad (%)", "Cota de sensibilidad (%)", "Factible"
+  ];
+  const escapar = valor => `"${String(valor).replace(/"/g, '""')}"`;
+  const filas = ultimo.casos.map(c => [
+    c.T,
+    ...ultimo.A.flat(),
+    ...c.b,
+    ...c.x,
+    c.normaR,
+    c.resRel,
+    c.dif,
+    c.sens * 100,
+    c.cota * 100,
+    c.factible ? "Sí" : "No"
+  ]);
+  const contenido = "\ufeff" + [cabeceras, ...filas]
+    .map(fila => fila.map(escapar).join(","))
+    .join("\r\n");
+  const enlace = document.createElement("a");
+  const url = URL.createObjectURL(new Blob([contenido], { type: "text/csv;charset=utf-8" }));
+
+  enlace.href = url;
+  enlace.download = "resultados_sistemas_directos.csv";
+  document.body.appendChild(enlace);
+  enlace.click();
+  enlace.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 function textoMatriz(M, dec = 4) {
   const celdas = M.map(fila => fila.map(v => (Math.abs(v) < 0.5 * 10 ** -dec ? 0 : v).toFixed(dec)));
