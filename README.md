@@ -70,7 +70,11 @@ Implementar y analizar diferentes métodos numéricos mediante herramientas comp
 
 # Contenido del proyecto
 
-El proyecto está dividido en tres temas principales correspondientes a los informes desarrollados durante el curso.
+La portada del portal web organiza el sílabo en **seis capítulos y dieciséis temas**. Cada capítulo reúne sus temas y cada tarjeta abre directamente su página.
+
+La estructura del portal se define en `curriculum.js`. Los temas que ya tienen una página enlazan directamente con ella. Para los temas pendientes se crearon archivos HTML vacíos en `TEMAS/`, listos para completar más adelante.
+
+Los informes y módulos implementados en este repositorio incluyen los siguientes contenidos:
 
 ---
 

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Temas y módulos del capítulo de Métodos Numéricos seleccionado.">
+    <title>Capítulo · MetNum</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            wine: '#722f37',
+                            wineHover: '#58232a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="chapter" class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+    <header class="bg-slate-950 text-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 font-extrabold text-xl">
+                <span class="w-9 h-9 rounded-lg bg-brand-wine flex items-center justify-center"><i class="fa-solid fa-square-root-variable" aria-hidden="true"></i></span>
+                <span>Met<span class="text-indigo-400">Num</span></span>
+            </a>
+            <a href="index.html#capitulos" class="text-sm text-slate-200 hover:text-white"><i class="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i>Capítulos</a>
+        </div>
+    </header>
+    <main id="chapter-content" class="w-full max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14 flex-1">
+        <p class="text-slate-600" role="status">Cargando capítulo…</p>
+    </main>
+    <footer class="bg-slate-900 text-slate-400 py-6 mt-10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 text-xs">&copy; 2026 MetNum · Métodos Numéricos</div>
+    </footer>
+    <script src="curriculum.js"></script>
+    <script src="course-pages.js"></script>
+</body>
+</html>

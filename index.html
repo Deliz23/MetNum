@@ -3,23 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="MetNum: Plataforma interactiva de Métodos Numéricos para estudiantes y profesionales de Ingeniería. Teoría rigurosa, casos prácticos, simuladores, gráficas y problemas propuestos.">
-    <title>MetNum · Métodos Numéricos para Ingeniería</title>
-    
-    <!-- Tailwind CSS -->
+    <meta name="description" content="Explora los seis capítulos del curso de Métodos Numéricos y accede a sus temas y módulos interactivos.">
+    <title>MetNum · Capítulos del curso</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts Inter & Plex Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Archivo CSS Personalizado -->
     <link rel="stylesheet" href="styles.css">
-
     <script>
         tailwind.config = {
             theme: {
@@ -46,546 +37,107 @@
     </script>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased flex flex-col min-h-screen">
-
-    <!-- Header / Navbar integrado en el Hero -->
-    <header class="absolute top-0 left-0 right-0 z-50 transition-all duration-300">
+    <header class="absolute top-0 left-0 right-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
-                <!-- Logo -->
-                <a href="#inicio" class="flex items-center space-x-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-brand-wine flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-brand-wine/30 transition-transform group-hover:scale-105">
-                        <i class="fa-solid fa-square-root-variable"></i>
-                    </div>
+                <a href="#inicio" class="flex items-center space-x-3" aria-label="MetNum, inicio">
+                    <span class="w-10 h-10 rounded-xl bg-brand-wine flex items-center justify-center text-white text-xl shadow-lg">
+                        <i class="fa-solid fa-square-root-variable" aria-hidden="true"></i>
+                    </span>
                     <span class="text-2xl font-extrabold text-white tracking-tight">Met<span class="text-indigo-400">Num</span></span>
                 </a>
-
-                <!-- Navigation Links -->
-                <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-200">
+                <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-200" aria-label="Navegación principal">
                     <a href="#inicio" class="hover:text-white transition-colors">Inicio</a>
-                    <a href="#cursos" class="hover:text-white transition-colors">Temas del Curso</a>
-                    <a href="#cursos" class="px-4 py-2 bg-brand-wine hover:bg-brand-wineHover text-white rounded-lg text-xs font-semibold tracking-wide uppercase shadow-md transition-all">
-                        Explorar Cursos
-                    </a>
+                    <a href="#capitulos" class="hover:text-white transition-colors">Capítulos</a>
                 </nav>
-
-                <!-- Mobile Menu Button -->
-                <button id="mobile-menu-btn" class="md:hidden text-white text-2xl focus:outline-none p-2" aria-label="Abrir menú">
-                    <i class="fa-solid fa-bars"></i>
+                <button id="mobile-menu-btn" class="md:hidden text-white text-2xl focus:outline-none p-2" aria-label="Abrir menú" aria-expanded="false">
+                    <i class="fa-solid fa-bars" aria-hidden="true"></i>
                 </button>
             </div>
-
-            <!-- Mobile Dropdown -->
-            <div id="mobile-menu" class="hidden md:hidden bg-slate-900/95 backdrop-blur-md rounded-2xl p-4 border border-slate-800 text-white space-y-3 mt-2">
+            <nav id="mobile-menu" class="hidden md:hidden bg-slate-900/95 rounded-2xl p-4 border border-slate-800 text-white space-y-3 mt-2" aria-label="Navegación móvil">
                 <a href="#inicio" class="block py-2 px-3 rounded-lg hover:bg-slate-800 text-sm">Inicio</a>
-                <a href="#cursos" class="block py-2 px-3 rounded-lg hover:bg-slate-800 text-sm">Temas del Curso</a>
-            </div>
+                <a href="#capitulos" class="block py-2 px-3 rounded-lg hover:bg-slate-800 text-sm">Capítulos</a>
+            </nav>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section id="inicio" class="relative math-overlay pt-32 pb-44 lg:pt-40 lg:pb-52 overflow-hidden">
-        <!-- Floating Math Elements / Decorative graphics -->
-        <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20 select-none">
-            <div class="absolute top-1/4 left-10 text-white text-3xl font-mono">f(x) = 0</div>
-            <div class="absolute top-1/3 right-12 text-indigo-400 text-4xl font-mono">xₖ₊₁ = xₖ − f(xₖ)/f'(xₖ)</div>
-            <div class="absolute bottom-1/3 left-1/4 text-white text-3xl font-mono">‖Ax − b‖ &lt; ε</div>
-            <div class="absolute top-1/2 right-1/4 text-indigo-300 text-4xl font-mono">Ax = b</div>
-            <div class="absolute bottom-10 right-10 text-slate-400 text-2xl font-mono">ρ(T) &lt; 1</div>
-        </div>
-
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <!-- Badge -->
-            
-            <!-- Main Title -->
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight max-w-4xl mx-auto">
-                Aprende y Aplica los <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-indigo-400 to-sky-300">Métodos Numéricos</span>
-            </h1>
-
-            <!-- Subtitle -->
-            <p class="mt-6 text-base sm:text-lg text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed">
-                Diseñado para estudiantes y profesionales de ingeniería. Domina el análisis de errores, sistemas lineales, raíces no lineales, interpolación y ecuaciones diferenciales con simuladores interactivos y problemas aplicados paso a paso.
-            </p>
-
-            <!-- CTA Button -->
-            <div class="mt-8 flex justify-center items-center">
-                <a href="#cursos" class="w-full sm:w-auto px-8 py-4 bg-brand-wine hover:bg-brand-wineHover text-white font-bold rounded-xl shadow-lg shadow-brand-wine/40 transition-all transform hover:-translate-y-0.5 text-center uppercase tracking-wide text-xs">
-                    Explorar Temas del Curso <i class="fa-solid fa-arrow-down ml-2"></i>
+    <main class="flex-1">
+        <section id="inicio" class="relative math-overlay pt-32 pb-40 lg:pt-40 lg:pb-48 overflow-hidden">
+            <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20 select-none" aria-hidden="true">
+                <span class="absolute top-1/4 left-10 text-white text-3xl font-mono">f(x) = 0</span>
+                <span class="absolute top-1/3 right-12 text-indigo-400 text-4xl font-mono">xₖ₊₁ = xₖ − f(xₖ)/f'(xₖ)</span>
+                <span class="absolute bottom-1/3 left-1/4 text-white text-3xl font-mono">‖Ax − b‖ &lt; ε</span>
+            </div>
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+                <p class="text-indigo-200 text-sm font-semibold uppercase tracking-[0.2em] mb-4">Métodos Numéricos</p>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
+                    Explora los seis capítulos del curso
+                </h1>
+                
+                <a href="#capitulos" class="inline-block mt-8 px-8 py-4 bg-brand-wine hover:bg-brand-wineHover text-white font-bold rounded-xl shadow-lg transition-all uppercase tracking-wide text-xs">
+                    Ver capítulos <i class="fa-solid fa-arrow-down ml-2" aria-hidden="true"></i>
                 </a>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Cards Section -->
-    <section id="cursos" class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 sm:-mt-28 pb-16">
-        
-        <!-- Controls & Filters -->
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-            <div>
-                <h2 class="text-2xl font-bold text-slate-900">Temario del Curso</h2>
+        <section id="capitulos" class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 pb-16" aria-labelledby="chapters-heading">
+            <div class="mb-8">
+                <h2 id="chapters-heading" class="text-2xl font-bold text-slate-900">Capítulos del curso</h2>
+                <p class="mt-2 text-sm text-slate-600">Selecciona un capítulo para consultar su temario.</p>
             </div>
-        </div>
-
-        <!-- 10 Main Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            
-            <!-- Curso 1: Teoría de Errores (Disponible) -->
-            <div class="course-card disponible basico bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between border border-slate-200 group transform hover:-translate-y-1">
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="inline-block bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            TEMA I
-                        </span>
-                        <span class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Interactivo
-                        </span>
-                    </div>
-
-                    <div class="w-14 h-14 rounded-2xl bg-rose-50 text-brand-wine flex items-center justify-center text-2xl mb-4 group-hover:bg-brand-wine group-hover:text-white transition-colors duration-300 shadow-inner">
-                        <i class="fa-solid fa-calculator"></i>
-                    </div>
-
-                    <h3 class="text-lg font-bold text-slate-900 mb-2 leading-snug">
-                        Teoría de Errores y Estabilidad
-                    </h3>
-
-                    <p class="text-slate-600 text-xs leading-relaxed mb-4">
-                        Error absoluto, relativo y porcentual. Coma flotante IEEE 754, absorción numérica y algoritmos de suma compensada (Kahan y Neumaier).
-                    </p>
-                </div>
-
-                <div>
-                    <div class="border-t border-slate-100 pt-3 mb-4 flex justify-between items-center text-xs text-slate-500 font-medium">
-                        <span><i class="fa-solid fa-microchip mr-1"></i> Float32 vs Float64</span>
-                        <span><i class="fa-solid fa-list-check mr-1"></i> 5 Ejercicios</span>
-                    </div>
-
-                    <a href="LAB01/TeoriaErrores.html" 
-                        class="w-full py-3 bg-brand-wine hover:bg-brand-wineHover text-white text-xs font-semibold rounded-xl transition-colors duration-200 shadow-md text-center block uppercase tracking-wider">
-                        Iniciar Módulo <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                <a href="capitulo.html?capitulo=1" class="group bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all border border-slate-200 hover:-translate-y-1">
+                    <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-wider">Capítulo I</span>
+                    <div class="w-14 h-14 rounded-2xl bg-rose-50 text-brand-wine flex items-center justify-center text-2xl mt-5 mb-4 group-hover:bg-brand-wine group-hover:text-white transition-colors" aria-hidden="true"><i class="fa-solid fa-calculator"></i></div>
+                    <h3 class="text-lg font-bold text-slate-900">Teoría de errores</h3>
+                    <p class="mt-2 text-sm text-slate-600">Aproximación, exactitud, precisión y errores numéricos.</p>
+                    <span class="mt-5 inline-flex items-center text-sm font-semibold text-brand-wine">Ver 2 temas <i class="fa-solid fa-arrow-right ml-2" aria-hidden="true"></i></span>
+                </a>
+                <a href="capitulo.html?capitulo=2" class="group bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all border border-slate-200 hover:-translate-y-1">
+                    <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-wider">Capítulo II</span>
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mt-5 mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors" aria-hidden="true"><i class="fa-solid fa-arrows-to-dot"></i></div>
+                    <h3 class="text-lg font-bold text-slate-900">Solución de ecuaciones no lineales</h3>
+                    <p class="mt-2 text-sm text-slate-600">Métodos gráficos, cerrados, abiertos y raíces de polinomios.</p>
+                    <span class="mt-5 inline-flex items-center text-sm font-semibold text-brand-wine">Ver 3 temas <i class="fa-solid fa-arrow-right ml-2" aria-hidden="true"></i></span>
+                </a>
+                <a href="capitulo.html?capitulo=3" class="group bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all border border-slate-200 hover:-translate-y-1">
+                    <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-wider">Capítulo III</span>
+                    <div class="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-2xl mt-5 mb-4 group-hover:bg-sky-600 group-hover:text-white transition-colors" aria-hidden="true"><i class="fa-solid fa-table-cells-large"></i></div>
+                    <h3 class="text-lg font-bold text-slate-900">Solución de sistemas de ecuaciones</h3>
+                    <p class="mt-2 text-sm text-slate-600">Métodos directos e iterativos para sistemas lineales.</p>
+                    <span class="mt-5 inline-flex items-center text-sm font-semibold text-brand-wine">Ver 2 temas <i class="fa-solid fa-arrow-right ml-2" aria-hidden="true"></i></span>
+                </a>
+                <a href="capitulo.html?capitulo=4" class="group bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all border border-slate-200 hover:-translate-y-1">
+                    <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-wider">Capítulo IV</span>
+                    <div class="w-14 h-14 rounded-2xl bg-violet-50 text-violet-600 flex items-center justify-center text-2xl mt-5 mb-4 group-hover:bg-violet-600 group-hover:text-white transition-colors" aria-hidden="true"><i class="fa-solid fa-bezier-curve"></i></div>
+                    <h3 class="text-lg font-bold text-slate-900">Ajuste de curvas e interpolación</h3>
+                    <p class="mt-2 text-sm text-slate-600">Regresión, interpolación polinómica, splines y Fourier.</p>
+                    <span class="mt-5 inline-flex items-center text-sm font-semibold text-brand-wine">Ver 4 temas <i class="fa-solid fa-arrow-right ml-2" aria-hidden="true"></i></span>
+                </a>
+                <a href="capitulo.html?capitulo=5" class="group bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all border border-slate-200 hover:-translate-y-1">
+                    <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-wider">Capítulo V</span>
+                    <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl mt-5 mb-4 group-hover:bg-amber-500 group-hover:text-white transition-colors" aria-hidden="true"><i class="fa-solid fa-wave-square"></i></div>
+                    <h3 class="text-lg font-bold text-slate-900">Integración y derivación numérica</h3>
+                    <p class="mt-2 text-sm text-slate-600">Cuadratura numérica y aproximación de derivadas.</p>
+                    <span class="mt-5 inline-flex items-center text-sm font-semibold text-brand-wine">Ver 2 temas <i class="fa-solid fa-arrow-right ml-2" aria-hidden="true"></i></span>
+                </a>
+                <a href="capitulo.html?capitulo=6" class="group bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all border border-slate-200 hover:-translate-y-1">
+                    <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-wider">Capítulo VI</span>
+                    <div class="w-14 h-14 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-2xl mt-5 mb-4 group-hover:bg-cyan-600 group-hover:text-white transition-colors" aria-hidden="true"><i class="fa-solid fa-temperature-half"></i></div>
+                    <h3 class="text-lg font-bold text-slate-900">Ecuaciones diferenciales</h3>
+                    <p class="mt-2 text-sm text-slate-600">Ecuaciones ordinarias, métodos de Euler y Runge-Kutta, e introducción a EDP.</p>
+                    <span class="mt-5 inline-flex items-center text-sm font-semibold text-brand-wine">Ver 3 temas <i class="fa-solid fa-arrow-right ml-2" aria-hidden="true"></i></span>
+                </a>
             </div>
+        </section>
+    </main>
 
-            <!-- Curso 2: Métodos Cerrados -->
-            <div class="course-card disponible basico bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between border border-slate-200 group transform hover:-translate-y-1">
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            TEMA II
-                        </span>
-                        <span class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Interactivo
-                        </span>
-                    </div>
-
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-inner">
-                        <i class="fa-solid fa-arrows-to-dot"></i>
-                    </div>
-
-                    <h3 class="text-lg font-bold text-slate-900 mb-2 leading-snug">
-                        Métodos Cerrados para Raíces
-                    </h3>
-
-                    <p class="text-slate-600 text-xs leading-relaxed mb-4">
-                        Bisección y Falsa Posición para encontrar raíces dentro de un intervalo, analizar el error y justificar una decisión operativa.
-                    </p>
-                </div>
-
-                <div>
-                    <div class="border-t border-slate-100 pt-3 mb-4 flex justify-between items-center text-xs text-slate-500 font-medium">
-                        <span><i class="fa-solid fa-chart-line mr-1"></i> Bisección / Falsa Posición</span>
-                        <span><i class="fa-solid fa-list-check mr-1"></i> 4 Ejercicios</span>
-                    </div>
-
-                    <a href="LAB02/EcuacionesNoLineales.html"
-                            class="w-full py-3 bg-slate-800 hover:bg-indigo-600 text-white text-xs font-semibold rounded-xl transition-colors duration-200 shadow-md text-center block uppercase tracking-wider">
-                        Iniciar Módulo <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Curso 3: Métodos Abiertos -->
-            <div class="course-card disponible basico bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between border border-slate-200 group transform hover:-translate-y-1">
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            TEMA III
-                        </span>
-                        <span class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Interactivo
-                        </span>
-                    </div>
-
-                    <div class="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-2xl mb-4 group-hover:bg-sky-600 group-hover:text-white transition-colors duration-300 shadow-inner">
-                        <i class="fa-solid fa-bolt-lightning"></i>
-                    </div>
-
-                    <h3 class="text-lg font-bold text-slate-900 mb-2 leading-snug">
-                        Métodos Abiertos para Raíces
-                    </h3>
-
-                    <p class="text-slate-600 text-xs leading-relaxed mb-4">
-                        Iteración de Punto Fijo, Newton-Raphson de convergencia cuadrática y Método de la Secante para ecuaciones trascendentes y no lineales.
-                    </p>
-                </div>
-
-                <div>
-                    <div class="border-t border-slate-100 pt-3 mb-4 flex justify-between items-center text-xs text-slate-500 font-medium">
-                        <span><i class="fa-solid fa-gauge-high mr-1"></i> Convergencia y salvaguardas</span>
-                        <span><i class="fa-solid fa-list-check mr-1"></i> 6 Ejercicios</span>
-                    </div>
-
-                    <a href="LAB03/MetodosAbiertos.html"
-                            class="w-full py-3 bg-slate-800 hover:bg-sky-600 text-white text-xs font-semibold rounded-xl transition-colors duration-200 shadow-md text-center block uppercase tracking-wider">
-                        Iniciar Módulo <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Curso 4: Sistemas Lineales Directos (Disponible) -->
-            <div class="course-card disponible avanzado bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between border border-slate-200 group transform hover:-translate-y-1">
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="inline-block bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            TEMA IV
-                        </span>
-                        <span class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Interactivo
-                        </span>
-                    </div>
-
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4 group-hover:bg-brand-wine group-hover:text-white transition-colors duration-300 shadow-inner">
-                        <i class="fa-solid fa-table-cells-large"></i>
-                    </div>
-
-                    <h3 class="text-lg font-bold text-slate-900 mb-2 leading-snug">
-                        Sistemas Lineales Directos
-                    </h3>
-
-                    <p class="text-slate-600 text-xs leading-relaxed mb-4">
-                        Eliminación Gaussiana con pivoteo parcial, factorización LU (PA = LU), cálculo de matrices inversas y análisis del número de condición κ(A).
-                    </p>
-                </div>
-
-                <div>
-                    <div class="border-t border-slate-100 pt-3 mb-4 flex justify-between items-center text-xs text-slate-500 font-medium">
-                        <span><i class="fa-solid fa-matrix mr-1"></i> Matrices 4×4</span>
-                        <span><i class="fa-solid fa-network-wired mr-1"></i> Red Eléctrica</span>
-                    </div>
-
-                    <a href="LAB04/SistemasLineales.html" 
-                        class="w-full py-3 bg-brand-wine hover:bg-brand-wineHover text-white text-xs font-semibold rounded-xl transition-colors duration-200 shadow-md text-center block uppercase tracking-wider">
-                        Iniciar Módulo <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Curso 5: Sistemas Lineales Iterativos (Disponible) -->
-            <div class="course-card disponible avanzado bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between border border-slate-200 group transform hover:-translate-y-1">
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="inline-block bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            TEMA V
-                        </span>
-                        <span class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Interactivo
-                        </span>
-                    </div>
-
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4 group-hover:bg-brand-wine group-hover:text-white transition-colors duration-300 shadow-inner">
-                        <i class="fa-solid fa-repeat"></i>
-                    </div>
-
-                    <h3 class="text-lg font-bold text-slate-900 mb-2 leading-snug">
-                        Sistemas Lineales Iterativos
-                    </h3>
-
-                    <p class="text-slate-600 text-xs leading-relaxed mb-4">
-                        Métodos de Jacobi, Gauss-Seidel y SOR (Relajación Sucesiva). Análisis de dominancia diagonal, radio espectral ρ(T) y factor óptimo ω.
-                    </p>
-                </div>
-
-                <div>
-                    <div class="border-t border-slate-100 pt-3 mb-4 flex justify-between items-center text-xs text-slate-500 font-medium">
-                        <span><i class="fa-solid fa-chart-line mr-1"></i> Jacobi / GS / SOR</span>
-                        <span><i class="fa-solid fa-temperature-half mr-1"></i> Malla Térmica</span>
-                    </div>
-
-                    <a href="LAB05/SistemasIterativos.html" 
-                        class="w-full py-3 bg-brand-wine hover:bg-brand-wineHover text-white text-xs font-semibold rounded-xl transition-colors duration-200 shadow-md text-center block uppercase tracking-wider">
-                        Iniciar Módulo <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Curso 6: Interpolación (Disponible) -->
-            <div class="course-card disponible avanzado bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between border border-slate-200 group transform hover:-translate-y-1">
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="inline-block bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            TEMA VI
-                        </span>
-                        <span class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Interactivo
-                        </span>
-                    </div>
-
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4 group-hover:bg-brand-wine group-hover:text-white transition-colors duration-300 shadow-inner">
-                        <i class="fa-solid fa-bezier-curve"></i>
-                    </div>
-
-                    <h3 class="text-lg font-bold text-slate-900 mb-2 leading-snug">
-                        Interpolación Numérica
-                    </h3>
-
-                    <p class="text-slate-600 text-xs leading-relaxed mb-4">
-                        Polinomios de Lagrange, Diferencias Divididas de Newton, Splines Cúbicos Naturales con algoritmo de Thomas y validación Leave-One-Out.
-                    </p>
-                </div>
-
-                <div>
-                    <div class="border-t border-slate-100 pt-3 mb-4 flex justify-between items-center text-xs text-slate-500 font-medium">
-                        <span><i class="fa-solid fa-chart-spline mr-1"></i> Splines Cúbicos C²</span>
-                        <span><i class="fa-solid fa-solar-panel mr-1"></i> Irradiancia Solar</span>
-                    </div>
-
-                    <a href="LAB06/interpolacion.html" 
-                        class="w-full py-3 bg-brand-wine hover:bg-brand-wineHover text-white text-xs font-semibold rounded-xl transition-colors duration-200 shadow-md text-center block uppercase tracking-wider">
-                        Iniciar Módulo <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Curso 7: Ajuste de Curvas -->
-            <div class="course-card avanzado bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between border border-slate-200 group transform hover:-translate-y-1">
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            TEMA VII
-                        </span>
-                        <span class="inline-flex items-center text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                            En Planificación
-                        </span>
-                    </div>
-
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-inner">
-                        <i class="fa-solid fa-chart-scatter"></i>
-                    </div>
-
-                    <h3 class="text-lg font-bold text-slate-900 mb-2 leading-snug">
-                        Ajuste de Curvas y Regresión
-                    </h3>
-
-                    <p class="text-slate-600 text-xs leading-relaxed mb-4">
-                        Regresión lineal y polinomial por mínimos cuadrados. Linealización de modelos exponenciales y potenciales, coeficiente de correlación R².
-                    </p>
-                </div>
-
-                <div>
-                    <div class="border-t border-slate-100 pt-3 mb-4 flex justify-between items-center text-xs text-slate-500 font-medium">
-                        <span><i class="fa-solid fa-square-root-variable mr-1"></i> Mínimos Cuadrados</span>
-                        <span><i class="fa-solid fa-chart-line mr-1"></i> R² y Residuos</span>
-                    </div>
-
-                    <button onclick="openCourseModal('Ajuste de Curvas y Regresión', 'Técnicas estadísticas y numéricas para ajustar funciones analíticas a conjuntos de datos experimentales ruidosos.', ['Regresión Lineal Simple y Ecuaciones Normales', 'Mínimos Cuadrados Polinomiales', 'Linealización de Leyes de Potencia y Exponenciales', 'Coeficiente de Determinación R² y Error Estándar', 'Problema de ingeniería: Calibración de sensores de deformación'])" 
-                            class="w-full py-3 bg-slate-800 hover:bg-indigo-600 text-white text-xs font-semibold rounded-xl transition-colors duration-200 shadow-md text-center block uppercase tracking-wider">
-                        Ver Contenido <i class="fa-solid fa-circle-info ml-1"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Curso 8: Derivación Numérica -->
-            <div class="course-card avanzado bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between border border-slate-200 group transform hover:-translate-y-1">
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            TEMA VIII
-                        </span>
-                        <span class="inline-flex items-center text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                            En Planificación
-                        </span>
-                    </div>
-
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-inner">
-                        <i class="fa-solid fa-arrow-trend-up"></i>
-                    </div>
-
-                    <h3 class="text-lg font-bold text-slate-900 mb-2 leading-snug">
-                        Diferenciación Numérica
-                    </h3>
-
-                    <p class="text-slate-600 text-xs leading-relaxed mb-4">
-                        Diferencias finitas progresivas, regresivas y centradas de orden O(h) y O(h²). Extrapolación de Richardson y segundas derivadas.
-                    </p>
-                </div>
-
-                <div>
-                    <div class="border-t border-slate-100 pt-3 mb-4 flex justify-between items-center text-xs text-slate-500 font-medium">
-                        <span><i class="fa-solid fa-calculator mr-1"></i> O(h²) Centrada</span>
-                        <span><i class="fa-solid fa-rocket mr-1"></i> Richardson</span>
-                    </div>
-
-                    <button onclick="openCourseModal('Diferenciación Numérica', 'Aproximación de derivadas de funciones tabuladas o analíticamente complejas, balanceando el error de truncamiento frente al redondeo.', ['Diferencias hacia adelante y atrás O(h)', 'Diferencias centrales de primer y segundo orden O(h²)', 'Extrapolación de Richardson', 'Compromiso óptimo de paso h contra redondeo', 'Problema de ingeniería: Estimación de aceleración a partir de GPS'])" 
-                            class="w-full py-3 bg-slate-800 hover:bg-indigo-600 text-white text-xs font-semibold rounded-xl transition-colors duration-200 shadow-md text-center block uppercase tracking-wider">
-                        Ver Contenido <i class="fa-solid fa-circle-info ml-1"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Curso 9: Integración Numérica -->
-            <div class="course-card avanzado bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between border border-slate-200 group transform hover:-translate-y-1">
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            TEMA IX
-                        </span>
-                        <span class="inline-flex items-center text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                            En Planificación
-                        </span>
-                    </div>
-
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-inner">
-                        <i class="fa-solid fa-braille"></i>
-                    </div>
-
-                    <h3 class="text-lg font-bold text-slate-900 mb-2 leading-snug">
-                        Integración Numérica
-                    </h3>
-
-                    <p class="text-slate-600 text-xs leading-relaxed mb-4">
-                        Fórmulas de Newton-Cotes: Regla del Trapecio compuesta, Reglas de Simpson 1/3 y 3/8, Integración de Romberg y Cuadratura Gaussiana.
-                    </p>
-                </div>
-
-                <div>
-                    <div class="border-t border-slate-100 pt-3 mb-4 flex justify-between items-center text-xs text-slate-500 font-medium">
-                        <span><i class="fa-solid fa-calculator mr-1"></i> Simpson 1/3 & 3/8</span>
-                        <span><i class="fa-solid fa-draw-polygon mr-1"></i> Gauss-Legendre</span>
-                    </div>
-
-                    <button onclick="openCourseModal('Integración Numérica (Cuadratura)', 'Cálculo de integrales definidas sin antiderivada elemental o sobre perfiles de datos experimentales.', ['Regla del Trapecio Compuesta', 'Regla de Simpson 1/3 y Simpson 3/8', 'Método de Romberg', 'Cuadratura de Gauss-Legendre de 2 y 3 puntos', 'Problema de ingeniería: Cálculo de caudal y trabajo mecánico'])" 
-                            class="w-full py-3 bg-slate-800 hover:bg-indigo-600 text-white text-xs font-semibold rounded-xl transition-colors duration-200 shadow-md text-center block uppercase tracking-wider">
-                        Ver Contenido <i class="fa-solid fa-circle-info ml-1"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Curso 10: EDOs y Simulación (Disponible) -->
-            <div class="course-card disponible avanzado bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between border border-slate-200 group transform hover:-translate-y-1">
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="inline-block bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                            TEMA X
-                        </span>
-                        <span class="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Simulador Listo
-                        </span>
-                    </div>
-
-                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-4 group-hover:bg-brand-wine group-hover:text-white transition-colors duration-300 shadow-inner">
-                        <i class="fa-solid fa-temperature-arrow-down"></i>
-                    </div>
-
-                    <h3 class="text-lg font-bold text-slate-900 mb-2 leading-snug">
-                        Ecuaciones Diferenciales (EDO)
-                    </h3>
-
-                    <p class="text-slate-600 text-xs leading-relaxed mb-4">
-                        Problemas de Valor Inicial (PVI). Método de Euler Explícito vs Runge-Kutta 4to Orden (RK4). Simulación de disipación térmica (Ley de Enfriamiento de Newton).
-                    </p>
-                </div>
-
-                <div>
-                    <div class="border-t border-slate-100 pt-3 mb-4 flex justify-between items-center text-xs text-slate-500 font-medium">
-                        <span><i class="fa-solid fa-wave-square mr-1"></i> Euler vs RK4</span>
-                        <span><i class="fa-solid fa-fire-burner mr-1"></i> Enfriamiento</span>
-                    </div>
-
-                    <a href="simulador-enfriamiento/index.html" 
-                        class="w-full py-3 bg-brand-wine hover:bg-brand-wineHover text-white text-xs font-semibold rounded-xl transition-colors duration-200 shadow-md text-center block uppercase tracking-wider">
-                        Abrir Simulador EDO <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- Footer Discreto y Sobrio -->
-    <footer class="bg-slate-900 text-slate-400 py-10 mt-auto border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                <!-- Columna 1 -->
-                <div class="md:col-span-2">
-                    <div class="flex items-center space-x-2 text-white text-xl font-bold mb-3">
-                        <div class="w-7 h-7 rounded-lg bg-brand-wine flex items-center justify-center text-white text-xs">
-                            <i class="fa-solid fa-square-root-variable"></i>
-                        </div>
-                        <span>MetNum</span>
-                    </div>
-                    <p class="text-xs text-slate-400 leading-relaxed max-w-md">
-                        Plataforma educativa para el aprendizaje de Métodos Numéricos orientada a ingeniería. 
-                        Combina teoría rigurosa, cálculo computacional en punto flotante y ejercicios con datos reales.
-                    </p>
-                </div>
-
-                <!-- Columna 2: Navegación -->
-                <div>
-                    <h5 class="text-white text-xs font-bold uppercase tracking-wider mb-3">Navegación</h5>
-                    <ul class="space-y-1.5 text-xs">
-                        <li><a href="#inicio" class="hover:text-white transition-colors">Inicio</a></li>
-                        <li><a href="#cursos" class="hover:text-white transition-colors">Temas del Curso</a></li>
-                    </ul>
-                </div>
-
-                <!-- Columna 3: Módulos Interactivos -->
-                <div>
-                    <h5 class="text-white text-xs font-bold uppercase tracking-wider mb-3">Módulos</h5>
-                    <ul class="space-y-1.5 text-xs font-mono">
-                        <li><a href="LAB01/TeoriaErrores.html" class="hover:text-indigo-400 transition-colors">Teoría de Errores</a></li>
-                        <li><a href="LAB02/EcuacionesNoLineales.html" class="hover:text-indigo-400 transition-colors">Métodos Cerrados</a></li>
-                        <li><a href="LAB03/MetodosAbiertos.html" class="hover:text-indigo-400 transition-colors">Métodos Abiertos</a></li>
-                        <li><a href="LAB04/SistemasLineales.html" class="hover:text-indigo-400 transition-colors">Sistemas Directos</a></li>
-                        <li><a href="LAB05/SistemasIterativos.html" class="hover:text-indigo-400 transition-colors">Sistemas Iterativos</a></li>
-                        <li><a href="LAB06/interpolacion.html" class="hover:text-indigo-400 transition-colors">Interpolación</a></li>
-                        <li><a href="simulador-enfriamiento/index.html" class="hover:text-indigo-400 transition-colors">Simulador EDO</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="border-t border-slate-800 pt-6 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-2">
-                <div>
-                    &copy; 2026 MetNum · Portal Educativo de Métodos Numéricos para Ingeniería.
-                </div>
-                <div class="text-slate-600">
-                    Diseñado para propósitos académicos y de formación profesional.
-                </div>
-            </div>
+    <footer class="bg-slate-900 text-slate-400 py-8 mt-auto border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between gap-3 text-xs">
+            <span>&copy; 2026 MetNum · Portal Educativo de Métodos Numéricos</span>
+            <a href="#inicio" class="hover:text-white">Volver al inicio</a>
         </div>
     </footer>
-
-    <!-- Modal para detalle del curso -->
-    <div id="course-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative transform transition-all border border-slate-200">
-            <button onclick="closeCourseModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2 rounded-lg hover:bg-slate-100 transition-colors" aria-label="Cerrar modal">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-            <h3 id="modal-title" class="text-xl font-bold text-slate-900 mb-2"></h3>
-            <p id="modal-description" class="text-xs text-slate-600 mb-5 leading-relaxed"></p>
-            
-            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2.5">Temas Incluidos</h4>
-            <ul id="modal-topics" class="space-y-1 mb-6 text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                <!-- Se inyecta por JS -->
-            </ul>
-
-            <div class="flex space-x-3">
-                <button onclick="closeCourseModal()" class="w-1/2 py-2.5 border border-slate-300 text-slate-700 rounded-xl font-semibold text-xs hover:bg-slate-50 transition-colors">Cerrar</button>
-                <button id="modal-action-btn" class="w-1/2 py-2.5 bg-brand-wine hover:bg-brand-wineHover text-white rounded-xl font-semibold text-xs shadow-md transition-colors">Iniciar Módulo</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript code -->
     <script src="script.js"></script>
 </body>
 </html>
