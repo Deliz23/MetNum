@@ -4,11 +4,7 @@
 
 Este repositorio contiene el desarrollo del proyecto final del curso de **Métodos Numéricos**, en el cual se implementan, analizan y comparan diferentes métodos utilizados para la resolución de problemas numéricos.
 
-El proyecto reúne tres trabajos principales desarrollados durante el curso:
-
-1. **Teoría de Errores**
-2. **Ecuaciones no lineales: Bisección y Falsa Posición**
-3. **Punto Fijo, Newton-Raphson y Secante**
+El portal organiza el contenido del curso en **seis capítulos**. Los módulos disponibles incluyen simuladores numéricos, autoevaluaciones y archivos fuente JavaScript descargables; los temas pendientes conservan páginas estructurales para completarse posteriormente.
 
 El propósito del proyecto es mostrar cómo los métodos numéricos permiten resolver problemas matemáticos mediante algoritmos computacionales, considerando aspectos como la **precisión, convergencia, error numérico, estabilidad y rendimiento computacional**.
 
@@ -16,7 +12,7 @@ El propósito del proyecto es mostrar cómo los métodos numéricos permiten res
 
 ## ¿Qué es este proyecto?
 
-**MN-ProyectoFinal** es una plataforma de apoyo académico y computacional desarrollada para implementar y analizar métodos numéricos mediante programas ejecutables.
+**MN-ProyectoFinal** es una plataforma web de apoyo académico y computacional desarrollada para implementar y analizar métodos numéricos mediante módulos interactivos.
 
 A través de los diferentes módulos del proyecto se estudia cómo una expresión matemática puede transformarse en un algoritmo y posteriormente en una implementación computacional.
 
@@ -42,7 +38,7 @@ Este proyecto está dirigido principalmente a:
 * Estudiantes que cursan **Métodos Numéricos**.
 * Personas que desean comprender la implementación computacional de métodos matemáticos.
 * Estudiantes interesados en el análisis de errores y precisión numérica.
-* Personas que desean utilizar Python para implementar algoritmos numéricos.
+* Personas que desean comprender algoritmos numéricos implementados en JavaScript.
 
 El contenido está organizado de manera que se pueda revisar tanto la fundamentación matemática como la implementación y los resultados obtenidos.
 
@@ -72,7 +68,7 @@ Implementar y analizar diferentes métodos numéricos mediante herramientas comp
 
 La portada del portal web organiza el sílabo en **seis capítulos y dieciséis temas**. Cada capítulo reúne sus temas y cada tarjeta abre directamente su página.
 
-La estructura del portal se define en `curriculum.js`. Los temas que ya tienen una página enlazan directamente con ella. Para los temas pendientes se crearon archivos HTML vacíos en `TEMAS/`, listos para completar más adelante.
+La estructura del portal se define en `curriculum.js`. El Tema 14 y el Tema 15 abren el simulador de EDO en `LAB07/`; el Tema 16 conserva su página estructural para completarse más adelante. La portada incluye cinco espacios para tutoriales y una sección reservada para la bibliografía.
 
 Los informes y módulos implementados en este repositorio incluyen los siguientes contenidos:
 
@@ -216,57 +212,22 @@ También se implementa un mecanismo de **rescate mediante Bisección** cuando al
 
 # Tecnologías utilizadas
 
-El proyecto utiliza principalmente **Python** debido a su facilidad para implementar algoritmos matemáticos y analizar resultados.
+Los módulos interactivos están implementados en **JavaScript**, con páginas HTML y estilos CSS.
 
-### Lenguaje
+* JavaScript — cálculos numéricos, simuladores y autoevaluaciones.
+* HTML y CSS — estructura y presentación de las páginas.
+* Bootstrap, Chart.js, KaTeX y Tailwind CSS — recursos visuales cargados desde CDN donde corresponde.
+* CSV — exportación de resultados desde los simuladores que la ofrecen.
 
-* Python 3
-
-### Librerías
-
-* `NumPy` — operaciones numéricas y manejo de arreglos.
-* `Matplotlib` — generación de gráficos.
-* `Pandas` — procesamiento y análisis de resultados.
-* `CSV` — almacenamiento de resultados experimentales.
-* `Math` — operaciones matemáticas.
-* `Time` — medición del tiempo de ejecución.
-* `Tracemalloc` — medición de memoria utilizada durante la ejecución.
+Cada módulo permite descargar su archivo fuente JavaScript desde el pie de página.
 
 ---
 
-# Requisitos
+# Requisitos y ejecución
 
-Para ejecutar los programas se necesita tener instalado:
+Se necesita un navegador moderno. Como algunas páginas cargan sus recursos visuales desde CDN, se recomienda conexión a Internet.
 
-* Python 3
-* NumPy
-* Matplotlib
-* Pandas
-
-Las dependencias pueden instalarse mediante:
-
-```bash
-pip install numpy matplotlib pandas
-```
-
----
-
-# Ejecución
-
-Cada tema cuenta con su propio programa o conjunto de archivos.
-
-De manera general, los programas pueden ejecutarse desde una terminal utilizando:
-
-```bash
-python nombre_del_archivo.py
-```
-
-También pueden ejecutarse utilizando entornos de desarrollo como:
-
-* Visual Studio Code
-* Jupyter Notebook
-* PyCharm
-* IDLE
+Abre `index.html` directamente o publica el repositorio en un servidor estático, como GitHub Pages. No se requiere Python, instalación de paquetes ni proceso de compilación.
 
 ---
 
@@ -281,8 +242,7 @@ Dependiendo del tema, se generan:
 * Historial de iteraciones.
 * Gráficos.
 * Comparaciones de errores.
-* Mediciones de tiempo.
-* Mediciones de memoria.
+* Informes de texto en los módulos que los ofrecen.
 
 Estos resultados permiten complementar el análisis matemático con una evaluación computacional de los algoritmos.
 
@@ -320,47 +280,22 @@ Se verifica si el método alcanza una solución dentro de las tolerancias defini
 
 # Estructura del proyecto
 
-La estructura general del repositorio se organiza de la siguiente manera:
-
 ```text
 MN-ProyectoFinal/
-│
-├── Teoria de Errores/
-│   ├── código
-│   ├── resultados
-│   └── gráficos
-│
-├── Bisección y Falsa Posición/
-│   ├── código
-│   ├── resultados
-│   └── gráficos
-│
-├── Punto Fijo, Newton-Raphson y Secante/
-│   ├── código
-│   ├── resultados
-│   └── gráficos
-│
-├── README.md
-└── ...
+├── index.html                 # Portada con los seis capítulos
+├── capitulo.html              # Temario de cada capítulo
+├── curriculum.js              # Temas y rutas de navegación
+├── LAB01/ ... LAB07/          # Módulos interactivos y código JavaScript
+├── TEMAS/                     # Páginas estructurales de temas pendientes
+├── shared/                    # Estilos compartidos
+└── README.md
 ```
-
-> La estructura exacta puede variar de acuerdo con la organización final de los archivos del repositorio.
 
 ---
 
 # Reproducibilidad
 
-Los experimentos utilizan configuraciones y valores iniciales definidos previamente para facilitar la reproducción de los resultados.
-
-En el caso de los experimentos que utilizan datos pseudoaleatorios, se establece una semilla fija. Por ejemplo:
-
-```python
-semilla = 12345
-```
-
-Esto permite generar nuevamente los mismos datos de entrada y realizar comparaciones bajo las mismas condiciones.
-
-Asimismo, los métodos utilizan valores de tolerancia y límites máximos de iteraciones previamente establecidos.
+Los módulos muestran valores iniciales en sus controles y permiten modificarlos para repetir los cálculos. Las entradas, tolerancias y límites de iteraciones utilizados se pueden revisar en cada página; los resultados CSV incluyen los datos calculados por el simulador.
 
 ---
 
@@ -374,7 +309,7 @@ Mediante **Bisección y Falsa Posición** se estudian métodos basados en interv
 
 Finalmente, con **Punto Fijo, Newton-Raphson y Secante** se analizan métodos iterativos que generan aproximaciones sucesivas y cuya eficiencia depende de las condiciones iniciales y del comportamiento de la función.
 
-En conjunto, el proyecto permite relacionar la **formulación matemática, el diseño de algoritmos, la implementación en Python y la evaluación computacional**, proporcionando una visión práctica de la aplicación de los métodos numéricos.
+En conjunto, el proyecto permite relacionar la **formulación matemática, el diseño de algoritmos, la implementación en JavaScript y la evaluación computacional**, proporcionando una visión práctica de la aplicación de los métodos numéricos.
 
 ---
 

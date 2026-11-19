@@ -113,12 +113,12 @@ window.curriculum = [
             {
                 id: "14",
                 title: "Introducción y uso de ecuaciones diferenciales en ingeniería. EDO: métodos de Euler y Euler Modificado. Ejemplos.",
-                href: "TEMAS/Tema14.html"
+                href: "LAB07/EcuacionesDiferenciales.html#tema14"
             },
             {
                 id: "15",
                 title: "Métodos de Runge-Kutta.",
-                href: "TEMAS/Tema15.html"
+                href: "LAB07/EcuacionesDiferenciales.html#tema15"
             },
             {
                 id: "16",
