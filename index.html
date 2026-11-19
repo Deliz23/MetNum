@@ -61,30 +61,108 @@
         </div>
     </header>
 
-    <main class="flex-1">
-        <section id="inicio" class="relative math-overlay pt-32 pb-40 lg:pt-40 lg:pb-48 overflow-hidden">
-            <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20 select-none" aria-hidden="true">
-                <span class="absolute top-1/4 left-10 text-white text-3xl font-mono">f(x) = 0</span>
-                <span class="absolute top-1/3 right-12 text-indigo-400 text-4xl font-mono">xₖ₊₁ = xₖ − f(xₖ)/f'(xₖ)</span>
-                <span class="absolute bottom-1/3 left-1/4 text-white text-3xl font-mono">‖Ax − b‖ &lt; ε</span>
-            </div>
-            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-                <p class="text-indigo-200 text-sm font-semibold uppercase tracking-[0.2em] mb-4">Métodos Numéricos</p>
-                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
-                    Explora los seis capítulos del curso
-                </h1>
-                
-                <a href="#capitulos" class="inline-block mt-8 px-8 py-4 bg-brand-wine hover:bg-brand-wineHover text-white font-bold rounded-xl shadow-lg transition-all uppercase tracking-wide text-xs">
-                    Ver capítulos <i class="fa-solid fa-arrow-down ml-2" aria-hidden="true"></i>
-                </a>
-            </div>
-        </section>
+   <main class="flex-1">
+    <section id="inicio" class="relative math-overlay pt-20 pb-28 lg:pt-23 lg:pb-35 overflow-hidden">
+        <!-- Fórmulas decorativas de fondo -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-20 select-none" aria-hidden="true">
+            <span class="absolute top-1/4 left-10 text-white text-3xl font-mono">f(x) = 0</span>
+            <span class="absolute top-1/3 right-12 text-indigo-400 text-4xl font-mono">xₖ₊₁ = xₖ − f(xₖ)/f'(xₖ)</span>
+            <span class="absolute bottom-1/3 left-1/4 text-white text-3xl font-mono">‖Ax − b‖ &lt; ε</span>
+        </div>
 
-        <section id="capitulos" class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 pb-16" aria-labelledby="chapters-heading">
-            <div class="mb-8">
-                <h2 id="chapters-heading" class="text-2xl font-bold text-slate-900">Capítulos del curso</h2>
-                <p class="mt-2 text-sm text-slate-600">Selecciona un capítulo para consultar su temario.</p>
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <p class="text-indigo-200 text-sm font-semibold uppercase tracking-[0.2em] mb-3">
+                Métodos Numéricos — Proyecto Final
+            </p>
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight">
+                Explora los seis capítulos del curso
+            </h1>
+
+            <!-- Bloque de Objetivo -->
+            <div class="mt-6 max-w-3xl mx-auto bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl px-6 py-4 text-slate-200 shadow-xl">
+                <p class="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-1">
+                    Objetivo del Proyecto
+                </p>
+                <p class="text-sm sm:text-base leading-relaxed">
+                    Implementar y analizar métodos numéricos mediante herramientas computacionales en Python, evaluando su 
+                    <strong class="text-white font-semibold">precisión, convergencia, estabilidad y rendimiento</strong> 
+                    al resolver problemas matemáticos desde la teoría de errores hasta ecuaciones diferenciales.
+                </p>
             </div>
+
+            <!-- Cuadrícula de 4 Integrantes -->
+            <div class="mt-8 max-w-4xl mx-auto">
+                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-200/80 mb-3">
+                    Integrantes del Equipo
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-left">
+                    <!-- Integrante 1 -->
+                    <div class="bg-slate-900/60 backdrop-blur-md border border-white/10 rounded-xl p-3.5 hover:border-indigo-400/50 transition-colors">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-lg bg-brand-wine flex items-center justify-center text-white font-bold text-xs shrink-0">
+                                01
+                            </span>
+                            <div class="min-w-0">
+                                <p class="text-white font-semibold text-sm truncate">Josselin Condori</p>
+                                <p class="text-indigo-200/70 text-xs truncate">Ing. de Sistemas</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Integrante 2 -->
+                    <div class="bg-slate-900/60 backdrop-blur-md border border-white/10 rounded-xl p-3.5 hover:border-indigo-400/50 transition-colors">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-lg bg-brand-wine flex items-center justify-center text-white font-bold text-xs shrink-0">
+                                02
+                            </span>
+                            <div class="min-w-0">
+                                <p class="text-white font-semibold text-sm truncate">Fabiana Rojas</p>
+                                <p class="text-indigo-200/70 text-xs truncate">Ing. de Sistemas</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Integrante 3 -->
+                    <div class="bg-slate-900/60 backdrop-blur-md border border-white/10 rounded-xl p-3.5 hover:border-indigo-400/50 transition-colors">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-lg bg-brand-wine flex items-center justify-center text-white font-bold text-xs shrink-0">
+                                03
+                            </span>
+                            <div class="min-w-0">
+                                <p class="text-white font-semibold text-sm truncate">Diego Schreiber</p>
+                                <p class="text-indigo-200/70 text-xs truncate">Ing. de Sistemas</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Integrante 4 -->
+                    <div class="bg-slate-900/60 backdrop-blur-md border border-white/10 rounded-xl p-3.5 hover:border-indigo-400/50 transition-colors">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-lg bg-brand-wine flex items-center justify-center text-white font-bold text-xs shrink-0">
+                                04
+                            </span>
+                            <div class="min-w-0">
+                                <p class="text-white font-semibold text-sm truncate">Flor De Liz Velazque</p>
+                                <p class="text-indigo-200/70 text-xs truncate">Ing. de Sistemas</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón principal -->
+            <a href="#capitulos" class="inline-block mt-8 px-8 py-4 bg-brand-wine hover:bg-brand-wineHover text-white font-bold rounded-xl shadow-lg transition-all uppercase tracking-wide text-xs">
+                Ver capítulos <i class="fa-solid fa-arrow-down ml-2" aria-hidden="true"></i>
+            </a>
+        </div>
+    </section>
+
+    <section id="capitulos" class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 pb-16" aria-labelledby="chapters-heading">
+        <div class="mb-8">
+            <h2 id="chapters-heading" class="text-2xl font-bold text-white">Capítulos del curso</h2>
+            <p class="mt-2 text-sm text-indigo-200">Selecciona un capítulo para consultar su temario.</p>
+        </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
                 <a href="capitulo.html?capitulo=1" class="group bg-white rounded-2xl p-6 sm:p-7 shadow-lg hover:shadow-2xl transition-all border border-slate-200 hover:-translate-y-1">
                     <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full uppercase tracking-wider">Capítulo I</span>
