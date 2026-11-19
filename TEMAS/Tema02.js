@@ -1,27 +1,20 @@
 const $ = (id) => document.getElementById(id);
 const factorial = (n) => { let r = 1; for (let k = 2; k <= n; k++) r *= k; return r; };
 const fmt = (x, digits = 8) => Number(x).toLocaleString("es-PE", { maximumSignificantDigits: digits });
-const series = {
-  sin: { label: "sin(x)", f: Math.sin, coeff: (k, a) => Math.sin(a + k * Math.PI / 2) / factorial(k), domain: () => true },
-  cos: { label: "cos(x)", f: Math.cos, coeff: (k, a) => Math.cos(a + k * Math.PI / 2) / factorial(k), domain: () => true },
-  exp: { label: "eˣ", f: Math.exp, coeff: (k, a) => Math.exp(a) / factorial(k), domain: () => true },
-  log: { label: "ln(1+x)", f: x => Math.log1p(x), coeff: (k, a) => (k === 0 ? Math.log1p(a) : ((k % 2 ? 1 : -1) / (k * (1 + a) ** k))), domain: x => x > -1 }
-};
-function evaluateTaylor(key, a, x, n) {
-  const data = series[key]; let sum = 0; const terms = [];
-  for (let k = 0; k <= n; k++) { const term = data.coeff(k, a) * (x - a) ** k; sum += term; terms.push({ k, term }); }
-  return { sum, terms, exact: data.f(x) };
-}
 function calcularTaylor() {
-  const key = $("funcionTaylor").value, a = Number($("centroTaylor").value), x = Number($("puntoTaylor").value), n = Number($("gradoTaylor").value);
+  const t = Number($("tiempoSensor").value), tau = Number($("tauSensor").value), n = Number($("gradoTaylor").value), tolerancia = Number($("toleranciaSensor").value);
   const error = $("errorTaylor"); const resultado = $("resultadoTaylor");
-  if (![a, x, n].every(Number.isFinite) || !Number.isInteger(n) || n < 0 || n > 20 || !series[key].domain(x) || !series[key].domain(a)) {
-    error.textContent = "Revisa los valores: el grado debe ser un entero entre 0 y 20 y ln(1+x) requiere x > −1."; error.hidden = false; resultado.innerHTML = ""; $("terminosTaylor").innerHTML = ""; return;
+  if (["tiempoSensor", "tauSensor", "gradoTaylor", "toleranciaSensor"].some(id => $(id).value.trim() === "") || ![t, tau, n, tolerancia].every(Number.isFinite) || t < 0 || tau <= 0 || !Number.isInteger(n) || n < 0 || n > 12 || tolerancia <= 0 || t / tau > 0.4) {
+    error.textContent = "Usa t ≥ 0, τ > 0, un grado entero entre 0 y 12, una tolerancia positiva y verifica que 0 ≤ t/τ ≤ 0.4."; error.hidden = false; resultado.innerHTML = ""; $("terminosTaylor").innerHTML = ""; return;
   }
   error.hidden = true;
-  const { sum, terms, exact } = evaluateTaylor(key, a, x, n); const abs = Math.abs(exact - sum); const rel = exact === 0 ? null : abs / Math.abs(exact);
-  resultado.innerHTML = `<div class="row g-3"><div class="col-md-3"><div class="tema-metric"><span>P<sub>${n}</sub>(${fmt(x)})</span><strong>${fmt(sum, 12)}</strong></div></div><div class="col-md-3"><div class="tema-metric"><span>Valor de referencia</span><strong>${fmt(exact, 12)}</strong></div></div><div class="col-md-3"><div class="tema-metric"><span>Error absoluto observado</span><strong>${fmt(abs, 6)}</strong></div></div><div class="col-md-3"><div class="tema-metric"><span>Error relativo</span><strong>${rel === null ? "No definido" : fmt(rel * 100, 6) + "%"}</strong></div></div></div><p class="small text-secondary mt-3 mb-0">El error mostrado compara el valor de JavaScript con el polinomio; es el error observado en esta evaluación, no necesariamente una cota garantizada del resto.</p>`;
-  $("terminosTaylor").innerHTML = terms.map(({ k, term }) => `<span class="tema-term"><small>k=${k}</small>${fmt(term, 7)}</span>`).join("");
+  const u = t / tau;
+  const terms = Array.from({ length: n + 1 }, (_, k) => ({ k, value: (-u) ** k / factorial(k) }));
+  const approximation = terms.reduce((sum, term) => sum + term.value, 0);
+  const exact = Math.exp(-u), absoluteError = Math.abs(exact - approximation);
+  const bound = u ** (n + 1) / factorial(n + 1), meetsTolerance = bound <= tolerancia;
+  resultado.innerHTML = `<div class="row g-3"><div class="col-md-4"><div class="tema-metric"><span>Variable reducida u=t/τ</span><strong>${fmt(u, 10)}</strong></div></div><div class="col-md-4"><div class="tema-metric"><span>Respuesta aproximada P<sub>${n}</sub>(u)</span><strong>${fmt(approximation, 12)}</strong></div></div><div class="col-md-4"><div class="tema-metric"><span>Referencia e<sup>−u</sup></span><strong>${fmt(exact, 12)}</strong></div></div><div class="col-md-4"><div class="tema-metric"><span>Error absoluto observado</span><strong>${fmt(absoluteError, 8)}</strong></div></div><div class="col-md-4"><div class="tema-metric"><span>Cota de Lagrange</span><strong>${fmt(bound, 8)}</strong></div></div><div class="col-md-4"><div class="tema-metric"><span>Criterio de diseño</span><strong class="${meetsTolerance ? "text-success" : "text-danger"}">${meetsTolerance ? "Cumple ε" : "No cumple ε"}</strong></div></div></div><p class="small text-secondary mt-3 mb-0">P<sub>${n}</sub>(u)=Σ<sub>k=0</sub><sup>${n}</sup>(−u)<sup>k</sup>/k!. Como |f<sup>(${n + 1})</sup>(u)|≤1 en 0≤u≤0.4, se garantiza |R<sub>${n}</sub>|≤u<sup>${n + 1}</sup>/(${n + 1})! = ${fmt(bound, 8)}. ${meetsTolerance ? "El grado elegido satisface la tolerancia solicitada." : "Aumenta el grado hasta que la cota sea menor o igual que ε."}</p>`;
+  $("terminosTaylor").innerHTML = terms.map(({ k, value }) => `<span class="tema-term"><small>k=${k}</small>${fmt(value, 8)}</span>`).join("");
 }
 
 let banco = [], activo = 0, guiaAbierta = null;
