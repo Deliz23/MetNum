@@ -1,32 +1,79 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tema 02 · MetNum</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config = { theme: { extend: { colors: { brand: { wine: '#722f37', wineHover: '#58232a' } } } } };</script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Serie de Taylor, error de truncamiento, orden de aproximación y aplicaciones en derivación numérica.">
+  <meta name="theme-color" content="#0b1830">
+  <title>Serie de Taylor y error de truncamiento | MetNum</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../LAB01/styles.css">
+  <link rel="stylesheet" href="Tema02.css">
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
-    <header class="bg-slate-950 text-white">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-5 flex justify-between items-center">
-            <a href="../index.html" class="font-extrabold text-xl">Met<span class="text-indigo-400">Num</span></a>
-            <a href="../capitulo.html?capitulo=1" class="text-sm text-slate-200 hover:text-white"><i class="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i>Capítulo I</a>
-        </div>
-    </header>
-    <main class="w-full max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14 flex-1">
-        <nav class="text-sm text-slate-500 mb-7" aria-label="Ruta de navegación">
-            <a href="../index.html" class="hover:text-brand-wine">Inicio</a>
-            <span class="mx-2" aria-hidden="true">/</span>
-            <a href="../capitulo.html?capitulo=1" class="hover:text-brand-wine">Capítulo I</a>
-            <span class="mx-2" aria-hidden="true">/</span><span>Tema 02</span>
-        </nav>
-        <p class="text-xs font-bold uppercase tracking-[0.18em] text-brand-wine">Capítulo I: Teoría de errores</p>
-        <h1 class="mt-2 text-3xl sm:text-4xl font-extrabold text-slate-950">Tema 02</h1>
-        <p class="mt-4 text-lg text-slate-700 leading-relaxed">La serie de Taylor: errores de truncamiento, orden de aproximación y aplicaciones.</p>
-        <section id="contenido" class="mt-8" aria-label="Contenido del tema"></section>
-    </main>
-    <footer class="bg-slate-900 text-slate-400 py-6"><div class="max-w-6xl mx-auto px-4 sm:px-6 text-xs">&copy; 2026 MetNum</div></footer>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header class="header sticky-top">
+    <nav class="navbar navbar-expand-xl" aria-label="Navegación principal"><div class="container-xl header-inner">
+      <a href="../index.html" class="navbar-brand logo text-decoration-none"><span class="brand-icon"><i class="bi bi-cpu"></i></span><span class="sitename">Met<span>Num</span></span></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-label="Abrir menú"><span class="navbar-toggler-icon"></span></button>
+      <div class="collapse navbar-collapse" id="navmenu"><ul class="navbar-nav ms-auto align-items-xl-center">
+        <li class="nav-item nav-course-item"><a href="../capitulo.html?capitulo=1" class="course-link"><i class="bi bi-arrow-left me-1"></i>Capítulo I</a></li>
+        <li class="nav-item"><a href="#hero" class="nav-link">Inicio</a></li><li class="nav-item"><a href="#teoria" class="nav-link">Teoría</a></li><li class="nav-item"><a href="#caso-practico" class="nav-link">Caso práctico</a></li><li class="nav-item"><a href="#calculadora" class="nav-link">Calculadora</a></li><li class="nav-item"><a href="#aplicaciones" class="nav-link">Aplicaciones</a></li><li class="nav-item"><a href="#ejercicios" class="nav-link">Autoevaluación</a></li>
+      </ul></div>
+    </div></nav>
+  </header>
+  <main id="contenido">
+    <section id="hero" class="hero"><div class="container"><div class="row gy-5 align-items-center">
+      <div class="col-lg-6"><span class="tema-kicker">Capítulo I · Tema 02</span><h1>Serie de Taylor y error de truncamiento</h1>
+        <p class="lead mt-3">Aproxima funciones con polinomios, estima qué parte del error proviene de truncar la serie y elige el orden adecuado para cada cálculo.</p>
+        <div class="hero-buttons mt-4"><a href="#calculadora" class="btn btn-light btn-lg"><i class="bi bi-calculator me-2"></i>Probar la calculadora</a><a href="#teoria" class="btn btn-outline-light btn-lg">Estudiar la teoría</a></div>
+      </div>
+      <div class="col-lg-6"><div class="tema-formula-card"><span class="tema-formula-label">Polinomio de Taylor alrededor de a</span><div class="tema-formula">f(x) = P<sub>n</sub>(x) + R<sub>n</sub>(x)</div><p class="mb-0">El polinomio aporta la aproximación; el resto describe lo que dejamos fuera.</p><div class="tema-formula-small">P<sub>n</sub>(x) = Σ<sub>k=0</sub><sup>n</sup> f<sup>(k)</sup>(a)(x−a)<sup>k</sup>/k!</div></div></div>
+    </div></div></section>
+    <section id="teoria" class="section"><div class="container"><header class="section-head"><span class="section-badge">Fundamentos</span><h2>¿De dónde sale la aproximación?</h2><p>Una función suficientemente suave puede representarse cerca de un punto mediante sus derivadas en ese punto.</p></header>
+      <div class="row g-4">
+        <div class="col-lg-6"><article class="panel h-100"><h3 class="panel-title"><i class="bi bi-signpost-split text-primary me-2"></i>Construcción término a término</h3><ol class="tema-lista"><li><strong>Valor inicial:</strong> f(a) fija la altura del polinomio.</li><li><strong>Pendiente:</strong> f′(a)(x−a) reproduce el cambio lineal local.</li><li><strong>Curvatura:</strong> f″(a)(x−a)²/2! captura la variación de la pendiente.</li><li><strong>Órdenes siguientes:</strong> cada derivada añade información local de mayor orden.</li></ol><p class="mb-0">Al aumentar n, se incorporan más términos. La mejora depende de la función y de qué tan lejos esté x del centro a.</p></article></div>
+        <div class="col-lg-6"><article class="panel h-100"><h3 class="panel-title"><i class="bi bi-exclamation-diamond text-warning me-2"></i>Error de truncamiento</h3><p>El resto de Lagrange expresa el error tras cortar en grado n:</p><div class="tema-math">R<sub>n</sub>(x) = f<sup>(n+1)</sup>(ξ) (x−a)<sup>n+1</sup>/(n+1)!</div><p>para algún ξ entre a y x. Si |f<sup>(n+1)</sup>(t)| ≤ M en ese intervalo, entonces:</p><div class="tema-math">|R<sub>n</sub>(x)| ≤ M |x−a|<sup>n+1</sup>/(n+1)!</div><p>La cota requiere una cota válida de la derivada en todo el segmento entre a y x. Sirve para garantizar precisión antes del cálculo, mientras que comparar con el valor exacto solo mide el error observado después.</p></article></div>
+        <div class="col-lg-6"><article class="panel h-100"><h3 class="panel-title"><i class="bi bi-graph-up-arrow text-success me-2"></i>Orden de aproximación</h3><p>Si el error se comporta como C h<sup>p</sup> cuando h es pequeño, el método es de orden p:</p><div class="tema-math">E(h) = O(h<sup>p</sup>)</div><p>Reducir h a la mitad reduce aproximadamente el error por un factor 2<sup>p</sup>, siempre que domine ese término asintótico.</p><div class="table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>Orden p</th><th>Reducción esperada al usar h/2</th></tr></thead><tbody><tr><td>1</td><td>≈ 2 veces menor</td></tr><tr><td>2</td><td>≈ 4 veces menor</td></tr><tr><td>3</td><td>≈ 8 veces menor</td></tr></tbody></table></div></article></div>
+        <div class="col-lg-6"><article class="panel h-100"><h3 class="panel-title"><i class="bi bi-rulers text-info me-2"></i>Truncamiento y redondeo</h3><p>En cómputo conviven dos fuentes de error:</p><ul><li><strong>Truncamiento:</strong> usamos un polinomio finito o una fórmula aproximada.</li><li><strong>Redondeo:</strong> el equipo almacena números con precisión finita.</li></ul><p>Disminuir h o sumar más términos reduce el truncamiento, pero puede amplificar redondeo o costo. El parámetro debe equilibrar ambos efectos.</p><div class="alert alert-warning mb-0"><strong>Importante:</strong> el teorema de Taylor garantiza una representación con resto para un grado finito; la igualdad con la serie infinita requiere además que el resto tienda a cero cuando n crece.</div></article></div>
+      </div>
+    </div></section>
+    <section id="caso-practico" class="section section-alt"><div class="container"><header class="section-head"><span class="section-badge">Caso práctico</span><h2>Respuesta transitoria de un sensor térmico</h2><p>Un microcontrolador debe estimar la respuesta de un sensor sin ejecutar una función exponencial costosa en cada muestra. Usaremos Taylor para elegir una aproximación que cumpla una tolerancia establecida.</p></header>
+      <div class="panel case-intro mb-4"><div class="row g-4 align-items-center"><div class="col-lg-8"><span class="case-label"><i class="bi bi-thermometer-half me-2"></i>Contexto de ingeniería</span><p class="mt-3 mb-2">La respuesta normalizada de un sensor de primer orden durante un transitorio se modela como <strong>y(t)=e<sup>−t/τ</sup></strong>, donde τ es la constante de tiempo. Para un instante t, definimos u=t/τ y evaluamos e<sup>−u</sup>.</p><p class="mb-0">El equipo requiere que el error absoluto de la aproximación no supere <strong>10<sup>−5</sup></strong> en el intervalo 0≤u≤0.4. ¿Qué grado de Taylor alrededor de u=0 es suficiente?</p></div><div class="col-lg-4"><div class="case-spec"><span>Variable reducida</span><strong>u = t/τ ∈ [0, 0.4]</strong><span>Tolerancia absoluta</span><strong>ε = 0.00001</strong><span>Máximo de derivadas</span><strong>M = 1</strong></div></div></div></div>
+      <div class="row g-4">
+        <div class="col-lg-7"><article class="panel h-100"><h3 class="panel-title"><i class="bi bi-list-ol text-primary me-2"></i>Desarrollo del análisis</h3><ol class="tema-lista case-steps"><li><strong>Expande el modelo.</strong> La serie alrededor de cero es e<sup>−u</sup>=1−u+u²/2!−u³/3!+… Por tanto, P<sub>n</sub>(u)=Σ<sub>k=0</sub><sup>n</sup>(−u)<sup>k</sup>/k!.</li><li><strong>Acota la derivada.</strong> La derivada de orden n+1 tiene magnitud e<sup>−ξ</sup>≤1 cuando 0≤ξ≤0.4, de modo que podemos usar M=1.</li><li><strong>Aplica el resto de Lagrange.</strong> Para cualquier u del intervalo: |R<sub>n</sub>(u)|≤u<sup>n+1</sup>/(n+1)!≤0.4<sup>n+1</sup>/(n+1)!.</li><li><strong>Prueba grados consecutivos.</strong> Con n=4 la cota es 0.4⁵/5!≈0.00003413, que supera la tolerancia. Con n=5 resulta 0.4⁶/6!≈0.00000569, que sí la cumple.</li></ol><div class="case-conclusion"><strong>Decisión:</strong> usar el polinomio de grado 5 garantiza, mediante esta cota, un error absoluto menor que 10<sup>−5</sup> en todo el intervalo indicado.</div></article></div>
+        <div class="col-lg-5"><article class="panel h-100"><h3 class="panel-title"><i class="bi bi-activity text-success me-2"></i>Comprobación en el extremo</h3><p>En u=0.4:</p><div class="tema-math">P₅(0.4)=1−0.4+0.4²/2!−0.4³/3!+0.4⁴/4!−0.4⁵/5!</div><dl class="case-readout"><div><dt>Aproximación P₅(0.4)</dt><dd>0.67031467</dd></div><div><dt>Referencia e<sup>−0.4</sup></dt><dd>0.67032005</dd></div><div><dt>Error observado</dt><dd>≈ 0.00000538</dd></div><div><dt>Cota garantizada</dt><dd>&lt; 0.00000569</dd></div></dl><p class="small text-secondary mb-0">El error observado es menor que la cota. La cota es conservadora y permite asegurar el requisito incluso sin conocer previamente el valor exacto.</p></article></div>
+        <div class="col-12"><article class="panel"><h3 class="panel-title"><i class="bi bi-lightbulb text-warning me-2"></i>Qué enseña el caso</h3><div class="row g-3"><div class="col-md-4"><div class="case-insight"><strong>El centro importa</strong><span>Expandir alrededor de u=0 resulta natural porque el transitorio se expresa en función de t/τ y el intervalo está cerca del origen.</span></div></div><div class="col-md-4"><div class="case-insight"><strong>La cota responde a un requisito</strong><span>No buscamos “muchos términos”: buscamos el menor grado cuya cota queda debajo de la tolerancia.</span></div></div><div class="col-md-4"><div class="case-insight"><strong>Hay que declarar el intervalo</strong><span>La garantía depende de que 0≤u≤0.4; fuera de ese rango se debe volver a analizar la derivada y el resto.</span></div></div></div></article></div>
+      </div>
+    </div></section>
+    <section id="calculadora" class="section section-alt"><div class="container"><header class="section-head"><span class="section-badge">Calculadora Numérica</span><h2>Explora una aproximación de Taylor</h2><p>Elige una función, su centro, el punto de evaluación y el grado del polinomio. Compara la aproximación con el valor de referencia.</p></header>
+      <div class="panel"><form id="formTaylor" class="row g-3 align-items-end">
+        <div class="col-md-3"><label for="funcionTaylor" class="form-label">Función</label><select id="funcionTaylor" class="form-select"><option value="sin">sin(x)</option><option value="exp">eˣ</option><option value="cos">cos(x)</option><option value="log">ln(1+x)</option></select></div>
+        <div class="col-md-3"><label for="centroTaylor" class="form-label">Centro a</label><input id="centroTaylor" class="form-control" type="number" step="any" value="0"></div>
+        <div class="col-md-3"><label for="puntoTaylor" class="form-label">Punto x</label><input id="puntoTaylor" class="form-control" type="number" step="any" value="0.8"></div>
+        <div class="col-md-3"><label for="gradoTaylor" class="form-label">Grado n</label><input id="gradoTaylor" class="form-control" type="number" min="0" max="20" step="1" value="5"></div>
+        <div class="col-12"><button class="btn btn-primary" type="submit"><i class="bi bi-play-fill me-1"></i>Calcular aproximación</button></div>
+      </form><div id="errorTaylor" class="alert alert-danger mt-3" role="alert" hidden></div>
+      <div id="resultadoTaylor" class="tema-resultados mt-4" aria-live="polite"></div>
+      <div class="tema-terms mt-3"><h3 class="h6 fw-bold">Términos incluidos</h3><div id="terminosTaylor" class="d-flex flex-wrap gap-2"></div></div></div>
+    </div></section>
+    <section id="aplicaciones" class="section"><div class="container"><header class="section-head"><span class="section-badge">Aplicaciones</span><h2>La serie también construye algoritmos</h2><p>Al combinar expansiones alrededor del mismo punto, se identifican los términos que sobreviven y se obtiene el orden del error.</p></header><div class="row g-4">
+      <div class="col-md-4"><article class="panel h-100"><span class="tema-numero">01</span><h3 class="h5 fw-bold mt-3">Derivación hacia adelante</h3><div class="tema-math">f(x+h)=f(x)+hf′(x)+h²f″(ξ)/2</div><p>Despejar f′(x) y dividir entre h deja un término de error proporcional a h:</p><div class="tema-math">[f(x+h)−f(x)]/h = f′(x) + O(h)</div><p class="mb-0">Es sencilla y requiere una evaluación adicional, pero su precisión mejora linealmente al reducir el paso.</p></article></div>
+      <div class="col-md-4"><article class="panel h-100"><span class="tema-numero">02</span><h3 class="h5 fw-bold mt-3">Derivación centrada</h3><div class="tema-math">f(x±h)=f(x)±hf′(x)+h²f″(x)/2±h³f‴(ξ)/6</div><p>Al restar las expansiones, el término de segundo orden se cancela:</p><div class="tema-math">[f(x+h)−f(x−h)]/(2h) = f′(x) + O(h²)</div><p class="mb-0">La fórmula es de orden 2 si la función es suficientemente suave y el paso está en un régimen donde domina el truncamiento.</p></article></div>
+      <div class="col-md-4"><article class="panel h-100"><span class="tema-numero">03</span><h3 class="h5 fw-bold mt-3">Estimación del orden</h3><div class="tema-math">E(h) ≈ C h<sup>p</sup></div><p>Si dividimos el paso entre dos:</p><div class="tema-math">E(h)/E(h/2) ≈ 2<sup>p</sup></div><p>Entonces:</p><div class="tema-math">p ≈ log₂(E(h)/E(h/2))</div><p class="mb-0">Un cociente próximo a 2 sugiere orden 1; uno próximo a 4 sugiere orden 2.</p></article></div>
+    </div></div></section>
+    <section id="ejercicios" class="section section-alt"><div class="container"><header class="section-head"><span class="section-badge">Autoevaluación de conocimientos</span><h2>Problemas de Aplicación Práctica</h2><p>Tres preguntas independientes con datos aleatorios. En cada una puedes leer el desarrollo completo o practicarlo por pasos con pistas y explicaciones.</p></header>
+      <div class="tema-exercise-toolbar"><div id="selectorTaylor" class="btn-group flex-wrap" role="group" aria-label="Selecciona un ejercicio"></div><button id="nuevoTaylor" type="button" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-repeat me-1"></i>Generar nuevos valores</button></div>
+      <div id="contextoTaylor" class="panel scenario mb-4"></div><div id="preguntasTaylor" class="d-flex flex-column gap-4"></div>
+    </div></section>
+  </main>
+  <footer class="footer"><div class="container footer-inner"><div><p class="fw-bold mb-0 text-dark">MetNum · Métodos Numéricos para Ingeniería</p><small class="text-muted">Capítulo I: Teoría de errores · Tema 02: Serie de Taylor</small></div><div class="d-flex flex-wrap gap-3 text-muted small"><a href="../capitulo.html?capitulo=1" class="text-decoration-none">← Volver al Capítulo I</a><a href="#hero" class="text-decoration-none">Volver al inicio ↑</a></div></div></footer>
+  <a href="#hero" class="back-to-top" aria-label="Volver arriba"><i class="bi bi-arrow-up-short"></i></a>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="Tema02.js" defer></script>
 </body>
 </html>
