@@ -2,73 +2,638 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Módulo interactivo de métodos cerrados para resolver ecuaciones no lineales con bisección y falsa posición.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ecuaciones no lineales y raíces con garantía: métodos cerrados de bisección y falsa posición (regula falsi), análisis de estancamiento, umbral de capacidad bajo SLA y redondeo seguro.">
   <meta name="theme-color" content="#0b1830">
-  <title>Raíces con garantía | Métodos Numéricos</title>
+
+  <title>Raíces con garantía: métodos cerrados | Métodos Numéricos</title>
+
+  <!-- Fuentes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+
+  <!-- Nuestro CSS -->
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
+
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
-  <header class="header sticky-top">
-    <nav class="navbar navbar-expand-xl" aria-label="Navegación principal"><div class="container-xl header-inner">
-      <a href="#hero" class="navbar-brand logo text-decoration-none"><span class="brand-icon"><i class="bi bi-bullseye"></i></span><span class="sitename">Met<span>Num</span></span></a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu" aria-controls="navmenu" aria-expanded="false" aria-label="Abrir menú"><span class="navbar-toggler-icon"></span></button>
-      <div class="collapse navbar-collapse" id="navmenu"><ul class="navbar-nav ms-auto align-items-xl-center">
-        <li class="nav-item nav-course-item"><a href="../index.html" class="course-link"><i class="bi bi-arrow-left me-1"></i>Cursos</a></li>
-        <li class="nav-item"><a href="#teoria" class="nav-link">Teoría</a></li><li class="nav-item"><a href="#ejemplo" class="nav-link">Ejemplo</a></li><li class="nav-item"><a href="#caso-practico" class="nav-link">Aplicación</a></li><li class="nav-item"><a href="#calculadora" class="nav-link">Calculadora</a></li><li class="nav-item"><a href="#ejercicios" class="nav-link">Autoevaluación</a></li>
-      </ul></div>
-    </div></nav>
+
+  <!-- ENCABEZADO Y MENÚ ADAPTABLE -->
+  <header id="header" class="header sticky-top">
+    <nav class="navbar navbar-expand-xl" aria-label="Navegación principal">
+      <div class="container-xl header-inner">
+
+        <a href="#hero" class="navbar-brand logo text-decoration-none">
+          <span class="brand-icon" aria-hidden="true"><i class="bi bi-bullseye"></i></span>
+          <span class="sitename">Met<span>Num</span></span>
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navmenu"
+          aria-controls="navmenu"
+          aria-expanded="false"
+          aria-label="Abrir menú">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navmenu">
+          <ul class="navbar-nav ms-auto align-items-xl-center">
+
+            <li class="nav-item nav-course-item">
+              <a href="../index.html" class="course-link">
+                <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Cursos
+              </a>
+            </li>
+
+            <li class="nav-item"><a href="#hero" class="nav-link active">Inicio</a></li>
+            <li class="nav-item"><a href="#teoria" class="nav-link">Teoría</a></li>
+            <li class="nav-item"><a href="#caso-practico" class="nav-link">Caso Práctico</a></li>
+            <li class="nav-item"><a href="#calculadora" class="nav-link">Calculadora</a></li>
+            <li class="nav-item"><a href="#grafico" class="nav-link">Gráfica</a></li>
+            <li class="nav-item"><a href="#ejercicios" class="nav-link">Autoevaluación</a></li>
+
+          </ul>
+        </div>
+      </div>
+    </nav>
   </header>
+
   <main id="contenido">
-    <section id="hero" class="hero"><div class="container"><div class="row gy-5 align-items-center">
-      <div class="col-lg-6"><h1>Raíces con garantía: métodos cerrados</h1><p class="lead mt-3">Aísla una raíz en un intervalo y observa cómo bisección y falsa posición lo reducen hasta encontrar una aproximación útil.</p><div class="hero-buttons mt-4"><a href="#calculadora" class="btn btn-light btn-lg"><i class="bi bi-calculator me-2"></i>Abrir calculadora</a><a href="#teoria" class="btn btn-outline-light btn-lg">Repasar teoría</a></div></div>
-      <div class="col-lg-6"><div class="readout"><h2 class="readout-title">Reto: capacidad que cumple el SLA</h2><p class="mb-2">Encuentra la carga máxima <span class="math">q</span> para la que la latencia no supera 140 ms.</p><div class="formula-card">L(q) = 18 + 0.0025q² / (1 − q/1200)<br>f(q) = L(q) − 140</div><dl class="readout-rows"><div><dt>Dominio operativo</dt><dd>100 ≤ q ≤ 1100</dd></div><div><dt>Intervalo inicial</dt><dd>[100, 1100]</dd></div><div><dt>Decisión final</dt><dd>capacidad entera segura</dd></div></dl></div></div>
-    </div></div></section>
 
-    <section id="teoria" class="section"><div class="container"><div class="section-head"><span class="section-badge">01 · Fundamento</span><h2>¿Qué hace que un método sea cerrado?</h2><p>Los dos métodos conservan un intervalo que contiene una raíz. El cambio de signo da existencia si la función es continua; por sí solo no garantiza que la raíz sea única.</p></div>
-      <div class="row g-4"><div class="col-lg-6"><article class="panel h-100"><h3 class="panel-title">Bisección</h3><div class="formula-card">cₖ = (aₖ + bₖ)/2<br>f(aₖ) · f(bₖ) &lt; 0</div><p>Se toma el punto medio y se conserva la mitad donde permanece el cambio de signo. El ancho del intervalo cae a la mitad en cada paso.</p><p class="mb-0"><strong>Cota:</strong> después de <span class="math">n</span> pasos, el error respecto de la raíz está acotado por <span class="math">(b₀ − a₀)/2ⁿ</span>.</p></article></div>
-      <div class="col-lg-6"><article class="panel h-100"><h3 class="panel-title">Falsa posición</h3><div class="formula-card">cₖ = (aₖ f(bₖ) − bₖ f(aₖ)) / (f(bₖ) − f(aₖ))</div><p>En vez del punto medio, usa el cruce con el eje de la recta que une los extremos. También conserva el cambio de signo.</p><p class="mb-0"><strong>Atención:</strong> puede avanzar rápido, pero un extremo puede quedarse casi fijo. Revisa el residuo y el cambio entre aproximaciones.</p></article></div></div>
-      <div class="row g-4 mt-1"><div class="col-lg-6"><article class="panel h-100"><h3 class="panel-title">Existencia no significa unicidad</h3><p>El teorema de Bolzano garantiza al menos una raíz si <span class="math">f</span> es continua en [a,b] y <span class="math">f(a)f(b)&lt;0</span>. Si hay varias raíces dentro del intervalo, ambos métodos pueden converger a una de ellas sin identificar cuántas existen.</p><p class="mb-0">Para justificar una raíz única, analiza además la monotonía. Si <span class="math">f′</span> mantiene un signo en todo el intervalo, la función es estrictamente monótona y no puede cruzar cero más de una vez.</p></article></div><div class="col-lg-6"><article class="panel h-100"><h3 class="panel-title">Cota y criterio de parada</h3><div class="formula-card">Bisección: |cₙ − r| ≤ (b₀−a₀)/2ⁿ<br>n ≥ ceil(log₂((b₀−a₀)/tolₓ))</div><p>La cota de bisección controla el error en la variable. El residuo <span class="math">|f(c)|</span> mide cuánto satisface la aproximación la ecuación. Son controles distintos, por eso el simulador exige ambos.</p><p class="mb-0">Falsa posición conserva un intervalo válido, pero el desplazamiento entre dos estimaciones consecutivas no es una cota general del error. Interpreta ese valor junto con el residuo y el intervalo retenido.</p></article></div></div>
-      <article class="panel mt-4"><h3 class="panel-title">Comparación de uso</h3><div class="table-responsive"><table class="results-table"><thead><tr><th>Aspecto</th><th>Bisección</th><th>Falsa posición</th></tr></thead><tbody><tr><td>Conserva cambio de signo</td><td>Sí</td><td>Sí</td></tr><tr><td>Elección del nuevo punto</td><td>Punto medio</td><td>Intersección de la secante</td></tr><tr><td>Garantía de reducción del intervalo</td><td>Mitad en cada paso</td><td>No necesariamente; puede estancarse un extremo</td></tr><tr><td>Ventaja principal</td><td>Robusta y con cota sencilla</td><td>Puede acercarse rápido a la raíz</td></tr><tr><td>Control recomendado</td><td>Ancho/cota y residuo</td><td>Residuo, paso y signos de los extremos</td></tr></tbody></table></div></article>
-      <div class="callout-note mt-4"><strong>Criterio de parada usado aquí:</strong> se cumplen a la vez el cambio en <span class="math">x</span> menor que la tolerancia y el residuo <span class="math">|f(c)|</span> menor que su tolerancia, o se alcanza el máximo de iteraciones.</div>
-    </div></section>
+    <!-- INICIO -->
+    <section id="hero" class="hero">
+      <div class="container">
+        <div class="row gy-5 align-items-center">
 
-    <section id="ejemplo" class="section section-alt"><div class="container"><div class="section-head"><span class="section-badge">02 · Ejemplo guiado</span><h2>Un umbral de latencia</h2><p>La guía plantea un modelo sencillo para practicar el aislamiento y la interpretación de la raíz.</p></div>
-      <div class="row g-4 align-items-stretch"><div class="col-lg-7"><article class="panel h-100"><h3 class="panel-title">Planteamiento e iteraciones de bisección</h3><div class="formula-card">L(q) = 20 + 0.003q²/(1 − q/1000)<br>f(q) = L(q) − 120 = 0, &nbsp; q ∈ [100, 900]</div><p>Los extremos dan <span class="math">f(100) ≈ −66.667</span> y <span class="math">f(900) = 24 200</span>. Como la función es continua en el intervalo y hay cambio de signo, existe una raíz.</p><div class="table-responsive"><table class="results-table"><thead><tr><th>k</th><th>cₖ</th><th>f(cₖ)</th><th>Intervalo que se conserva</th></tr></thead><tbody><tr><td>1</td><td>500</td><td>1 400</td><td>[100, 500]</td></tr><tr><td>2</td><td>300</td><td>285.714</td><td>[100, 300]</td></tr><tr><td>3</td><td>200</td><td>50</td><td>[100, 200]</td></tr><tr><td>4</td><td>150</td><td>−20.588</td><td>[150, 200]</td></tr><tr><td>5</td><td>175</td><td>11.364</td><td>[150, 175]</td></tr></tbody></table></div><p class="small mb-0">El signo de cada residuo indica qué mitad sigue conteniendo el cambio de signo.</p></article></div>
-      <div class="col-lg-5"><article class="panel h-100"><h3 class="panel-title">De raíz a decisión</h3><p>Si la capacidad solo admite enteros, no basta con redondear al entero más cercano. Como la latencia crece con <span class="math">q</span> en este rango, se prueba el entero inferior.</p><div class="decision-box"><div><span>Raíz continua</span><strong>166.667</strong></div><div><span>Candidato seguro</span><strong>166 solicitudes/s</strong></div><div><span>Verificación</span><strong>L(166) ≤ 120 ms</strong></div></div><p class="small text-secondary mb-0">El entero superior, 167, debe verificarse por separado porque una raíz aproximada no reemplaza la comprobación de la restricción.</p></article></div></div>
-          <article class="panel mt-4"><h3 class="panel-title">Falsa posición en el mismo intervalo</h3><p>Con los mismos extremos, la primera intersección de la secante es:</p><div class="formula-card">c₁=(100·24 200−900·(−66.667))/(24 200−(−66.667))≈102.198<br>f(c₁)≈−65.100</div><p class="mb-0">Aunque el intervalo conserva el cambio de signo, el nuevo punto queda cerca de 100. La diferencia de magnitud entre los residuos puede dejar el extremo superior casi fijo durante varias iteraciones. El ejemplo muestra por qué falsa posición puede estancarse y por qué conviene revisar su historial frente a bisección.</p></article>
-</div></section>
+          <div class="col-lg-6">
+            <h1>Raíces con garantía: métodos cerrados</h1>
 
-    <section id="caso-practico" class="section"><div class="container"><div class="section-head"><span class="section-badge">03 · Aplicación de ingeniería</span><h2>Capacidad máxima bajo un SLA</h2><p>El problema que usa la calculadora convierte una raíz aproximada en una decisión operativa verificable.</p></div><div class="row g-4"><div class="col-lg-7"><article class="panel h-100"><h3 class="panel-title">Modelo y dominio</h3><div class="formula-card">L(q)=18+0.0025q²/(1−q/1200) &nbsp; [ms]<br>f(q)=L(q)−140=0<br>100 ≤ q ≤ 1100 &lt; 1200</div><p><span class="math">q</span> representa solicitudes por segundo. El denominador se anula en 1200; por eso el dominio operativo se mantiene por debajo de ese valor.</p><p>En [100,1100], <span class="math">L′(q)=0.0025q(2−q/1200)/(1−q/1200)² &gt; 0</span>. La latencia es estrictamente creciente. Junto con el cambio de signo en los extremos, esto justifica que el intervalo contiene una única capacidad límite.</p><p class="mb-0">La calculadora verifica <span class="math">f(a)f(b)≤0</span> antes de iterar y rechaza intervalos fuera del dominio o sin cambio de signo.</p></article></div><div class="col-lg-5"><article class="panel h-100"><h3 class="panel-title">Interpretar el resultado</h3><p>La solución continua es aproximadamente <span class="math">q*=201.5077</span>. Como no se pueden atender fracciones de solicitud, se comparan los enteros vecinos con el SLA:</p><div class="decision-box"><div><span>201 solicitudes/s</span><strong>L(201) ≈ 139.324 ms</strong></div><div><span>202 solicitudes/s</span><strong>L(202) ≈ 140.657 ms</strong></div><div><span>Recomendación</span><strong>201 solicitudes/s</strong></div></div><p class="small text-secondary mb-0">La decisión se basa en evaluar la desigualdad original, no solo en redondear la raíz.</p></article></div></div></div></section>
+            <p class="lead mt-3">
+              Aísla una raíz en un intervalo con cambio de signo garantizado por el Teorema de Bolzano.
+              Compara la reducción geométrica estricta de <strong>Bisección</strong> frente a la interpolación
+              lineal de <strong>Falsa Posición</strong> y analiza el fenómeno clásico de estancamiento en funciones convexas.
+            </p>
 
-    <section id="calculadora" class="section"><div class="container"><div class="section-head"><span class="section-badge">04 · Simulador</span><h2>Compara los métodos</h2><p>Edita el intervalo y las tolerancias. Ambos algoritmos resuelven el problema del umbral de capacidad y muestran su historial.</p></div>
-      <div class="row g-4"><div class="col-lg-4"><form id="formSim" class="panel" novalidate><h3 class="panel-title">Parámetros</h3>
-        <label class="form-label" for="inputA">Extremo a</label><input class="form-control mb-3" id="inputA" type="number" value="100" step="any">
-        <label class="form-label" for="inputB">Extremo b</label><input class="form-control mb-3" id="inputB" type="number" value="1100" step="any">
-        <label class="form-label" for="tolX">Tolerancia en x</label><input class="form-control mb-3" id="tolX" type="number" value="0.01" min="0.000000001" step="any">
-        <label class="form-label" for="tolF">Tolerancia en f(x)</label><input class="form-control mb-3" id="tolF" type="number" value="0.01" min="0.000000001" step="any">
-        <label class="form-label" for="maxIter">Máximo de iteraciones</label><input class="form-control mb-3" id="maxIter" type="number" value="1000" min="1" max="5000" step="1">
-        <button class="btn btn-primary w-100" type="submit"><i class="bi bi-play-fill me-1"></i>Calcular ambos</button><p id="errorMsg" class="form-error mt-3" role="alert" hidden></p>
-      </form><div class="panel mt-4"><h3 class="panel-title">Función del reto</h3><div class="formula-card">f(q) = 18 + 0.0025q²/(1 − q/1200) − 140</div><p class="small mb-0">Intervalo permitido: [100, 1100]. La función no está definida en q = 1200.</p></div></div>
-      <div class="col-lg-8"><div id="summary" class="results mb-4" aria-live="polite"></div><div class="panel mb-4"><h3 class="panel-title">Función e intervalo</h3><div class="chart-wrap"><canvas id="functionChart" aria-label="Gráfica de f(q) y raíces aproximadas"></canvas></div></div><div class="panel mb-4"><h3 class="panel-title">Convergencia por iteración</h3><div class="chart-wrap"><canvas id="convergenceChart" aria-label="Gráfica del residuo por iteración"></canvas></div></div><div class="panel"><div class="d-flex flex-wrap justify-content-between align-items-center gap-2"><h3 class="panel-title mb-0">Historial de iteraciones</h3><label class="small">Método <select id="historyMethod" class="form-select form-select-sm d-inline-block w-auto"><option value="biseccion">Bisección</option><option value="falsa">Falsa posición</option></select></label></div><div class="table-responsive mt-3"><table class="results-table"><thead><tr><th>k</th><th>aₖ</th><th>bₖ</th><th>cₖ</th><th>f(cₖ)</th><th>error x</th><th>decisión</th></tr></thead><tbody id="historyBody"></tbody></table></div></div></div></div>
-    </div></section>
+            <div class="hero-buttons mt-4">
+              <a href="#calculadora" class="btn btn-light btn-lg">
+                <i class="bi bi-calculator me-2" aria-hidden="true"></i>Abrir el simulador
+              </a>
+              <a href="#teoria" class="btn btn-outline-light btn-lg">Leer la teoría</a>
+            </div>
+          </div>
 
-    <section id="ejercicios" class="section section-alt"><div class="container"><div class="section-head"><span class="section-badge">05 · Autoevaluación</span><h2>Resuelve y recibe orientación</h2><p>Responde sin desplegar soluciones. Al corregir, la página te dirá qué concepto revisar y mostrará el razonamiento.</p></div><div class="row g-4">
-      <div class="col-md-6"><article class="panel h-100 assessment-card" data-assessment="bolzano"><h3 class="panel-title">1. Garantía de Bolzano</h3><p>Si <span class="math">f</span> es continua en [a,b] y <span class="math">f(a)f(b)&lt;0</span>, ¿qué afirmación está garantizada?</p><label class="form-label" for="answer-bolzano">Elige una respuesta</label><select class="form-select assessment-input" id="answer-bolzano"><option value="">Selecciona…</option><option value="exist">Existe al menos una raíz</option><option value="unique">Existe exactamente una raíz</option><option value="none">No existe ninguna raíz</option></select><button class="btn btn-primary mt-3 assess-check" type="button">Corregir</button><p class="assessment-feedback mt-3" aria-live="polite"></p><div class="assessment-solution" hidden>La continuidad y el cambio de signo garantizan al menos una raíz interior; no prueban unicidad.</div></article></div>
-      <div class="col-md-6"><article class="panel h-100 assessment-card" data-assessment="bisection"><h3 class="panel-title">2. Cota de bisección</h3><p>Un intervalo inicial tiene ancho 1000. ¿Cuántas iteraciones mínimas aseguran una cota de error ≤ 0.01? Usa <span class="math">1000/2ⁿ≤0.01</span>.</p><label class="form-label" for="answer-bisection">Iteraciones mínimas</label><input class="form-control assessment-input" id="answer-bisection" type="number" step="1" inputmode="numeric" placeholder="Número entero"><button class="btn btn-primary mt-3 assess-check" type="button">Corregir</button><p class="assessment-feedback mt-3" aria-live="polite"></p><div class="assessment-solution" hidden>n ≥ log₂(100000) ≈ 16.61. Se toma el siguiente entero: 17 iteraciones. Si respondiste 16, faltó redondear hacia arriba.</div></article></div>
-      <div class="col-md-6"><article class="panel h-100 assessment-card" data-assessment="tolerances"><h3 class="panel-title">3. Criterio de parada</h3><p>El cambio entre dos aproximaciones es menor que la tolerancia, pero el residuo <span class="math">|f(c)|</span> sigue siendo grande. ¿Qué conviene hacer?</p><label class="form-label" for="answer-tolerances">Elige una respuesta</label><select class="form-select assessment-input" id="answer-tolerances"><option value="">Selecciona…</option><option value="stop">Parar: el cambio pequeño basta</option><option value="continue">Continuar o revisar: exigir cambio y residuo aceptables</option><option value="raise">Aumentar la tolerancia del residuo</option></select><button class="btn btn-primary mt-3 assess-check" type="button">Corregir</button><p class="assessment-feedback mt-3" aria-live="polite"></p><div class="assessment-solution" hidden>Un cambio pequeño no garantiza que la ecuación se satisfaga. Conviene comprobar simultáneamente el error en x y el residuo según el criterio definido.</div></article></div>
-      <div class="col-md-6"><article class="panel h-100 assessment-card" data-assessment="capacity"><h3 class="panel-title">4. Decisión de capacidad</h3><p>La raíz continua es aproximadamente 166.667 solicitudes/s y la latencia crece con la carga. ¿Qué capacidad entera es segura según el SLA?</p><label class="form-label" for="answer-capacity">Solicitudes por segundo</label><input class="form-control assessment-input" id="answer-capacity" type="number" step="1" inputmode="numeric" placeholder="Entero seguro"><button class="btn btn-primary mt-3 assess-check" type="button">Corregir</button><p class="assessment-feedback mt-3" aria-live="polite"></p><div class="assessment-solution" hidden>Se elige 166 y se evalúa en la función original para confirmar el SLA. Redondear al entero más cercano (167) puede exceder el umbral.</div></article></div>
-    </div><div class="callout-note mt-4"><strong>Interpretación:</strong> aprobar una respuesta confirma el concepto evaluado. Para elegir un método, compara también garantía, velocidad y comportamiento observado en la calculadora.</div></div></section>
+          <div class="col-lg-6">
+            <div class="readout" role="group" aria-labelledby="readoutTitulo">
+              <h2 id="readoutTitulo" class="readout-title">Prueba la latencia: L(q) vs SLA</h2>
+
+              <div class="readout-inputs">
+                <label for="heroQ">q (solicitudes/s)
+                  <input id="heroQ" type="number" value="201" min="100" max="1199" inputmode="decimal">
+                </label>
+                <label for="heroSLA">SLA contractual (ms)
+                  <input id="heroSLA" type="number" value="140" min="20" max="500" inputmode="decimal">
+                </label>
+              </div>
+
+              <dl class="readout-rows">
+                <div><dt>Latencia L(q)</dt><dd id="heroL">139.32 ms</dd></div>
+                <div><dt>Residuo f(q) = L(q) − SLA</dt><dd id="heroRes">−0.68 ms</dd></div>
+                <div><dt>Derivada L′(q)</dt><dd id="heroDeriv">+1.34 ms/(sol/s)</dd></div>
+                <div><dt>Estado de SLA</dt><dd id="heroStatus" class="status status-ok">Cumple SLA</dd></div>
+              </dl>
+
+              <p id="heroMsg" class="readout-msg" aria-live="polite">
+                Para q = 201 sol/s la latencia es 139.32 ms ≤ 140 ms: umbral seguro sin violar el acuerdo contractual.
+              </p>
+
+              <div class="readout-presets" aria-label="Ejemplos">
+                <button type="button" class="preset" data-q="100" data-sla="140">q = 100 (vacío)</button>
+                <button type="button" class="preset" data-q="201" data-sla="140">q = 201 (seguro ⌊q*⌋)</button>
+                <button type="button" class="preset" data-q="202" data-sla="140">q = 202 (viola SLA)</button>
+                <button type="button" class="preset" data-q="500" data-sla="140">q = 500 (saturado)</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. TEORÍA GENERAL -->
+    <section id="teoria" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <h2>Teoría de Métodos Cerrados</h2>
+          <p>
+            Un método cerrado encierra en todo momento la raíz dentro de un intervalo acotado [a, b].
+            Para aplicarlo con rigor en ingeniería hay que resolver tres interrogantes fundamentales.
+          </p>
+        </header>
+
+        <dl class="sources">
+          <div>
+            <dt>¿Qué garantiza Bolzano?</dt>
+            <dd>Si f es continua y f(a)·f(b) &lt; 0, existe al menos una raíz interior. No prueba unicidad por sí solo.</dd>
+          </div>
+          <div>
+            <dt>¿Cómo converge Bisección?</dt>
+            <dd>Reduce el intervalo a la mitad en cada paso. Su cota analítica predice el número exacto de iteraciones a priori.</dd>
+          </div>
+          <div>
+            <dt>¿Por qué se estanca Falsa Posición?</dt>
+            <dd>En curvas con curvatura (convexas f″ &gt; 0), la secante corta siempre del mismo lado y fija un extremo indefinidamente.</dd>
+          </div>
+        </dl>
+
+        <div class="concepts">
+
+          <article class="concept">
+            <h3>Teorema de Bolzano y Unicidad</h3>
+            <p>
+              El Teorema del Valor Intermedio garantiza la existencia de al menos una raíz en (a, b).
+              La unicidad requiere además que f sea estrictamente monótona (f′ no cambia de signo).
+            </p>
+            <div class="math-box"><div id="math-bolzano"></div></div>
+          </article>
+
+          <article class="concept">
+            <h3>Método de Bisección</h3>
+            <p>
+              Calcula el punto medio aritmético c = (a + b)/2. Conserva la mitad con cambio de signo
+              y reduce el error máximo exactamente al 50% en cada iteración.
+            </p>
+            <div class="math-box"><div id="math-biseccion"></div></div>
+          </article>
+
+          <article class="concept">
+            <h3>Falsa Posición (Regula Falsi)</h3>
+            <p>
+              Traza la recta secante entre (a, f(a)) y (b, f(b)). Pondera el punto de prueba hacia el extremo
+              más cercano a cero, pero sufre de estancamiento ante curvaturas pronunciadas.
+            </p>
+            <div class="math-box"><div id="math-falsa"></div></div>
+          </article>
+
+        </div>
+
+        <div class="row g-5 mt-1">
+
+          <div class="col-lg-6">
+            <h3 class="subhead">Cota de error y número de iteraciones</h3>
+            <p class="text-secondary">
+              A diferencia de los métodos abiertos, la bisección posee una fórmula analítica cerrada
+              que determina cuántas iteraciones se requieren antes de comenzar el cálculo:
+            </p>
+
+            <div class="math-box"><div id="math-cota"></div></div>
+
+            <div class="table-responsive mt-3">
+              <table class="table data-table align-middle mb-0">
+                <caption class="visually-hidden">Iteraciones requeridas por bisección según ancho de intervalo y tolerancia</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Ancho inicial (b₀ − a₀)</th>
+                    <th scope="col" class="num">Tolerancia tol_x</th>
+                    <th scope="col" class="num">Iteraciones mínimas ⌈n⌉</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">1000 (ej. [100, 1100])</th><td class="num">0.1</td><td class="num">14</td></tr>
+                  <tr><th scope="row">1000 (ej. [100, 1100])</th><td class="num">0.01</td><td class="num">17</td></tr>
+                  <tr><th scope="row">1000 (ej. [100, 1100])</th><td class="num">0.001</td><td class="num">20</td></tr>
+                  <tr><th scope="row">100 (ej. [150, 250])</th><td class="num">0.01</td><td class="num">14</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <h3 class="subhead">Matriz comparativa de métodos cerrados</h3>
+            <p class="text-secondary">
+              Propiedades computacionales y de convergencia observadas en la práctica de ingeniería:
+            </p>
+
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0">
+                <caption class="visually-hidden">Comparación de Bisección frente a Falsa Posición</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Propiedad</th>
+                    <th scope="col">Bisección</th>
+                    <th scope="col">Falsa Posición</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Cálculo del punto</th><td>Punto medio: (a + b)/2</td><td>Intersección secante: (af(b)−bf(a))/(f(b)−f(a))</td></tr>
+                  <tr><th scope="row">Garantía de parada</th><td>Incondicional (reduce ancho)</td><td>Incondicional (siempre que |f(c)| ≤ tol_f)</td></tr>
+                  <tr><th scope="row">Riesgo numérico</th><td>Lento en funciones planas</td><td>Estancamiento severo de un extremo</td></tr>
+                  <tr><th scope="row">Criterio seguro</th><td>|b − a|/2 ≤ tol_x</td><td>|c_k − c_{k−1}| ≤ tol_x y |f(c)| ≤ tol_f</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p class="table-note mt-3 mb-0">
+              En esta plataforma se exige cumplimiento simultáneo del paso en x y del residuo funcional |f(c)| ≤ tol_f.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. CASO PRÁCTICO -->
+    <section id="caso-practico" class="section">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-badge">Caso Práctico</span>
+          <h2>Dimensionamiento de Capacidad bajo SLA Contractual</h2>
+          <p>
+            En plataformas de comercio electrónico y microservicios, el acuerdo de nivel de servicio (SLA) fija
+            una latencia máxima aceptable antes de penalizaciones económicas. A continuación se estructura la
+            resolución del problema distribuyendo las responsabilidades técnicas del equipo.
+          </p>
+        </header>
+
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-cpu text-primary me-2"></i>Modelo Matemático del Sistema</h3>
+              <p class="text-secondary small">
+                La latencia media de respuesta <code>L(q)</code> en milisegundos (ms) ante una carga de tráfico <code>q</code> en solicitudes por segundo (sol/s) responde al modelo analítico de cola con saturación:
+              </p>
+              <div class="p-3 bg-light rounded-3 border mb-3">
+                <div class="fw-bold text-dark small mb-1">Ecuación de Latencia y Restricción SLA:</div>
+                <div class="small font-mono text-dark">
+                  L(q) = 18 + 0.0025·q² / (1 − q/1200) &nbsp; [ms]
+                </div>
+                <div class="small text-secondary mt-1">
+                  Condición de cumplimiento: <code>L(q) ≤ 140 ms</code> &nbsp;⟹&nbsp; <code>f(q) = L(q) − 140 = 0</code>.
+                </div>
+              </div>
+              <p class="text-secondary small mb-0">
+                <strong>Análisis de dominio:</strong> El denominador se anula en <code>q = 1200 sol/s</code> (asíntota vertical de colapso). El dominio admisible se acota en <code>q ∈ [100, 1100]</code>. Como <code>L′(q) &gt; 0</code> en todo el rango, la función es estrictamente monótona creciente y la raíz admisible es única.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="panel h-100">
+              <h3 class="panel-title"><i class="bi bi-diagram-3 text-primary me-2"></i>Distribución de Tareas del Equipo</h3>
+              <dl class="method-list">
+                <div>
+                  <dt class="text-primary">1. Rol Modelador</dt>
+                  <dd>Formula <code>f(q) = L(q) − 140 = 0</code>, justifica el dominio <code>[100, 1100]</code> y comprueba Bolzano: <code>f(100) ≈ −94.73 &lt; 0</code> y <code>f(1100) ≈ +36178 &gt; 0</code>.</dd>
+                </div>
+                <div>
+                  <dt class="text-indigo">2. Rol Programador</dt>
+                  <dd>Implementa Bisección y Falsa Posición con criterio dual de parada y exporta la traza completa de iteraciones (a, b, c, f(c), error y decisión).</dd>
+                </div>
+                <div>
+                  <dt class="text-success">3. Rol Verificador / QA</dt>
+                  <dd>Evalúa el redondeo seguro: comprueba que <code>⌊q*⌋ = 201 sol/s</code> cumple el SLA (139.32 ms) mientras que redondear hacia arriba a 202 viola el SLA (140.66 ms).</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SIMULADOR Y CALCULADORA -->
+    <section id="calculadora" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-badge">Calculadora Numérica</span>
+          <h2>Simulador en Vivo</h2>
+          <p>
+            Define los extremos del intervalo inicial [a, b], las tolerancias y el SLA contractual.
+            El motor ejecutará simultáneamente Bisección y Falsa Posición para comparar su velocidad y detectar estancamiento.
+          </p>
+        </header>
+
+        <div class="row g-4 align-items-stretch">
+          <div class="col-lg-12">
+            <form id="formSim" class="panel" novalidate>
+              <h3 class="panel-title"><i class="bi bi-sliders text-primary me-2"></i>Parámetros de Entrada</h3>
+
+              <div class="row g-3">
+                <div class="col-md-2 col-sm-6">
+                  <label for="calcA" class="form-label">Extremo <em>a</em> (sol/s)</label>
+                  <input type="number" id="calcA" class="form-control" value="100" min="100" max="1199" step="any">
+                  <div class="form-text">Mínimo admisible ≥ 100.</div>
+                </div>
+
+                <div class="col-md-2 col-sm-6">
+                  <label for="calcB" class="form-label">Extremo <em>b</em> (sol/s)</label>
+                  <input type="number" id="calcB" class="form-control" value="1100" min="101" max="1199" step="any">
+                  <div class="form-text">Máximo ≤ 1100 (asíntota 1200).</div>
+                </div>
+
+                <div class="col-md-2 col-sm-6">
+                  <label for="calcSLA" class="form-label">SLA Límite (ms)</label>
+                  <input type="number" id="calcSLA" class="form-control" value="140" min="20" max="500" step="any">
+                  <div class="form-text">Umbral contractual.</div>
+                </div>
+
+                <div class="col-md-2 col-sm-6">
+                  <label for="calcTolX" class="form-label">Tolerancia en <em>x</em></label>
+                  <input type="number" id="calcTolX" class="form-control" value="0.01" min="0.000000001" step="any">
+                  <div class="form-text">Cota de error en variable.</div>
+                </div>
+
+                <div class="col-md-2 col-sm-6">
+                  <label for="calcTolF" class="form-label">Tolerancia en <em>f(x)</em></label>
+                  <input type="number" id="calcTolF" class="form-control" value="0.01" min="0.000000001" step="any">
+                  <div class="form-text">Residuo |f(c)| máximo.</div>
+                </div>
+
+                <div class="col-md-2 col-sm-6">
+                  <label for="calcMax" class="form-label">Máx. Iteraciones</label>
+                  <input type="number" id="calcMax" class="form-control" value="1000" min="10" max="5000" step="10">
+                  <div class="form-text">Límite de seguridad.</div>
+                </div>
+              </div>
+
+              <div id="calcError" class="form-error" role="alert" hidden></div>
+
+              <div class="d-flex flex-wrap gap-2 mt-4">
+                <button type="submit" class="btn btn-primary" id="btnEjecutar">
+                  <i class="bi bi-play-fill me-1" aria-hidden="true"></i>Ejecutar Simulación
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnCsvBis" disabled>
+                  <i class="bi bi-download me-1" aria-hidden="true"></i>Exportar Bisección (CSV)
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnCsvFP" disabled>
+                  <i class="bi bi-download me-1" aria-hidden="true"></i>Exportar Falsa Posición (CSV)
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnInforme" disabled>
+                  <i class="bi bi-file-earmark-text me-1" aria-hidden="true"></i>Descargar Informe (TXT)
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="btnReset">
+                  <i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Restablecer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- RESULTADOS -->
+        <div id="simResultados" class="results" hidden>
+
+          <h3 class="subhead"><i class="bi bi-speedometer2 text-primary me-2"></i>Resultados del Benchmark Numérico</h3>
+
+          <!-- Métricas Clave -->
+          <div class="metrics" aria-label="Magnitudes clave">
+            <div class="metric">
+              <span class="metric-label">Raíz Bisección (q*)</span>
+              <span class="metric-value font-mono" id="mRaizBis">—</span>
+              <span class="metric-unit">sol/s (Reducción estricta)</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Raíz Falsa Posición (q*)</span>
+              <span class="metric-value font-mono" id="mRaizFP">—</span>
+              <span class="metric-unit">sol/s (Intersección secante)</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Capacidad Segura ⌊q*⌋</span>
+              <span class="metric-value font-mono text-success" id="mCapSegura">—</span>
+              <span class="metric-unit">sol/s (Entero bajo SLA)</span>
+            </div>
+          </div>
+
+          <!-- Tabla de Benchmark de Métodos -->
+          <div class="table-responsive">
+            <table class="table data-table results-table align-middle mb-0">
+              <caption class="visually-hidden">Resultados comparativos de bisección y falsa posición</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Método Algorítmico</th>
+                  <th scope="col" class="num">Raíz Estimada (sol/s)</th>
+                  <th scope="col" class="num">Iteraciones</th>
+                  <th scope="col" class="num">Residuo Final |f(c)|</th>
+                  <th scope="col" class="num">Error Final en x</th>
+                  <th scope="col" class="num">Tiempo (ms)</th>
+                  <th scope="col">Estado</th>
+                </tr>
+              </thead>
+              <tbody id="tablaBenchmark"></tbody>
+            </table>
+          </div>
+
+          <p class="table-note mt-2">
+            <i class="bi bi-info-circle me-1"></i> Ambos métodos se evaluaron sobre el mismo intervalo inicial con criterios de tolerancia idénticos.
+          </p>
+
+          <!-- Diagnóstico y Recomendación -->
+          <div class="row g-4 mt-2">
+            <div class="col-lg-7">
+              <h3 class="subhead"><i class="bi bi-clipboard-pulse text-primary me-2"></i>Diagnóstico Numérico Detallado</h3>
+              <ul id="diagnostico" class="diagnosis"></ul>
+            </div>
+
+            <div class="col-lg-5">
+              <div class="panel h-100 bg-white">
+                <h3 class="subhead"><i class="bi bi-lightbulb text-warning me-2"></i>Recomendación para Ingeniería</h3>
+                <div id="cajaRecomendacion"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Historial de Iteraciones Detallado -->
+          <article class="panel mt-4">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+              <div>
+                <h4 class="panel-title mb-0"><i class="bi bi-clock-history text-primary me-2"></i>Historial de Iteraciones Paso a Paso</h4>
+                <span class="text-secondary small">Traza de cálculo con registro de extremos, residuo y decisión de intervalo</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <label for="historyMethod" class="form-label mb-0 small text-secondary">Ver historial de:</label>
+                <select id="historyMethod" class="form-select form-select-sm font-mono" style="width: auto;">
+                  <option value="biseccion">Bisección</option>
+                  <option value="falsa">Falsa Posición</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table data-table align-middle mb-0" id="historyTable">
+                <thead>
+                  <tr>
+                    <th scope="col">k</th>
+                    <th scope="col" class="num">a_k</th>
+                    <th scope="col" class="num">b_k</th>
+                    <th scope="col" class="num">c_k</th>
+                    <th scope="col" class="num">f(c_k)</th>
+                    <th scope="col" class="num">Error en x</th>
+                    <th scope="col">Decisión de Intervalo</th>
+                  </tr>
+                </thead>
+                <tbody id="historyBody"></tbody>
+              </table>
+            </div>
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. GRÁFICA -->
+    <section id="grafico" class="section section-alt">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-badge">Análisis de Convergencia</span>
+          <h2>Curva de Latencia y Convergencia de Error</h2>
+          <p>
+            Visualización interactiva: la curva de respuesta frente al SLA contractual y la comparativa
+            en escala logarítmica de la caída del residuo en cada iteración.
+          </p>
+        </header>
+
+        <div class="panel">
+          <div class="chart-controls">
+            <div class="d-flex flex-wrap gap-3 align-items-center">
+              <div>
+                <label for="modoGrafico" class="form-label mb-0 small text-secondary me-2">Vista:</label>
+                <select id="modoGrafico" class="form-select form-select-sm d-inline-block w-auto">
+                  <option value="convergencia">Convergencia del Residuo |f(c)| por Iteración</option>
+                  <option value="latencia">Curva de Latencia L(q) vs SLA</option>
+                </select>
+              </div>
+
+              <div class="form-check form-switch mb-0" id="contenedorLog">
+                <input class="form-check-input" type="checkbox" role="switch" id="logScale" checked>
+                <label class="form-check-label small" for="logScale">Escala logarítmica en el eje Y</label>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-sm" id="btnGrafico">
+              <i class="bi bi-graph-up me-2" aria-hidden="true"></i>Actualizar gráfico
+            </button>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="errorChart" role="img" aria-label="Gráfico de convergencia de bisección y falsa posición"></canvas>
+            <p id="chartVacio" class="chart-empty">Pulsa «Actualizar gráfico» para dibujar la vista elegida.</p>
+          </div>
+
+          <p class="table-note mb-0" id="notaGrafico">
+            La vista de convergencia muestra cómo Bisección desciende de forma regular y predecible, mientras que Falsa Posición manifiesta su meseta de estancamiento.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 5. TEST TEÓRICO PREVIO -->
+    <section id="test-teorico" class="section section-alt">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-badge">Cuestionario Teórico</span>
+          <h2>Relación de conceptos</h2>
+        </header>
+        <div class="row justify-content-center">
+          <div class="col-xl-9 col-lg-10">
+            <div id="cajaTestTeorico" class="panel bg-white shadow-sm">
+              <!-- El contenido se inyecta dinámicamente desde main.js -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. AUTOEVALUACIÓN Y PROBLEMAS -->
+    <section id="ejercicios" class="section">
+      <div class="container">
+
+        <header class="section-head">
+          <span class="section-badge">Autoevaluación de conocimientos</span>
+          <h2>Problemas de Aplicación Práctica</h2>
+          <p>
+            Dos ejercicios independientes basados en los casos de estudio de la guía oficial de laboratorio.
+            Las preguntas son autónomas, usan datos aleatorios y no dependen entre sí. En cada una puedes
+            leer todo el desarrollo o practicarlo en una guía interactiva por pasos.
+          </p>
+        </header>
+
+        <div class="row justify-content-center">
+          <div class="col-xl-10">
+
+            <!-- Selector de Ejercicio -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+              <div id="selectorEjercicios" class="btn-group shadow-sm" role="group" aria-label="Selector de Ejercicio">
+                <button type="button" class="btn btn-primary" data-ej-i="0">
+                  <i class="bi bi-speedometer2 me-1"></i> Cota Analítica y Bolzano
+                </button>
+                <button type="button" class="btn btn-outline-primary" data-ej-i="1">
+                  <i class="bi bi-shield-check me-1"></i> Redondeo Seguro bajo SLA
+                </button>
+              </div>
+
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="btnNuevoCaso">
+                <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i>Generar nuevos valores aleatorios
+              </button>
+            </div>
+
+            <!-- Escenario -->
+            <div class="panel scenario mb-4" id="escenarioEjercicio"></div>
+
+            <!-- Preguntas -->
+            <div id="preguntasContainer" class="d-flex flex-column gap-4"></div>
+
+            <div id="resumenEjercicio" class="panel summary mt-4" hidden aria-live="polite"></div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
-  <footer class="footer"><div class="container footer-inner"><p>Métodos cerrados · Métodos Numéricos</p><a href="../index.html">Volver al portal de cursos</a></div></footer>
+
+  <!-- PIE DE PÁGINA -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div>
+        <p class="fw-bold mb-0 text-dark">MetNum · Métodos Numéricos para Ingeniería</p>
+        <small class="text-muted">Módulo 02: Ecuaciones No Lineales, Métodos Cerrados, Bisección y Falsa Posición.</small>
+      </div>
+      <div class="d-flex gap-3 text-muted small align-items-center">
+        <a href="../index.html" class="text-decoration-none text-muted">← Volver al Portal de Cursos</a>
+        <span>•</span>
+        <a href="#hero" class="text-decoration-none text-muted">Volver al Inicio ↑</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- BOTÓN VOLVER ARRIBA -->
+  <a href="#hero" id="scrollTopBtn" class="back-to-top" aria-label="Volver al inicio">
+    <i class="bi bi-arrow-up-short" aria-hidden="true"></i>
+  </a>
+
+  <!-- LIBRERÍAS EXTERNAS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Nuestro JavaScript -->
   <script src="main.js" defer></script>
+
 </body>
 </html>
